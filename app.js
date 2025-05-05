@@ -1,6 +1,52 @@
+import { supabase } from './supabaseAPI.js';
+
+// Check if user is authenticated
+async function checkAuth() {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (!user) {
+        // Redirect to login page if not authenticated
+        window.location.href = 'login.html';
+    } else {
+        // Update UI with user info
+        const userAvatar = document.querySelector('.user-avatar');
+        const welcomeTitle = document.querySelector('.welcome-title');
+        
+        if (userAvatar) {
+            userAvatar.textContent = user.email.charAt(0).toUpperCase();
+        }
+        
+        if (welcomeTitle) {
+            welcomeTitle.textContent = `Welcome, ${user.email.split('@')[0]}`;
+        }
+    }
+}
+
+// Handle logout
+async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+        console.error('Error logging out:', error.message);
+    } else {
+        // Redirect to login page after successful logout
+        window.location.href = 'login.html';
+    }
+}
+
+// Add event listeners
 document.addEventListener('DOMContentLoaded', () => {
-  // Add event listeners
-  setupEventListeners();
+    // Check authentication status
+    checkAuth();
+    
+    // Add logout button event listener
+    const logoutButton = document.getElementById('logoutButton');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', handleLogout);
+    }
+
+    // Add event listeners
+    setupEventListeners();
 });
 
 function setupEventListeners() {

@@ -772,4 +772,35 @@ svg {
 
 .nav-item.active svg {
   stroke: var(--primary);
+}
+
+.logout-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: #f3f4f6;
+    border: none;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.logout-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 } 

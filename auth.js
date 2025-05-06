@@ -1,3 +1,11 @@
+/*
+Required npm packages:
+npm install @supabase/supabase-js@2
+
+Note: This file uses ES modules, so make sure your HTML files include:
+<script type="module" src="auth.js"></script>
+*/
+
 import { supabase } from './supabaseAPI.js';
 
 // DOM Elements

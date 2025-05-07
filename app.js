@@ -8,16 +8,27 @@ async function checkAuth() {
         // Redirect to login page if not authenticated
         window.location.href = 'login.html';
     } else {
+        // Get user's profile data
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
         // Update UI with user info
         const userAvatar = document.querySelector('.user-avatar');
         const welcomeTitle = document.querySelector('.welcome-title');
         
         if (userAvatar) {
-            userAvatar.textContent = user.email.charAt(0).toUpperCase();
+            // Use first letter of full name if available, otherwise use email
+            const displayName = profile?.full_name || user.email;
+            userAvatar.textContent = displayName.charAt(0).toUpperCase();
         }
         
         if (welcomeTitle) {
-            welcomeTitle.textContent = `Welcome, ${user.email.split('@')[0]}`;
+            // Use full name if available, otherwise use email
+            const displayName = profile?.full_name || user.email.split('@')[0];
+            welcomeTitle.textContent = `Welcome, ${displayName}`;
         }
     }
 }

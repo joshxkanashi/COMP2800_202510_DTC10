@@ -20,6 +20,6 @@ console.error = (...args) => {
 };
 
 // Create Supabase client
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey)
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 
-export { supabaseClient as supabase }
+export { supabase }

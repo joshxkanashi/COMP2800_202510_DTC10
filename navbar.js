@@ -16,10 +16,28 @@ fetch('navbar.html')
     const logoutBtn = document.getElementById('logoutButton');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', async () => {
-        if (window.supabase) {
-          await supabase.auth.signOut();
+        let sb = window.supabase;
+        if (!sb) {
+          try {
+            const module = await import('./supabaseAPI.js');
+            sb = module.supabase;
+          } catch (e) {
+            sb = null;
+          }
         }
-        window.location.href = 'login.html';
+        if (sb && sb.auth && typeof sb.auth.signOut === 'function') {
+          try {
+            await sb.auth.signOut();
+          } catch (e) {
+            // ignore signOut errors
+          }
+        }
+        const currentPage = window.location.pathname.split('/').pop();
+        if (currentPage !== 'login.html') {
+          window.location.href = 'login.html';
+        } else {
+          window.location.reload();
+        }
       });
     }
     // Update avatar after navbar loads (if function exists)

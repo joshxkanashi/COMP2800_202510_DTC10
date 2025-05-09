@@ -1493,4 +1493,58 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Load featured projects when the page loads
   loadFeaturedProjects();
+
+  // === City Display from Supabase and Geolocation ===
+  const locationSpan = document.getElementById('location-info');
+  if (locationSpan && window.supabase) {
+    // Step 4: Show city from Supabase profile on load
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('city')
+          .eq('id', user.id)
+          .single();
+        if (profile && profile.city) {
+          locationSpan.textContent = profile.city;
+        }
+      }
+    });
+  }
+
+  if (locationSpan && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+      const apiKey = '6ed586b1c42a40068db9fc04056a9c90';
+      const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${apiKey}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const components = data.results[0].components;
+        const city = components.city || components.town || components.village || components.county || 'Unknown';
+        locationSpan.textContent = city;
+        // Save city to Supabase profile only if changed
+        if (window.supabase) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('city')
+              .eq('id', user.id)
+              .single();
+            if (!profile || profile.city !== city) {
+              await supabase
+                .from('profiles')
+                .update({ city })
+                .eq('id', user.id);
+            }
+          }
+        }
+      } catch (err) {
+        locationSpan.textContent = 'City unavailable';
+      }
+    }, (err) => {
+      locationSpan.textContent = 'Location unavailable';
+    });
+  }
 });

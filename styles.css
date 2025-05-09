@@ -1545,4 +1545,35 @@ svg {
 .portfolio-section .project-languages {
   padding: 0.7rem 1.2rem 1.2rem 1.2rem;
   gap: 0.7rem;
+}
+
+/* Floating Edit Profile Button */
+.edit-fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 1200;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 28px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.18);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.edit-fab:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  box-shadow: 0 8px 24px rgba(99,102,241,0.28);
+  transform: translateY(-2px) scale(1.04);
+}
+@media (max-width: 600px) {
+  .edit-fab {
+    bottom: 16px;
+    right: 16px;
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
 } 

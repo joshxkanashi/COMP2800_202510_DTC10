@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSync - Build Your Tech Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div id="navbar-placeholder"></div>
+        <script src="navbar.js"></script>
+
+        <main class="container">
+            <h1 style="font-size: 2rem; font-weight: 600; text-align: center; margin: 48px 0 32px;">Find similar
+                portfolios to connect with</h1>
+            <div
+                style="display: flex; flex-direction: column; gap: 32px; align-items: center; max-width: 600px; margin: 0 auto 80px auto;">
+                <div class="connect-card">
+                    <div class="connect-avatar">D</div>
+                    <div class="connect-info">
+                        <div class="connect-name">Dummy</div>
+                        <div class="connect-role">Java Developer</div>
+                    </div>
+                    <button id="openCard" class="connect-open-btn">Open</button>
+                </div>
+                <div class="connect-card">
+                    <div class="connect-avatar">D</div>
+                    <div class="connect-info">
+                        <div class="connect-name">Dummy</div>
+                        <div class="connect-role">Java Developer</div>
+                    </div>
+                    <button id="openCard" class="connect-open-btn">Open</button>
+                </div>
+            </div>
+            <style>
+                .connect-card {
+                    display: flex;
+                    align-items: center;
+                    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+                    border-radius: 20px;
+                    box-shadow: var(--card-shadow);
+                    padding: 32px 36px;
+                    color: #fff;
+                    width: 100%;
+                    max-width: 500px;
+                    margin: 0 auto;
+                    transition: box-shadow 0.3s, transform 0.3s;
+                    position: relative;
+                }
+
+                .connect-card:not(:last-child) {
+                    margin-bottom: 24px;
+                }
+
+                .connect-card:hover {
+                    box-shadow: var(--card-hover-shadow);
+                    transform: translateY(-3px);
+                }
+
+                .connect-avatar {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.18);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2rem;
+                    font-weight: 600;
+                    margin-right: 28px;
+                    border: 2px solid rgba(255, 255, 255, 0.25);
+                }
+
+                .connect-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .connect-name {
+                    font-size: 1.3rem;
+                    font-weight: 600;
+                    margin-bottom: 4px;
+                }
+
+                .connect-role {
+                    font-size: 1rem;
+                    opacity: 0.92;
+                }
+
+                .connect-open-btn {
+                    position: absolute;
+                    bottom: 24px;
+                    right: 32px;
+                    background: #fff;
+                    color: var(--primary);
+                    border: none;
+                    border-radius: 8px;
+                    padding: 10px 22px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.10);
+                    cursor: pointer;
+                    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+                }
+
+                .connect-open-btn:hover {
+                    background: var(--primary-dark);
+                    color: #fff;
+                    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.18);
+                }
+
+                @media (max-width: 600px) {
+                    .connect-card {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        padding: 24px 16px;
+                    }
+
+                    .connect-avatar {
+                        margin-right: 0;
+                        margin-bottom: 16px;
+                    }
+
+                    .connect-open-btn {
+                        bottom: 16px;
+                        right: 16px;
+                        padding: 9px 18px;
+                        font-size: 0.95rem;
+                    }
+                }
+            </style>
+        </main>
+    </div>
+    <script type="module" src="profile.js"></script>
+    <script type="module" src="eachConnect.js"></script>
+</body>
+
+</html>

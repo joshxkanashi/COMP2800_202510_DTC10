@@ -1547,4 +1547,85 @@ document.addEventListener("DOMContentLoaded", function () {
       locationSpan.textContent = 'Location unavailable';
     });
   }
+
+  // Function to update location in Supabase
+  async function updateLocation() {
+    const locationSpan = document.getElementById('location-info');
+    if (locationSpan && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        const apiKey = '6ed586b1c42a40068db9fc04056a9c90';
+        const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${apiKey}`;
+        try {
+          const res = await fetch(url);
+          const data = await res.json();
+          const components = data.results[0].components;
+          const city = components.city || components.town || components.village || components.county || 'Unknown';
+          locationSpan.textContent = city;
+          
+          // Save city to Supabase profile
+          if (window.supabase) {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              await supabase
+                .from('profiles')
+                .update({ city })
+                .eq('id', user.id);
+            }
+          }
+        } catch (err) {
+          locationSpan.textContent = 'City unavailable';
+        }
+      }, (err) => {
+        locationSpan.textContent = 'Location unavailable';
+      });
+    }
+  }
+
+  // Modify the saveProfile function to include location update
+  async function saveProfile() {
+    const savingIndicator = document.getElementById('savingIndicator');
+    savingIndicator.style.display = 'flex';
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Get all editable content
+      const editableContent = document.querySelectorAll('.editable-content');
+      const updates = {};
+      
+      editableContent.forEach(element => {
+        const field = element.getAttribute('data-field');
+        if (field) {
+          updates[field] = element.textContent;
+        }
+      });
+
+      // Update profile in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Update location
+      await updateLocation();
+
+      // Show success message
+      showMessage('Profile updated successfully!', 'success');
+      
+      // Exit edit mode
+      exitEditMode();
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      showMessage('Error saving profile. Please try again.', 'error');
+    } finally {
+      savingIndicator.style.display = 'none';
+    }
+  }
 });

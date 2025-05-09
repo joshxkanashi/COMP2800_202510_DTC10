@@ -12,6 +12,16 @@ fetch('navbar.html')
         link.classList.remove('active');
       }
     });
+    // Attach logout event listener after navbar is loaded
+    const logoutBtn = document.getElementById('logoutButton');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        if (window.supabase) {
+          await supabase.auth.signOut();
+        }
+        window.location.href = 'login.html';
+      });
+    }
     // Update avatar after navbar loads (if function exists)
     if (window.updateUserAvatar) {
       window.updateUserAvatar();

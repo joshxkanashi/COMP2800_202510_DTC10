@@ -60,21 +60,21 @@
                 <div class="portfolio-hero-content">
                     <div class="avatar large">CS</div>
                     <div class="portfolio-info">
-                        <h1 class="portfolio-title editable-content" data-field="name">CS Student</h1>
-                        <p class="portfolio-subtitle editable-content" data-field="title">Full Stack Developer & Computer Science Enthusiast</p>
+                        <h1 class="portfolio-title" data-field="name">CS Student</h1>
+                        <p class="portfolio-subtitle editable-content" data-field="title" contenteditable="true">Full Stack Developer & Computer Science Enthusiast</p>
                         <div class="portfolio-meta">
                             <div class="portfolio-meta-item">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span class="editable-content" data-field="location">Vancouver, Canada</span>
+                                <span data-field="location">Vancouver, Canada</span>
                             </div>
                             <div class="portfolio-meta-item">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span class="editable-content" data-field="email">csstudent@example.com</span>
+                                <span data-field="email">csstudent@example.com</span>
                             </div>
                             <div class="portfolio-meta-item">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -86,7 +86,7 @@
                         <a href="#contact" class="connect-button">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             Connect With Me
                         </a>
@@ -317,80 +317,8 @@
 
             <section id="projects" class="portfolio-section">
                 <h2 class="section-title">Featured Projects</h2>
-                <div class="portfolio-projects" id="projectsContainer">
-                    <div class="portfolio-project-card" data-item-id="proj1">
-                        <div class="portfolio-project-image">
-                            <span class="project-badge editable-content" data-field="proj1_badge">Web App</span>
-                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                        <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title editable-content" data-field="proj1_title">Task Management Platform</h3>
-                            <p class="portfolio-project-description editable-content" data-field="proj1_description">A comprehensive task management application with real-time updates, team collaboration features, and analytics dashboard.</p>
-                            <div class="portfolio-project-tech" data-project="proj1">
-                                <span class="tech-tag" data-tag="React">React</span>
-                                <span class="tech-tag" data-tag="Node.js">Node.js</span>
-                                <span class="tech-tag" data-tag="MongoDB">MongoDB</span>
-                                <span class="tech-tag" data-tag="Socket.io">Socket.io</span>
-                            </div>
-                            <div class="portfolio-project-links">
-                                <a href="#" class="project-link editable-content" data-field="proj1_link">View Project</a>
-                                <a href="#" class="project-link editable-content" data-field="proj1_github">GitHub</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="portfolio-project-card" data-item-id="proj2">
-                        <div class="portfolio-project-image">
-                            <span class="project-badge editable-content" data-field="proj2_badge">Mobile App</span>
-                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 18.0001V14.0001M12 14.0001V10.0001M12 14.0001H16M12 14.0001H8M21 12.0001C21 16.9707 16.9706 21.0001 12 21.0001C7.02944 21.0001 3 16.9707 3 12.0001C3 7.02956 7.02944 3.00012 12 3.00012C16.9706 3.00012 21 7.02956 21 12.0001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </div>
-                        <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title editable-content" data-field="proj2_title">Health Tracker App</h3>
-                            <p class="portfolio-project-description editable-content" data-field="proj2_description">A mobile application that helps users track their health metrics, set fitness goals, and monitor their progress over time.</p>
-                            <div class="portfolio-project-tech" data-project="proj2">
-                                <span class="tech-tag" data-tag="Flutter">Flutter</span>
-                                <span class="tech-tag" data-tag="Firebase">Firebase</span>
-                                <span class="tech-tag" data-tag="TensorFlow Lite">TensorFlow Lite</span>
-                            </div>
-                            <div class="portfolio-project-links">
-                                <a href="#" class="project-link editable-content" data-field="proj2_link">View Project</a>
-                                <a href="#" class="project-link editable-content" data-field="proj2_github">GitHub</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="portfolio-project-card" data-item-id="proj3">
-                        <div class="portfolio-project-image">
-                            <span class="project-badge editable-content" data-field="proj3_badge">AI Project</span>
-                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" stroke-width="2"/>
-                                <path d="M7 16.5H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                <path d="M7 12.5H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                <path d="M7 8.5H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                <path d="M14 16.5H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title editable-content" data-field="proj3_title">Sentiment Analysis Tool</h3>
-                            <p class="portfolio-project-description editable-content" data-field="proj3_description">An AI-powered tool that analyzes customer feedback and social media mentions to determine sentiment and provide actionable insights.</p>
-                            <div class="portfolio-project-tech" data-project="proj3">
-                                <span class="tech-tag" data-tag="Python">Python</span>
-                                <span class="tech-tag" data-tag="TensorFlow">TensorFlow</span>
-                                <span class="tech-tag" data-tag="NLTK">NLTK</span>
-                                <span class="tech-tag" data-tag="Flask">Flask</span>
-                            </div>
-                            <div class="portfolio-project-links">
-                                <a href="#" class="project-link editable-content" data-field="proj3_link">View Project</a>
-                                <a href="#" class="project-link editable-content" data-field="proj3_github">GitHub</a>
-                            </div>
-                        </div>
-                    </div>
+                <div class="projects-grid" id="projectsContainer">
+                    <!-- Projects will be dynamically loaded here -->
                 </div>
                 
                 <!-- Add project button (visible only in edit mode) -->
@@ -528,7 +456,7 @@
                 <div class="nav-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                         <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
                 <span>Connect</span>
@@ -548,7 +476,8 @@
         <span>Saving changes...</span>
     </div>
 
-    <script src="app.js" type="module"></script>
-    <script src="portfolio.js" defer></script>
+    <!-- Scripts -->
+    <script type="module" src="portfolio.js"></script>
+    <script type="module" src="featured-projects.js"></script>
 </body>
 </html> 

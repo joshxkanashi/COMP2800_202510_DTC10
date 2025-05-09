@@ -1,3 +1,5 @@
+import { supabase } from './supabaseAPI.js';
+
 // Wait for the DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", function () {
   // Import Supabase client
@@ -1372,4 +1374,123 @@ document.addEventListener("DOMContentLoaded", function () {
       fadeInObserver.observe(element);
     });
   }
+
+  async function loadPortfolioHeader() {
+    // Get the logged-in user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Fetch profile from Supabase (only full_name, no location)
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
+    if (error) {
+        console.error('Error loading profile:', error);
+        return;
+    }
+
+    // Set avatar circle to first letter of full name
+    const initials = (profile?.full_name || user.email || 'U')[0].toUpperCase();
+    document.querySelector('.avatar.large').textContent = initials;
+
+    // Set name to full name
+    document.querySelector('.portfolio-title').textContent = profile?.full_name || 'CS Student';
+
+    // Set email to user's email
+    document.querySelector('[data-field="email"]').textContent = user.email;
+
+    // Set location to a static value for now
+    document.querySelector('[data-field="location"]').textContent = 'Location';
+
+    // Make title editable
+    const titleEl = document.querySelector('.portfolio-subtitle');
+    titleEl.contentEditable = true;
+    titleEl.classList.add('editable-content');
+    // Optionally, add a save button or save on blur logic
+  }
+
+  // Call it directly, since we're already inside DOMContentLoaded
+  loadPortfolioHeader();
+
+  // --- FEATURED PROJECTS SECTION ---
+  async function loadFeaturedProjects() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Fetch up to 3 most recent projects for the user
+        const { data: projects, error } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(3);
+
+        if (error) throw error;
+
+        const projectsContainer = document.getElementById('projectsContainer');
+        projectsContainer.innerHTML = '';
+
+        if (!projects || projects.length === 0) {
+            // Show empty state if no projects
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            empty.innerHTML = `<h2>No Featured Projects</h2><p>Add a project to feature it here!</p>`;
+            projectsContainer.appendChild(empty);
+            return;
+        }
+
+        // Only show up to 3 projects
+        (projects.slice(0, 3)).forEach(project => {
+            const card = createFeaturedProjectCard(project);
+            projectsContainer.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Error loading featured projects:', error);
+    }
+  }
+
+  function createFeaturedProjectCard(project) {
+    const card = document.createElement('div');
+    card.className = 'project-card';
+
+    // Thumbnail
+    const thumb = document.createElement('div');
+    thumb.className = 'project-thumb';
+    if (project.photo_url) {
+        const img = document.createElement('img');
+        img.src = project.photo_url;
+        img.alt = project.title;
+        thumb.appendChild(img);
+    } else {
+        thumb.style.background = '#e5e7eb';
+    }
+
+    // Title
+    const title = document.createElement('div');
+    title.className = 'project-title';
+    title.textContent = project.title;
+
+    // Languages
+    const langs = document.createElement('div');
+    langs.className = 'project-languages';
+    (project.languages || []).forEach(lang => {
+        const tag = document.createElement('span');
+        tag.className = 'language-tag';
+        tag.textContent = lang;
+        langs.appendChild(tag);
+    });
+
+    card.appendChild(thumb);
+    card.appendChild(title);
+    card.appendChild(langs);
+
+    return card;
+  }
+
+  // Load featured projects when the page loads
+  loadFeaturedProjects();
 });

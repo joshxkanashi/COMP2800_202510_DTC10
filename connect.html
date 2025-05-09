@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSync - Build Your Tech Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">CSync</div>
+                <!-- Desktop Navigation Menu -->
+                <nav class="desktop-nav">
+                    <a href="index.html" class="desktop-nav-item">Home</a>
+                    <a href="#" class="desktop-nav-item">Portfolio</a>
+                    <a href="projects.html" class="desktop-nav-item">Projects</a>
+                    <a href="connect.html" class="desktop-nav-item active">Connect</a>
+                </nav>
+            </div>
+            <!-- User Controls for Desktop -->
+            <div class="user-controls">
+                <button class="user-button" aria-label="Notifications">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z"
+                            fill="currentColor" />
+                    </svg>
+                </button>
+                <div class="user-avatar">CS</div>
+                <button id="logoutButton" class="logout-button" aria-label="Logout">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <main class="container">
+            <h1 style="font-size: 2rem; font-weight: 600; text-align: center; margin: 48px 0 32px;">Find similar
+                portfolios to connect with</h1>
+            <div
+                style="display: flex; flex-direction: column; gap: 32px; align-items: center; max-width: 600px; margin: 0 auto 80px auto;">
+                <div class="connect-card">
+                    <div class="connect-avatar">D</div>
+                    <div class="connect-info">
+                        <div class="connect-name">Dummy</div>
+                        <div class="connect-role">Java Developer</div>
+                    </div>
+                </div>
+                <div class="connect-card">
+                    <div class="connect-avatar">D</div>
+                    <div class="connect-info">
+                        <div class="connect-name">Dummy</div>
+                        <div class="connect-role">Java Developer</div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .connect-card {
+                    display: flex;
+                    align-items: center;
+                    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+                    border-radius: 20px;
+                    box-shadow: var(--card-shadow);
+                    padding: 32px 36px;
+                    color: #fff;
+                    width: 100%;
+                    max-width: 500px;
+                    margin: 0 auto;
+                    transition: box-shadow 0.3s, transform 0.3s;
+                }
+
+                .connect-card:not(:last-child) {
+                    margin-bottom: 24px;
+                }
+
+                .connect-card:hover {
+                    box-shadow: var(--card-hover-shadow);
+                    transform: translateY(-3px);
+                }
+
+                .connect-avatar {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.18);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 2rem;
+                    font-weight: 600;
+                    margin-right: 28px;
+                    border: 2px solid rgba(255, 255, 255, 0.25);
+                }
+
+                .connect-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .connect-name {
+                    font-size: 1.3rem;
+                    font-weight: 600;
+                    margin-bottom: 4px;
+                }
+
+                .connect-role {
+                    font-size: 1rem;
+                    opacity: 0.92;
+                }
+
+                @media (max-width: 600px) {
+                    .connect-card {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        padding: 24px 16px;
+                    }
+
+                    .connect-avatar {
+                        margin-right: 0;
+                        margin-bottom: 16px;
+                    }
+                }
+            </style>
+        </main>
+    </div>
+    <script type="module" src="profile.js"></script>
+</body>
+
+</html>

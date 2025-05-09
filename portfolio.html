@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSync - My Portfolio</title>
-    <meta name="description" content="Professional portfolio of CS Student - Full Stack Developer & Computer Science Enthusiast">
+    <meta name="description"
+        content="Professional portfolio of CS Student - Full Stack Developer & Computer Science Enthusiast">
     <meta name="theme-color" content="#6366f1">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="CS Student Portfolio">
     <meta property="og:description" content="Full Stack Developer & Computer Science Enthusiast">
     <meta property="og:type" content="website">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%236366f1' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E" type="image/svg+xml">
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%236366f1' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/%3E%3C/svg%3E"
+        type="image/svg+xml">
     <!-- Preload critical assets -->
     <link rel="preload" href="styles.css" as="style">
     <link rel="preload" href="portfolio.css" as="style">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        as="style">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="portfolio.css">
@@ -23,6 +28,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
     <div id="app">
         <header class="header">
@@ -33,25 +39,34 @@
                     <a href="index.html" class="desktop-nav-item">Home</a>
                     <a href="portfolio.html" class="desktop-nav-item active">Portfolio</a>
                     <a href="projects.html" class="desktop-nav-item">Projects</a>
-                    <a href="#contact" class="desktop-nav-item">Connect</a>
+                    <a href="connect.html" class="desktop-nav-item">Connect</a>
                 </nav>
             </div>
             <!-- User Controls for Desktop -->
             <div class="user-controls">
                 <button class="user-button" aria-label="Notifications">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="currentColor"/>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true" focusable="false">
+                        <path
+                            d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z"
+                            fill="currentColor" />
                     </svg>
                 </button>
                 <div class="user-avatar">CS</div>
+                <button id="logoutButton" class="logout-button" aria-label="Logout">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <path d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Logout
+                </button>
             </div>
         </header>
 
-        <!-- Move the edit button to replace the floating connect button -->
-        <button id="editProfileButton" class="floating-edit-btn" aria-label="Edit Profile">
+        <!-- Floating connect button -->
+        <a href="#contact" class="floating-connect-btn" aria-label="Connect with me">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
         </button>
 
@@ -64,29 +79,50 @@
                         <p class="portfolio-subtitle editable-content" data-field="title">Full Stack Developer & Computer Science Enthusiast</p>
                         <div class="portfolio-meta">
                             <div class="portfolio-meta-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
                                 </svg>
                                 <span class="editable-content" data-field="location">Vancouver, Canada</span>
                             </div>
                             <div class="portfolio-meta-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
                                 </svg>
                                 <span class="editable-content" data-field="email">csstudent@example.com</span>
                             </div>
                             <div class="portfolio-meta-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
                                 </svg>
                                 <span class="editable-content" data-field="education">Computer Science, Year 3</span>
                             </div>
                         </div>
                         <a href="#contact" class="connect-button">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path
+                                    d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                             </svg>
                             Connect With Me
                         </a>
@@ -105,12 +141,12 @@
             <section id="about" class="portfolio-section">
                 <h2 class="section-title">About Me</h2>
                 <div class="about-content">
-                    <p class="about-text editable-content" data-field="about1">
+                    <p class="about-text">
                         I'm a passionate Computer Science student with a strong interest in web development, artificial intelligence, 
                         and cybersecurity. My journey in tech began when I was 15, teaching myself how to code through online resources.
                         Today, I'm focused on building innovative solutions that solve real-world problems.
                     </p>
-                    <p class="about-text editable-content" data-field="about2">
+                    <p class="about-text">
                         When I'm not coding, you can find me exploring new technologies, contributing to open-source projects,
                         or mentoring junior developers. I believe in continuous learning and pushing the boundaries of what's possible with technology.
                     </p>
@@ -124,9 +160,9 @@
                         <div class="timeline-dot"></div>
                         <div class="timeline-date editable-content" data-field="edu1_date">2021 - Present</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title editable-content" data-field="edu1_degree">BSc in Computer Science</h3>
-                            <p class="timeline-subtitle editable-content" data-field="edu1_school">British Columbia Institute of Technology</p>
-                            <p class="timeline-description editable-content" data-field="edu1_description">Focusing on Software Development, Data Structures, and Algorithms</p>
+                            <h3 class="timeline-title">BSc in Computer Science</h3>
+                            <p class="timeline-subtitle">British Columbia Institute of Technology</p>
+                            <p class="timeline-description">Focusing on Software Development, Data Structures, and Algorithms</p>
                         </div>
                     </div>
                     <div class="timeline-item" data-item-id="edu2">
@@ -282,27 +318,27 @@
                         <div class="timeline-dot"></div>
                         <div class="timeline-date editable-content" data-field="exp1_date">2022 - Present</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title editable-content" data-field="exp1_title">Junior Web Developer</h3>
-                            <p class="timeline-subtitle editable-content" data-field="exp1_company">TechVision Labs, Vancouver</p>
-                            <p class="timeline-description editable-content" data-field="exp1_description">Developing responsive web applications using React and Node.js. Collaborating with designers and back-end developers to create seamless user experiences.</p>
+                            <h3 class="timeline-title">Junior Web Developer</h3>
+                            <p class="timeline-subtitle">TechVision Labs, Vancouver</p>
+                            <p class="timeline-description">Developing responsive web applications using React and Node.js. Collaborating with designers and back-end developers to create seamless user experiences.</p>
                         </div>
                     </div>
                     <div class="timeline-item" data-item-id="exp2">
                         <div class="timeline-dot"></div>
                         <div class="timeline-date editable-content" data-field="exp2_date">2021 - 2022</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title editable-content" data-field="exp2_title">Web Development Intern</h3>
-                            <p class="timeline-subtitle editable-content" data-field="exp2_company">CodeCraft Studios</p>
-                            <p class="timeline-description editable-content" data-field="exp2_description">Assisted in developing and maintaining websites for clients. Gained experience in responsive design, cross-browser compatibility, and performance optimization.</p>
+                            <h3 class="timeline-title">Web Development Intern</h3>
+                            <p class="timeline-subtitle">CodeCraft Studios</p>
+                            <p class="timeline-description">Assisted in developing and maintaining websites for clients. Gained experience in responsive design, cross-browser compatibility, and performance optimization.</p>
                         </div>
                     </div>
                     <div class="timeline-item" data-item-id="exp3">
                         <div class="timeline-dot"></div>
                         <div class="timeline-date editable-content" data-field="exp3_date">2020</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title editable-content" data-field="exp3_title">Teaching Assistant</h3>
-                            <p class="timeline-subtitle editable-content" data-field="exp3_company">BCIT, Computer Science Department</p>
-                            <p class="timeline-description editable-content" data-field="exp3_description">Assisted professors in teaching introductory programming courses. Held office hours to help students with assignments and conceptual understanding.</p>
+                            <h3 class="timeline-title">Teaching Assistant</h3>
+                            <p class="timeline-subtitle">BCIT, Computer Science Department</p>
+                            <p class="timeline-description">Assisted professors in teaching introductory programming courses. Held office hours to help students with assignments and conceptual understanding.</p>
                         </div>
                     </div>
                 </div>
@@ -320,7 +356,7 @@
                 <div class="portfolio-projects" id="projectsContainer">
                     <div class="portfolio-project-card" data-item-id="proj1">
                         <div class="portfolio-project-image">
-                            <span class="project-badge editable-content" data-field="proj1_badge">Web App</span>
+                            <span class="project-badge">Web App</span>
                             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                                 <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -328,13 +364,13 @@
                             </svg>
                         </div>
                         <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title editable-content" data-field="proj1_title">Task Management Platform</h3>
-                            <p class="portfolio-project-description editable-content" data-field="proj1_description">A comprehensive task management application with real-time updates, team collaboration features, and analytics dashboard.</p>
-                            <div class="portfolio-project-tech" data-project="proj1">
-                                <span class="tech-tag" data-tag="React">React</span>
-                                <span class="tech-tag" data-tag="Node.js">Node.js</span>
-                                <span class="tech-tag" data-tag="MongoDB">MongoDB</span>
-                                <span class="tech-tag" data-tag="Socket.io">Socket.io</span>
+                            <h3 class="portfolio-project-title">Task Management Platform</h3>
+                            <p class="portfolio-project-description">A comprehensive task management application with real-time updates, team collaboration features, and analytics dashboard.</p>
+                            <div class="portfolio-project-tech">
+                                <span class="tech-tag">React</span>
+                                <span class="tech-tag">Node.js</span>
+                                <span class="tech-tag">MongoDB</span>
+                                <span class="tech-tag">Socket.io</span>
                             </div>
                             <div class="portfolio-project-links">
                                 <a href="#" class="project-link editable-content" data-field="proj1_link">View Project</a>
@@ -345,18 +381,18 @@
 
                     <div class="portfolio-project-card" data-item-id="proj2">
                         <div class="portfolio-project-image">
-                            <span class="project-badge editable-content" data-field="proj2_badge">Mobile App</span>
+                            <span class="project-badge">Mobile App</span>
                             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 18.0001V14.0001M12 14.0001V10.0001M12 14.0001H16M12 14.0001H8M21 12.0001C21 16.9707 16.9706 21.0001 12 21.0001C7.02944 21.0001 3 16.9707 3 12.0001C3 7.02956 7.02944 3.00012 12 3.00012C16.9706 3.00012 21 7.02956 21 12.0001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
                         <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title editable-content" data-field="proj2_title">Health Tracker App</h3>
-                            <p class="portfolio-project-description editable-content" data-field="proj2_description">A mobile application that helps users track their health metrics, set fitness goals, and monitor their progress over time.</p>
-                            <div class="portfolio-project-tech" data-project="proj2">
-                                <span class="tech-tag" data-tag="Flutter">Flutter</span>
-                                <span class="tech-tag" data-tag="Firebase">Firebase</span>
-                                <span class="tech-tag" data-tag="TensorFlow Lite">TensorFlow Lite</span>
+                            <h3 class="portfolio-project-title">Health Tracker App</h3>
+                            <p class="portfolio-project-description">A mobile application that helps users track their health metrics, set fitness goals, and monitor their progress over time.</p>
+                            <div class="portfolio-project-tech">
+                                <span class="tech-tag">Flutter</span>
+                                <span class="tech-tag">Firebase</span>
+                                <span class="tech-tag">TensorFlow Lite</span>
                             </div>
                             <div class="portfolio-project-links">
                                 <a href="#" class="project-link editable-content" data-field="proj2_link">View Project</a>
@@ -367,7 +403,7 @@
 
                     <div class="portfolio-project-card" data-item-id="proj3">
                         <div class="portfolio-project-image">
-                            <span class="project-badge editable-content" data-field="proj3_badge">AI Project</span>
+                            <span class="project-badge">AI Project</span>
                             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" stroke-width="2"/>
                                 <path d="M7 16.5H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -377,13 +413,13 @@
                             </svg>
                         </div>
                         <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title editable-content" data-field="proj3_title">Sentiment Analysis Tool</h3>
-                            <p class="portfolio-project-description editable-content" data-field="proj3_description">An AI-powered tool that analyzes customer feedback and social media mentions to determine sentiment and provide actionable insights.</p>
-                            <div class="portfolio-project-tech" data-project="proj3">
-                                <span class="tech-tag" data-tag="Python">Python</span>
-                                <span class="tech-tag" data-tag="TensorFlow">TensorFlow</span>
-                                <span class="tech-tag" data-tag="NLTK">NLTK</span>
-                                <span class="tech-tag" data-tag="Flask">Flask</span>
+                            <h3 class="portfolio-project-title">Sentiment Analysis Tool</h3>
+                            <p class="portfolio-project-description">An AI-powered tool that analyzes customer feedback and social media mentions to determine sentiment and provide actionable insights.</p>
+                            <div class="portfolio-project-tech">
+                                <span class="tech-tag">Python</span>
+                                <span class="tech-tag">TensorFlow</span>
+                                <span class="tech-tag">NLTK</span>
+                                <span class="tech-tag">Flask</span>
                             </div>
                             <div class="portfolio-project-links">
                                 <a href="#" class="project-link editable-content" data-field="proj3_link">View Project</a>
@@ -412,15 +448,20 @@
                     <div class="contact-info">
                         <h3 class="contact-subtitle">Let's Connect</h3>
                         <p class="contact-text">
-                            I'm currently open to new opportunities and collaborations. Whether you have a project in mind, 
+                            I'm currently open to new opportunities and collaborations. Whether you have a project in
+                            mind,
                             a question about my work, or just want to say hello, feel free to reach out!
                         </p>
-                        
+
                         <div class="contact-methods">
                             <div class="contact-method">
                                 <div class="contact-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                        <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                        <path
+                                            d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
                                     </svg>
                                 </div>
                                 <div class="contact-detail">
@@ -428,12 +469,19 @@
                                     <p class="contact-value">csstudent@example.com</p>
                                 </div>
                             </div>
-                            
+
                             <div class="contact-method">
                                 <div class="contact-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                        <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                        <path
+                                            d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
                                     </svg>
                                 </div>
                                 <div class="contact-detail">
@@ -445,34 +493,64 @@
 
                         <div class="social-links">
                             <a href="#" class="social-link" aria-label="GitHub Profile">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                    <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5229 6.47715 22 12 22C17.5229 22 22 17.5229 22 12C22 6.47715 17.5229 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M14.3333 19V17.137C14.3583 16.8275 14.3154 16.5163 14.2073 16.2242C14.0993 15.9321 13.9286 15.6657 13.7067 15.4428C15.8 15.2156 18 14.4431 18 10.8989C17.9998 9.99256 17.6418 9.12101 17 8.46461C17.3039 7.67171 17.2824 6.79528 16.94 6.01739C16.94 6.01739 16.1533 5.7902 14.3333 6.97433C12.8053 6.57853 11.1947 6.57853 9.66666 6.97433C7.84666 5.7902 7.05999 6.01739 7.05999 6.01739C6.71757 6.79528 6.69609 7.67171 6.99999 8.46461C6.35341 9.12588 5.99501 10.0053 5.99999 10.9183C5.99999 14.4366 8.19999 15.2091 10.2933 15.4622C10.074 15.6829 9.90483 15.9461 9.79686 16.2347C9.68889 16.5232 9.64453 16.8306 9.66666 17.137V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M9.66667 17.7018C7.66667 18.3335 6 17.7018 5 16.0684" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                    <path
+                                        d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5229 6.47715 22 12 22C17.5229 22 22 17.5229 22 12C22 6.47715 17.5229 2 12 2Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M14.3333 19V17.137C14.3583 16.8275 14.3154 16.5163 14.2073 16.2242C14.0993 15.9321 13.9286 15.6657 13.7067 15.4428C15.8 15.2156 18 14.4431 18 10.8989C17.9998 9.99256 17.6418 9.12101 17 8.46461C17.3039 7.67171 17.2824 6.79528 16.94 6.01739C16.94 6.01739 16.1533 5.7902 14.3333 6.97433C12.8053 6.57853 11.1947 6.57853 9.66666 6.97433C7.84666 5.7902 7.05999 6.01739 7.05999 6.01739C6.71757 6.79528 6.69609 7.67171 6.99999 8.46461C6.35341 9.12588 5.99501 10.0053 5.99999 10.9183C5.99999 14.4366 8.19999 15.2091 10.2933 15.4622C10.074 15.6829 9.90483 15.9461 9.79686 16.2347C9.68889 16.5232 9.64453 16.8306 9.66666 17.137V19"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M9.66667 17.7018C7.66667 18.3335 6 17.7018 5 16.0684" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </a>
                             <a href="#" class="social-link" aria-label="LinkedIn Profile">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                    <path d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M6 9H2V21H6V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                    <path
+                                        d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M6 9H2V21H6V9Z" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                    <path
+                                        d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
                                 </svg>
                             </a>
                             <a href="#" class="social-link" aria-label="Twitter/X Profile">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                    <path d="M22 4.01C21.0424 4.68547 19.9821 5.20368 18.86 5.54C18.2577 4.84751 17.4573 4.35925 16.567 4.13311C15.6767 3.90697 14.7395 3.95393 13.8821 4.26838C13.0247 4.58282 12.2884 5.15124 11.773 5.89592C11.2575 6.6406 10.9877 7.52505 11 8.43V9.43C9.44799 9.46925 7.90997 9.09748 6.5286 8.35555C5.14724 7.61361 3.97079 6.52573 3.11 5.2C3.11 5.2 -0.11 13.2 8.89 17.2C7.00816 18.4328 4.79451 19.1027 2.5 19.2C11.5 24.2 22.5 19.2 22.5 8.4C22.4997 8.14114 22.4774 7.88313 22.433 7.63C23.4518 6.65077 24.1916 5.39207 22 4.01Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                    <path
+                                        d="M22 4.01C21.0424 4.68547 19.9821 5.20368 18.86 5.54C18.2577 4.84751 17.4573 4.35925 16.567 4.13311C15.6767 3.90697 14.7395 3.95393 13.8821 4.26838C13.0247 4.58282 12.2884 5.15124 11.773 5.89592C11.2575 6.6406 10.9877 7.52505 11 8.43V9.43C9.44799 9.46925 7.90997 9.09748 6.5286 8.35555C5.14724 7.61361 3.97079 6.52573 3.11 5.2C3.11 5.2 -0.11 13.2 8.89 17.2C7.00816 18.4328 4.79451 19.1027 2.5 19.2C11.5 24.2 22.5 19.2 22.5 8.4C22.4997 8.14114 22.4774 7.88313 22.433 7.63C23.4518 6.65077 24.1916 5.39207 22 4.01Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
                                 </svg>
                             </a>
                             <a href="#" class="social-link" aria-label="Instagram Profile">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                    <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M16 2.5H8C4.96243 2.5 2.5 4.96243 2.5 8V16C2.5 19.0376 4.96243 21.5 8 21.5H16C19.0376 21.5 21.5 19.0376 21.5 16V8C21.5 4.96243 19.0376 2.5 16 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M17.5 7C18.3284 7 19 6.32843 19 5.5C19 4.67157 18.3284 4 17.5 4C16.6716 4 16 4.67157 16 5.5C16 6.32843 16.6716 7 17.5 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                    <path
+                                        d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M16 2.5H8C4.96243 2.5 2.5 4.96243 2.5 8V16C2.5 19.0376 4.96243 21.5 8 21.5H16C19.0376 21.5 21.5 19.0376 21.5 16V8C21.5 4.96243 19.0376 2.5 16 2.5Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M17.5 7C18.3284 7 19 6.32843 19 5.5C19 4.67157 18.3284 4 17.5 4C16.6716 4 16 4.67157 16 5.5C16 6.32843 16.6716 7 17.5 7Z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
                                 </svg>
                             </a>
                         </div>
                     </div>
-                    
+
                     <div class="contact-form-container">
                         <form class="contact-form" novalidate>
                             <div class="form-group">
@@ -489,7 +567,8 @@
                             </div>
                             <div class="form-group">
                                 <label for="message" class="form-label">Message</label>
-                                <textarea id="message" class="form-textarea" placeholder="Your message" rows="5" required></textarea>
+                                <textarea id="message" class="form-textarea" placeholder="Your message" rows="5"
+                                    required></textarea>
                             </div>
                             <button type="submit" class="btn-primary form-submit">Send Message</button>
                         </form>
@@ -502,33 +581,47 @@
         <nav class="bottom-nav">
             <a href="index.html" class="nav-item" aria-label="Home">
                 <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M9 20V14C9 13.4477 9.44772 13 10 13H14C14.5523 13 15 13.4477 15 14V20M3 10L12 3L21 10M5 8.5V18C5 19.1046 5.89543 20 7 20H17C18.1046 20 19 19.1046 19 18V8.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true" focusable="false">
+                        <path
+                            d="M9 20V14C9 13.4477 9.44772 13 10 13H14C14.5523 13 15 13.4477 15 14V20M3 10L12 3L21 10M5 8.5V18C5 19.1046 5.89543 20 7 20H17C18.1046 20 19 19.1046 19 18V8.5"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span>Home</span>
             </a>
             <a href="#" class="nav-item" aria-label="Search">
                 <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true" focusable="false">
+                        <path
+                            d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span>Search</span>
             </a>
             <a href="portfolio.html" class="nav-item active" aria-label="Portfolio">
                 <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M2 11L8.18517 17.1852C10.0159 19.0159 15.6729 14.1643 13.8422 12.3337L8.18517 6.67663C5.32068 3.81214 10.9988 -1.86604 13.8422 0.988442L19.071 6.21726C22.9835 10.1297 17.1899 15.9233 13.2775 12.0108L8.18517 6.91852C5.32068 4.05403 10.9988 -1.62415 13.8422 1.23033" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true" focusable="false">
+                        <path
+                            d="M2 11L8.18517 17.1852C10.0159 19.0159 15.6729 14.1643 13.8422 12.3337L8.18517 6.67663C5.32068 3.81214 10.9988 -1.86604 13.8422 0.988442L19.071 6.21726C22.9835 10.1297 17.1899 15.9233 13.2775 12.0108L8.18517 6.91852C5.32068 4.05403 10.9988 -1.62415 13.8422 1.23033"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span>Portfolio</span>
             </a>
             <a href="#contact" class="nav-item" aria-label="Connect">
                 <div class="nav-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true" focusable="false">
+                        <path
+                            d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path
+                            d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </div>
                 <span>Connect</span>
@@ -551,4 +644,5 @@
     <script src="app.js" type="module"></script>
     <script src="portfolio.js" defer></script>
 </body>
-</html> 
+
+</html>

@@ -39,6 +39,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-top: 72px; /* Adjust this value based on your header height */
 }
 
 .container {
@@ -60,9 +61,11 @@ body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 16px;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 10;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   border-bottom: 1px solid var(--glass-border);
 }
 

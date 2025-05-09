@@ -25,35 +25,8 @@
 </head>
 <body>
     <div id="app">
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">CSync</div>
-                <!-- Desktop Navigation Menu -->
-                <nav class="desktop-nav">
-                    <a href="index.html" class="desktop-nav-item">Home</a>
-                    <a href="portfolio.html" class="desktop-nav-item active">Portfolio</a>
-                    <a href="projects.html" class="desktop-nav-item">Projects</a>
-                    <a href="#contact" class="desktop-nav-item">Connect</a>
-                </nav>
-            </div>
-            <!-- User Controls for Desktop -->
-            <div class="user-controls">
-                <button class="user-button" aria-label="Notifications">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="currentColor"/>
-                    </svg>
-                </button>
-                <div class="user-avatar">CS</div>
-            </div>
-        </header>
-
-        <!-- Move the edit button to replace the floating connect button -->
-        <button id="editProfileButton" class="floating-edit-btn" aria-label="Edit Profile">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
+        <div id="navbar-placeholder"></div>
+        <script src="navbar.js"></script>
 
         <main class="container">
             <div class="portfolio-hero">
@@ -477,6 +450,7 @@
     </div>
 
     <!-- Scripts -->
+    <script type="module" src="profile.js"></script>
     <script type="module" src="portfolio.js"></script>
     <script type="module" src="featured-projects.js"></script>
 </body>

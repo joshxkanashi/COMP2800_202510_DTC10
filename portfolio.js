@@ -1,5 +1,1096 @@
 // Wait for the DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+  // Import Supabase client
+  import('./supabaseAPI.js')
+    .then(module => {
+      const supabase = module.supabase;
+      initializePortfolio(supabase);
+    })
+    .catch(error => {
+      console.error('Error importing Supabase:', error);
+      // Initialize without Supabase for fallback
+      initializePortfolio(null);
+    });
+
+  function initializePortfolio(supabase) {
+    // Global variables
+    let isEditMode = false;
+    let originalData = {};
+    let portfolioData = {};
+    
+    // DOM Elements
+    const editProfileButton = document.getElementById('editProfileButton');
+    const saveProfileButton = document.getElementById('saveProfileButton');
+    const cancelEditButton = document.getElementById('cancelEditButton');
+    const editControls = document.querySelector('.edit-controls');
+    const savingIndicator = document.getElementById('savingIndicator');
+    const editableElements = document.querySelectorAll('.editable-content');
+    const addEducationButton = document.getElementById('addEducationButton');
+    const addExperienceButton = document.getElementById('addExperienceButton');
+    const addSkill1Button = document.getElementById('addSkill1Button');
+    const addSkill2Button = document.getElementById('addSkill2Button');
+    
+    // Initialize portfolio data from Supabase if available
+    async function initializePortfolioData() {
+      if (!supabase) return;
+      
+      // Show loading indicator
+      showSavingIndicator('Loading profile...');
+      
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { data, error } = await supabase
+            .from('portfolios')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+            
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error loading portfolio:', error);
+          }
+          
+          if (data) {
+            portfolioData = data.portfolio_data || {};
+            renderPortfolioData();
+          } else {
+            // Create new portfolio record if none exists
+            portfolioData = gatherPortfolioData();
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing portfolio:', error);
+      } finally {
+        // Hide loading indicator
+        hideSavingIndicator();
+      }
+    }
+    
+    // Render portfolio data from Supabase
+    function renderPortfolioData() {
+      // Exit if no data
+      if (!portfolioData || Object.keys(portfolioData).length === 0) return;
+      
+      // Update each editable element based on field
+      editableElements.forEach(element => {
+        const field = element.dataset.field;
+        if (field && portfolioData[field]) {
+          element.textContent = portfolioData[field];
+        }
+      });
+      
+      // Update skill progress bars
+      const skillItems = document.querySelectorAll('.skill-item');
+      skillItems.forEach(item => {
+        const itemId = item.dataset.itemId;
+        const progress = portfolioData[`${itemId}_progress`];
+        if (progress) {
+          const progressBar = item.querySelector('.skill-progress');
+          progressBar.setAttribute('data-progress', progress);
+          const progressBarFill = item.querySelector('.skill-progress-bar');
+          progressBarFill.style.width = `${progress}%`;
+        }
+      });
+    }
+    
+    // Gather all current portfolio data
+    function gatherPortfolioData() {
+      const data = {};
+      
+      // Get all editable field values
+      editableElements.forEach(element => {
+        const field = element.dataset.field;
+        if (field) {
+          data[field] = element.textContent.trim();
+        }
+      });
+      
+      // Get all skill progress values
+      const skillItems = document.querySelectorAll('.skill-item');
+      skillItems.forEach(item => {
+        const itemId = item.dataset.itemId;
+        const progressBar = item.querySelector('.skill-progress');
+        if (progressBar) {
+          data[`${itemId}_progress`] = progressBar.getAttribute('data-progress');
+        }
+      });
+      
+      // Get all project tech tags
+      const techContainers = document.querySelectorAll('.portfolio-project-tech');
+      techContainers.forEach(container => {
+        const projectId = container.dataset.project;
+        const tags = container.querySelectorAll('.tech-tag');
+        
+        // Store tags as an array
+        data[`${projectId}_tags`] = Array.from(tags).map(tag => {
+          return tag.getAttribute('data-tag') || tag.textContent.trim();
+        });
+      });
+      
+      return data;
+    }
+    
+    // Show saving indicator
+    function showSavingIndicator(message = 'Saving changes...') {
+      const messageElement = savingIndicator.querySelector('span');
+      messageElement.textContent = message;
+      savingIndicator.classList.add('show');
+    }
+    
+    // Hide saving indicator
+    function hideSavingIndicator() {
+      savingIndicator.classList.remove('show');
+    }
+    
+    // Enable edit mode
+    function enableEditMode() {
+      if (!isEditMode) {
+        // Store original data for canceling
+        originalData = JSON.parse(JSON.stringify(gatherPortfolioData()));
+        
+        // Update UI
+        isEditMode = true;
+        editProfileButton.classList.add('active');
+        editControls.classList.add('active');
+        document.body.classList.add('edit-mode');
+        
+        // Check if we're on mobile view
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+          // Scroll to top for better visibility when starting edit mode on mobile
+          window.scrollTo({top: 0, behavior: 'smooth'});
+          
+          // Show a mobile-friendly editing message
+          showSavingIndicator('Editing mode activated. Tap text to edit.');
+          setTimeout(hideSavingIndicator, 3000);
+        }
+        
+        // Make elements editable
+        editableElements.forEach(element => {
+          element.setAttribute('contenteditable', 'true');
+          element.setAttribute('spellcheck', 'true');
+          
+          // Add placeholder if empty
+          if (element.textContent.trim() === '') {
+            element.textContent = `Enter ${element.dataset.field}...`;
+            element.classList.add('edit-placeholder');
+          }
+          
+          // Handle focus to remove placeholder
+          element.addEventListener('focus', handleElementFocus);
+          
+          // Handle blur to restore placeholder if empty
+          element.addEventListener('blur', handleElementBlur);
+          
+          // For mobile: ensure element is visible when tapped
+          element.addEventListener('click', ensureEditableElementVisible);
+        });
+        
+        // Show add buttons
+        addEducationButton.style.display = 'flex';
+        addExperienceButton.style.display = 'flex';
+        addSkill1Button.style.display = 'flex';
+        addSkill2Button.style.display = 'flex';
+        
+        // Show add project button
+        const addProjectButton = document.getElementById('addProjectButton');
+        if (addProjectButton) {
+          addProjectButton.style.display = 'flex';
+        }
+        
+        // Add delete buttons to timeline and skill items
+        addDeleteButtons();
+        
+        // Add progress editors to skill items
+        addProgressEditors();
+        
+        // Make project tech tags editable
+        makeTagsEditable();
+        
+        // Add project action buttons
+        addProjectActionButtons();
+      }
+    }
+    
+    // Make sure edited element is properly visible on screen, especially on mobile
+    function ensureEditableElementVisible(e) {
+      // Only needed on mobile views
+      if (window.innerWidth >= 768) return;
+      
+      const element = e.target;
+      
+      // Wait a bit for the mobile keyboard to appear
+      setTimeout(() => {
+        // Get element position
+        const rect = element.getBoundingClientRect();
+        
+        // If element is not fully visible in viewport, scroll to it
+        if (rect.bottom > window.innerHeight || rect.top < 0) {
+          // Calculate position to scroll to (with some padding)
+          const scrollTarget = window.pageYOffset + rect.top - 80;
+          
+          // Smooth scroll to element
+          window.scrollTo({
+            top: scrollTarget,
+            behavior: 'smooth'
+          });
+        }
+      }, 300);
+    }
+    
+    // Disable edit mode
+    function disableEditMode() {
+      if (isEditMode) {
+        // Update UI
+        isEditMode = false;
+        editProfileButton.classList.remove('active');
+        editControls.classList.remove('active');
+        document.body.classList.remove('edit-mode');
+        
+        // Make elements non-editable
+        editableElements.forEach(element => {
+          element.removeAttribute('contenteditable');
+          element.removeAttribute('spellcheck');
+          element.classList.remove('edit-placeholder');
+          
+          // Remove event listeners
+          element.removeEventListener('focus', handleElementFocus);
+          element.removeEventListener('blur', handleElementBlur);
+          element.removeEventListener('click', ensureEditableElementVisible);
+        });
+        
+        // Hide add buttons
+        addEducationButton.style.display = 'none';
+        addExperienceButton.style.display = 'none';
+        addSkill1Button.style.display = 'none';
+        addSkill2Button.style.display = 'none';
+        
+        // Hide add project button
+        const addProjectButton = document.getElementById('addProjectButton');
+        if (addProjectButton) {
+          addProjectButton.style.display = 'none';
+        }
+        
+        // Remove delete buttons
+        removeDeleteButtons();
+        
+        // Remove progress editors
+        removeProgressEditors();
+        
+        // Remove tag editing
+        removeTagEditing();
+        
+        // Remove project action buttons
+        removeProjectActionButtons();
+      }
+    }
+    
+    // Reset to original data
+    function resetToOriginalData() {
+      if (Object.keys(originalData).length > 0) {
+        // Restore editable content
+        editableElements.forEach(element => {
+          const field = element.dataset.field;
+          if (field && originalData[field]) {
+            element.textContent = originalData[field];
+            element.classList.remove('edit-placeholder');
+          }
+        });
+        
+        // Restore skill progress bars
+        const skillItems = document.querySelectorAll('.skill-item');
+        skillItems.forEach(item => {
+          const itemId = item.dataset.itemId;
+          const progress = originalData[`${itemId}_progress`];
+          if (progress) {
+            const progressBar = item.querySelector('.skill-progress');
+            progressBar.setAttribute('data-progress', progress);
+            const progressBarFill = item.querySelector('.skill-progress-bar');
+            progressBarFill.style.width = `${progress}%`;
+          }
+        });
+        
+        // TODO: Handle deletion/addition of items when that's implemented
+      }
+    }
+    
+    // Handle element focus
+    function handleElementFocus(e) {
+      const element = e.target;
+      if (element.classList.contains('edit-placeholder')) {
+        element.textContent = '';
+        element.classList.remove('edit-placeholder');
+      }
+    }
+    
+    // Handle element blur
+    function handleElementBlur(e) {
+      const element = e.target;
+      if (element.textContent.trim() === '') {
+        element.textContent = `Enter ${element.dataset.field}...`;
+        element.classList.add('edit-placeholder');
+      }
+    }
+    
+    // Add delete buttons to timeline and skill items
+    function addDeleteButtons() {
+      const timelineItems = document.querySelectorAll('.timeline-item');
+      const skillItems = document.querySelectorAll('.skill-item');
+      
+      // Add delete buttons to timeline items
+      timelineItems.forEach(item => {
+        // Skip if already has delete button
+        if (item.querySelector('.delete-item-button')) return;
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-item-button';
+        deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        deleteButton.setAttribute('type', 'button');
+        deleteButton.setAttribute('aria-label', 'Delete item');
+        
+        // Add click handler for delete
+        deleteButton.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this item?')) {
+            item.remove();
+          }
+        });
+        
+        item.prepend(deleteButton);
+      });
+      
+      // Add delete buttons to skill items
+      skillItems.forEach(item => {
+        // Skip if already has delete button
+        if (item.querySelector('.delete-item-button')) return;
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-item-button';
+        deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        deleteButton.setAttribute('type', 'button');
+        deleteButton.setAttribute('aria-label', 'Delete item');
+        
+        // Add click handler for delete
+        deleteButton.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this skill?')) {
+            item.remove();
+          }
+        });
+        
+        item.appendChild(deleteButton);
+      });
+    }
+    
+    // Remove delete buttons
+    function removeDeleteButtons() {
+      const deleteButtons = document.querySelectorAll('.delete-item-button');
+      deleteButtons.forEach(button => button.remove());
+    }
+    
+    // Add progress editors to skill items
+    function addProgressEditors() {
+      const skillItems = document.querySelectorAll('.skill-item');
+      
+      skillItems.forEach(item => {
+        // Skip if already has progress editor
+        if (item.querySelector('.progress-editor')) return;
+        
+        const progressBar = item.querySelector('.skill-progress');
+        const currentProgress = progressBar.getAttribute('data-progress');
+        
+        const editor = document.createElement('div');
+        editor.className = 'progress-editor';
+        editor.innerHTML = `
+          <input type="number" min="0" max="100" value="${currentProgress}" aria-label="Skill progress percentage">
+          <button type="button">Set</button>
+        `;
+        
+        // Add click handler for progress update
+        editor.querySelector('button').addEventListener('click', function() {
+          const input = editor.querySelector('input');
+          const newProgress = Math.min(100, Math.max(0, parseInt(input.value) || 0));
+          
+          progressBar.setAttribute('data-progress', newProgress);
+          const progressBarFill = item.querySelector('.skill-progress-bar');
+          progressBarFill.style.width = `${newProgress}%`;
+        });
+        
+        item.appendChild(editor);
+      });
+    }
+    
+    // Remove progress editors
+    function removeProgressEditors() {
+      const progressEditors = document.querySelectorAll('.progress-editor');
+      progressEditors.forEach(editor => editor.remove());
+    }
+    
+    // Function to make tech tags editable
+    function makeTagsEditable() {
+      const techContainers = document.querySelectorAll('.portfolio-project-tech');
+      
+      techContainers.forEach(container => {
+        const projectId = container.dataset.project;
+        const tags = container.querySelectorAll('.tech-tag');
+        
+        // Add delete button to each tag
+        tags.forEach(tag => {
+          tag.classList.add('editable');
+          
+          const deleteBtn = document.createElement('span');
+          deleteBtn.className = 'tech-tag-delete';
+          deleteBtn.innerHTML = '×';
+          deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (confirm('Delete this tag?')) {
+              tag.remove();
+            }
+          });
+          
+          tag.appendChild(deleteBtn);
+        });
+        
+        // Add "Add Tag" button
+        const addTagButton = document.createElement('button');
+        addTagButton.className = 'add-tag-button';
+        addTagButton.innerHTML = `
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Add Tag
+        `;
+        
+        addTagButton.addEventListener('click', function() {
+          // Hide add button temporarily
+          addTagButton.style.display = 'none';
+          
+          // Create input for new tag
+          const tagInputContainer = document.createElement('div');
+          tagInputContainer.className = 'tag-input-container';
+          tagInputContainer.innerHTML = `
+            <input type="text" class="tag-input" placeholder="Tag name">
+            <div class="tag-input-actions">
+              <button class="tag-input-confirm">✓</button>
+              <button class="tag-input-cancel">×</button>
+            </div>
+          `;
+          
+          container.insertBefore(tagInputContainer, addTagButton);
+          const tagInput = tagInputContainer.querySelector('input');
+          tagInput.focus();
+          
+          // Confirm button action
+          tagInputContainer.querySelector('.tag-input-confirm').addEventListener('click', function() {
+            const tagName = tagInput.value.trim();
+            if (tagName) {
+              // Create new tag
+              const newTag = document.createElement('span');
+              newTag.className = 'tech-tag editable';
+              newTag.setAttribute('data-tag', tagName);
+              newTag.textContent = tagName;
+              
+              // Add delete button to new tag
+              const deleteBtn = document.createElement('span');
+              deleteBtn.className = 'tech-tag-delete';
+              deleteBtn.innerHTML = '×';
+              deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (confirm('Delete this tag?')) {
+                  newTag.remove();
+                }
+              });
+              
+              newTag.appendChild(deleteBtn);
+              
+              // Insert new tag before the input container
+              container.insertBefore(newTag, tagInputContainer);
+            }
+            
+            // Remove input and show add button
+            tagInputContainer.remove();
+            addTagButton.style.display = 'inline-flex';
+          });
+          
+          // Cancel button action
+          tagInputContainer.querySelector('.tag-input-cancel').addEventListener('click', function() {
+            tagInputContainer.remove();
+            addTagButton.style.display = 'inline-flex';
+          });
+          
+          // Handle Enter key
+          tagInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+              tagInputContainer.querySelector('.tag-input-confirm').click();
+            } else if (e.key === 'Escape') {
+              tagInputContainer.querySelector('.tag-input-cancel').click();
+            }
+          });
+        });
+        
+        container.appendChild(addTagButton);
+      });
+    }
+    
+    // Function to add project action buttons
+    function addProjectActionButtons() {
+      const projectCards = document.querySelectorAll('.portfolio-project-card');
+      
+      projectCards.forEach(card => {
+        // Skip if already has project actions
+        if (card.querySelector('.project-actions')) return;
+        
+        const actionsContainer = document.createElement('div');
+        actionsContainer.className = 'project-actions';
+        
+        // Create delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'project-delete-btn';
+        deleteBtn.setAttribute('aria-label', 'Delete project');
+        deleteBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+        
+        // Add click handler for delete project
+        deleteBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this project?')) {
+            card.remove();
+          }
+        });
+        
+        actionsContainer.appendChild(deleteBtn);
+        card.appendChild(actionsContainer);
+      });
+    }
+    
+    // Function to remove tag editing
+    function removeTagEditing() {
+      // Remove tag delete buttons
+      const tagDeleteButtons = document.querySelectorAll('.tech-tag-delete');
+      tagDeleteButtons.forEach(btn => btn.remove());
+      
+      // Remove editable class from tags
+      const editableTags = document.querySelectorAll('.tech-tag.editable');
+      editableTags.forEach(tag => tag.classList.remove('editable'));
+      
+      // Remove add tag buttons
+      const addTagButtons = document.querySelectorAll('.add-tag-button');
+      addTagButtons.forEach(btn => btn.remove());
+      
+      // Remove any active tag inputs
+      const tagInputContainers = document.querySelectorAll('.tag-input-container');
+      tagInputContainers.forEach(container => container.remove());
+    }
+    
+    // Function to remove project action buttons
+    function removeProjectActionButtons() {
+      const projectActions = document.querySelectorAll('.project-actions');
+      projectActions.forEach(actions => actions.remove());
+    }
+    
+    // Event Listeners
+    
+    // Edit button click handler
+    if (editProfileButton) {
+      editProfileButton.addEventListener('click', function() {
+        if (isEditMode) {
+          disableEditMode();
+        } else {
+          enableEditMode();
+        }
+      });
+    }
+    
+    // Save button click handler
+    if (saveProfileButton) {
+      saveProfileButton.addEventListener('click', async function() {
+        // Gather all portfolio data
+        portfolioData = gatherPortfolioData();
+        
+        // Show saving indicator
+        showSavingIndicator();
+        
+        // Save to Supabase if available
+        if (supabase) {
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+              const { data, error } = await supabase
+                .from('portfolios')
+                .upsert({
+                  user_id: user.id,
+                  portfolio_data: portfolioData,
+                  updated_at: new Date().toISOString()
+                }, {
+                  onConflict: 'user_id'
+                });
+                
+              if (error) {
+                console.error('Error saving portfolio:', error);
+                alert('Failed to save your profile. Please try again.');
+              } else {
+                console.log('Portfolio saved successfully!');
+              }
+            } else {
+              alert('You must be logged in to save your profile.');
+            }
+          } catch (error) {
+            console.error('Error saving portfolio:', error);
+            alert('Failed to save your profile. Please try again.');
+          } finally {
+            hideSavingIndicator();
+            disableEditMode();
+          }
+        } else {
+          // For demo/development without Supabase
+          console.log('Portfolio data saved to local variable:', portfolioData);
+          
+          // Simulate API delay
+          setTimeout(() => {
+            hideSavingIndicator();
+            disableEditMode();
+          }, 1000);
+        }
+      });
+    }
+    
+    // Cancel button click handler
+    if (cancelEditButton) {
+      cancelEditButton.addEventListener('click', function() {
+        resetToOriginalData();
+        disableEditMode();
+      });
+    }
+    
+    // Add event listeners for add buttons
+    if (addEducationButton) {
+      addEducationButton.addEventListener('click', function() {
+        addNewEducationItem();
+      });
+    }
+    
+    if (addExperienceButton) {
+      addExperienceButton.addEventListener('click', function() {
+        addNewExperienceItem();
+      });
+    }
+    
+    if (addSkill1Button) {
+      addSkill1Button.addEventListener('click', function() {
+        addNewSkillItem('skillsGrid1');
+      });
+    }
+    
+    if (addSkill2Button) {
+      addSkill2Button.addEventListener('click', function() {
+        addNewSkillItem('skillsGrid2');
+      });
+    }
+    
+    // Add new education item
+    function addNewEducationItem() {
+      const timelineContainer = document.getElementById('educationTimeline');
+      const items = timelineContainer.querySelectorAll('.timeline-item');
+      const newItemId = `edu${items.length + 1}`;
+      
+      const newItem = document.createElement('div');
+      newItem.className = 'timeline-item new-item';
+      newItem.dataset.itemId = newItemId;
+      
+      newItem.innerHTML = `
+        <div class="timeline-dot"></div>
+        <div class="timeline-date editable-content" data-field="${newItemId}_date">Enter date...</div>
+        <div class="timeline-content">
+          <h3 class="timeline-title editable-content" data-field="${newItemId}_degree">Enter degree/certification...</h3>
+          <p class="timeline-subtitle editable-content" data-field="${newItemId}_school">Enter school/institution...</p>
+          <p class="timeline-description editable-content" data-field="${newItemId}_description">Enter description...</p>
+        </div>
+      `;
+      
+      timelineContainer.appendChild(newItem);
+      
+      // Add delete button to new item
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'delete-item-button';
+      deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      deleteButton.setAttribute('type', 'button');
+      deleteButton.setAttribute('aria-label', 'Delete item');
+      
+      // Add click handler for delete
+      deleteButton.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete this item?')) {
+          newItem.remove();
+        }
+      });
+      
+      newItem.prepend(deleteButton);
+      
+      // Make new elements editable
+      const editableElements = newItem.querySelectorAll('.editable-content');
+      editableElements.forEach(element => {
+        element.setAttribute('contenteditable', 'true');
+        element.setAttribute('spellcheck', 'true');
+        
+        // Add placeholder styles
+        element.classList.add('edit-placeholder');
+        
+        // Handle focus to remove placeholder
+        element.addEventListener('focus', handleElementFocus);
+        
+        // Handle blur to restore placeholder if empty
+        element.addEventListener('blur', handleElementBlur);
+      });
+      
+      // Focus the first editable element
+      editableElements[0].focus();
+    }
+    
+    // Add new experience item
+    function addNewExperienceItem() {
+      const timelineContainer = document.getElementById('experienceTimeline');
+      const items = timelineContainer.querySelectorAll('.timeline-item');
+      const newItemId = `exp${items.length + 1}`;
+      
+      const newItem = document.createElement('div');
+      newItem.className = 'timeline-item new-item';
+      newItem.dataset.itemId = newItemId;
+      
+      newItem.innerHTML = `
+        <div class="timeline-dot"></div>
+        <div class="timeline-date editable-content" data-field="${newItemId}_date">Enter date...</div>
+        <div class="timeline-content">
+          <h3 class="timeline-title editable-content" data-field="${newItemId}_title">Enter job title...</h3>
+          <p class="timeline-subtitle editable-content" data-field="${newItemId}_company">Enter company...</p>
+          <p class="timeline-description editable-content" data-field="${newItemId}_description">Enter job description...</p>
+        </div>
+      `;
+      
+      timelineContainer.appendChild(newItem);
+      
+      // Add delete button to new item
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'delete-item-button';
+      deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      deleteButton.setAttribute('type', 'button');
+      deleteButton.setAttribute('aria-label', 'Delete item');
+      
+      // Add click handler for delete
+      deleteButton.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete this item?')) {
+          newItem.remove();
+        }
+      });
+      
+      newItem.prepend(deleteButton);
+      
+      // Make new elements editable
+      const editableElements = newItem.querySelectorAll('.editable-content');
+      editableElements.forEach(element => {
+        element.setAttribute('contenteditable', 'true');
+        element.setAttribute('spellcheck', 'true');
+        
+        // Add placeholder styles
+        element.classList.add('edit-placeholder');
+        
+        // Handle focus to remove placeholder
+        element.addEventListener('focus', handleElementFocus);
+        
+        // Handle blur to restore placeholder if empty
+        element.addEventListener('blur', handleElementBlur);
+      });
+      
+      // Focus the first editable element
+      editableElements[0].focus();
+    }
+    
+    // Add new skill item
+    function addNewSkillItem(gridId) {
+      const skillsGrid = document.getElementById(gridId);
+      const items = skillsGrid.querySelectorAll('.skill-item');
+      const allSkillItems = document.querySelectorAll('.skill-item');
+      const newItemId = `skill${allSkillItems.length + 1}`;
+      
+      const newItem = document.createElement('div');
+      newItem.className = 'skill-item new-item';
+      newItem.dataset.itemId = newItemId;
+      
+      newItem.innerHTML = `
+        <div class="skill-progress" data-progress="50">
+          <div class="skill-progress-bar" style="width: 50%"></div>
+        </div>
+        <div class="skill-info">
+          <span class="skill-name editable-content" data-field="${newItemId}_name">Enter skill name...</span>
+          <span class="skill-level editable-content" data-field="${newItemId}_level">Intermediate</span>
+        </div>
+      `;
+      
+      skillsGrid.appendChild(newItem);
+      
+      // Add delete button to new item
+      const deleteButton = document.createElement('button');
+      deleteButton.className = 'delete-item-button';
+      deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      deleteButton.setAttribute('type', 'button');
+      deleteButton.setAttribute('aria-label', 'Delete item');
+      
+      // Add click handler for delete
+      deleteButton.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete this skill?')) {
+          newItem.remove();
+        }
+      });
+      
+      newItem.appendChild(deleteButton);
+      
+      // Add progress editor to new item
+      const progressBar = newItem.querySelector('.skill-progress');
+      
+      const editor = document.createElement('div');
+      editor.className = 'progress-editor';
+      editor.innerHTML = `
+        <input type="number" min="0" max="100" value="50" aria-label="Skill progress percentage">
+        <button type="button">Set</button>
+      `;
+      
+      // Add click handler for progress update
+      editor.querySelector('button').addEventListener('click', function() {
+        const input = editor.querySelector('input');
+        const newProgress = Math.min(100, Math.max(0, parseInt(input.value) || 0));
+        
+        progressBar.setAttribute('data-progress', newProgress);
+        const progressBarFill = newItem.querySelector('.skill-progress-bar');
+        progressBarFill.style.width = `${newProgress}%`;
+      });
+      
+      newItem.appendChild(editor);
+      
+      // Make new elements editable
+      const editableElements = newItem.querySelectorAll('.editable-content');
+      editableElements.forEach(element => {
+        element.setAttribute('contenteditable', 'true');
+        element.setAttribute('spellcheck', 'true');
+        
+        // Add placeholder styles
+        element.classList.add('edit-placeholder');
+        
+        // Handle focus to remove placeholder
+        element.addEventListener('focus', handleElementFocus);
+        
+        // Handle blur to restore placeholder if empty
+        element.addEventListener('blur', handleElementBlur);
+      });
+      
+      // Focus the first editable element
+      editableElements[0].focus();
+    }
+    
+    // Add new project functionality
+    if (document.getElementById('addProjectButton')) {
+      document.getElementById('addProjectButton').addEventListener('click', function() {
+        addNewProject();
+      });
+    }
+    
+    // Function to add new project
+    function addNewProject() {
+      const projectsContainer = document.getElementById('projectsContainer');
+      const projects = projectsContainer.querySelectorAll('.portfolio-project-card');
+      const newItemId = `proj${projects.length + 1}`;
+      
+      // Create new project card
+      const newProject = document.createElement('div');
+      newProject.className = 'portfolio-project-card new-item';
+      newProject.dataset.itemId = newItemId;
+      
+      // Determine random project icon
+      const icons = [
+        `<path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+        `<path d="M12 18.0001V14.0001M12 14.0001V10.0001M12 14.0001H16M12 14.0001H8M21 12.0001C21 16.9707 16.9706 21.0001 12 21.0001C7.02944 21.0001 3 16.9707 3 12.0001C3 7.02956 7.02944 3.00012 12 3.00012C16.9706 3.00012 21 7.02956 21 12.0001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+        `<path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" stroke-width="2"/><path d="M7 16.5H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 12.5H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 8.5H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 16.5H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`
+      ];
+      
+      // Randomly select project badge type
+      const badgeTypes = ['Web App', 'Mobile App', 'AI Project', 'Game', 'API', 'Plugin'];
+      const randomBadge = badgeTypes[Math.floor(Math.random() * badgeTypes.length)];
+      
+      newProject.innerHTML = `
+        <div class="portfolio-project-image">
+          <span class="project-badge editable-content" data-field="${newItemId}_badge">${randomBadge}</span>
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            ${icons[Math.floor(Math.random() * icons.length)]}
+          </svg>
+        </div>
+        <div class="portfolio-project-content">
+          <h3 class="portfolio-project-title editable-content" data-field="${newItemId}_title">New Project</h3>
+          <p class="portfolio-project-description editable-content" data-field="${newItemId}_description">Enter project description here...</p>
+          <div class="portfolio-project-tech" data-project="${newItemId}">
+            <span class="tech-tag" data-tag="Tag1">Tag1</span>
+          </div>
+          <div class="portfolio-project-links">
+            <a href="#" class="project-link editable-content" data-field="${newItemId}_link">View Project</a>
+            <a href="#" class="project-link editable-content" data-field="${newItemId}_github">GitHub</a>
+          </div>
+        </div>
+      `;
+      
+      projectsContainer.appendChild(newProject);
+      
+      // Make new elements editable
+      const newEditableElements = newProject.querySelectorAll('.editable-content');
+      newEditableElements.forEach(element => {
+        element.setAttribute('contenteditable', 'true');
+        element.setAttribute('spellcheck', 'true');
+        
+        // Add placeholder styles if needed
+        if (element.textContent.trim() === 'New Project' || element.textContent.trim() === 'Enter project description here...') {
+          element.classList.add('edit-placeholder');
+        }
+        
+        // Handle focus to remove placeholder
+        element.addEventListener('focus', handleElementFocus);
+        
+        // Handle blur to restore placeholder if empty
+        element.addEventListener('blur', handleElementBlur);
+      });
+      
+      // Add project action buttons
+      const actionsContainer = document.createElement('div');
+      actionsContainer.className = 'project-actions';
+      
+      // Create delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'project-delete-btn';
+      deleteBtn.setAttribute('aria-label', 'Delete project');
+      deleteBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+      
+      // Add click handler for delete project
+      deleteBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete this project?')) {
+          newProject.remove();
+        }
+      });
+      
+      actionsContainer.appendChild(deleteBtn);
+      newProject.appendChild(actionsContainer);
+      
+      // Make tags editable
+      const techContainer = newProject.querySelector('.portfolio-project-tech');
+      const tags = techContainer.querySelectorAll('.tech-tag');
+      
+      // Add delete button to each tag
+      tags.forEach(tag => {
+        tag.classList.add('editable');
+        
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'tech-tag-delete';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (confirm('Delete this tag?')) {
+            tag.remove();
+          }
+        });
+        
+        tag.appendChild(deleteBtn);
+      });
+      
+      // Add "Add Tag" button
+      const addTagButton = document.createElement('button');
+      addTagButton.className = 'add-tag-button';
+      addTagButton.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Add Tag
+      `;
+      
+      addTagButton.addEventListener('click', createAddTagHandler(techContainer, addTagButton));
+      techContainer.appendChild(addTagButton);
+      
+      // Focus the title for immediate editing
+      newProject.querySelector('.portfolio-project-title').focus();
+    }
+    
+    // Create a reusable handler for adding tags
+    function createAddTagHandler(container, addTagButton) {
+      return function() {
+        // Hide add button temporarily
+        addTagButton.style.display = 'none';
+        
+        // Create input for new tag
+        const tagInputContainer = document.createElement('div');
+        tagInputContainer.className = 'tag-input-container';
+        tagInputContainer.innerHTML = `
+          <input type="text" class="tag-input" placeholder="Tag name">
+          <div class="tag-input-actions">
+            <button class="tag-input-confirm">✓</button>
+            <button class="tag-input-cancel">×</button>
+          </div>
+        `;
+        
+        container.insertBefore(tagInputContainer, addTagButton);
+        const tagInput = tagInputContainer.querySelector('input');
+        tagInput.focus();
+        
+        // Confirm button action
+        tagInputContainer.querySelector('.tag-input-confirm').addEventListener('click', function() {
+          const tagName = tagInput.value.trim();
+          if (tagName) {
+            // Create new tag
+            const newTag = document.createElement('span');
+            newTag.className = 'tech-tag editable';
+            newTag.setAttribute('data-tag', tagName);
+            newTag.textContent = tagName;
+            
+            // Add delete button to new tag
+            const deleteBtn = document.createElement('span');
+            deleteBtn.className = 'tech-tag-delete';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              if (confirm('Delete this tag?')) {
+                newTag.remove();
+              }
+            });
+            
+            newTag.appendChild(deleteBtn);
+            
+            // Insert new tag before the input container
+            container.insertBefore(newTag, tagInputContainer);
+          }
+          
+          // Remove input and show add button
+          tagInputContainer.remove();
+          addTagButton.style.display = 'inline-flex';
+        });
+        
+        // Cancel button action
+        tagInputContainer.querySelector('.tag-input-cancel').addEventListener('click', function() {
+          tagInputContainer.remove();
+          addTagButton.style.display = 'inline-flex';
+        });
+        
+        // Handle Enter key
+        tagInput.addEventListener('keyup', function(e) {
+          if (e.key === 'Enter') {
+            tagInputContainer.querySelector('.tag-input-confirm').click();
+          } else if (e.key === 'Escape') {
+            tagInputContainer.querySelector('.tag-input-cancel').click();
+          }
+        });
+      };
+    }
+    
+    // Initialize portfolio
+    initializePortfolioData();
+  }
+
   // Portfolio navigation smooth scrolling
   const portfolioNavLinks = document.querySelectorAll('.portfolio-nav-item');
   
@@ -35,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Connect button smooth scrolling
-  const connectButtons = document.querySelectorAll('.connect-button, .floating-connect-btn, a[href="#contact"]');
+  const connectButtons = document.querySelectorAll('.connect-button, a[href="#contact"]');
   
   connectButtons.forEach(button => {
     button.addEventListener('click', function(e) {

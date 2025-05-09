@@ -44,49 +44,43 @@
                     </svg>
                 </button>
                 <div class="user-avatar">CS</div>
-                <button id="logoutButton" class="logout-button" aria-label="Logout">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                        <path d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Logout
-                </button>
             </div>
         </header>
 
-        <!-- Floating connect button -->
-        <a href="#contact" class="floating-connect-btn" aria-label="Connect with me">
+        <!-- Move the edit button to replace the floating connect button -->
+        <button id="editProfileButton" class="floating-edit-btn" aria-label="Edit Profile">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-        </a>
+        </button>
 
         <main class="container">
             <div class="portfolio-hero">
                 <div class="portfolio-hero-content">
                     <div class="avatar large">CS</div>
                     <div class="portfolio-info">
-                        <h1 class="portfolio-title">CS Student</h1>
-                        <p class="portfolio-subtitle">Full Stack Developer & Computer Science Enthusiast</p>
+                        <h1 class="portfolio-title editable-content" data-field="name">CS Student</h1>
+                        <p class="portfolio-subtitle editable-content" data-field="title">Full Stack Developer & Computer Science Enthusiast</p>
                         <div class="portfolio-meta">
                             <div class="portfolio-meta-item">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                Vancouver, Canada
+                                <span class="editable-content" data-field="location">Vancouver, Canada</span>
                             </div>
                             <div class="portfolio-meta-item">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                csstudent@example.com
+                                <span class="editable-content" data-field="email">csstudent@example.com</span>
                             </div>
                             <div class="portfolio-meta-item">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                Computer Science, Year 3
+                                <span class="editable-content" data-field="education">Computer Science, Year 3</span>
                             </div>
                         </div>
                         <a href="#contact" class="connect-button">
@@ -111,12 +105,12 @@
             <section id="about" class="portfolio-section">
                 <h2 class="section-title">About Me</h2>
                 <div class="about-content">
-                    <p class="about-text">
+                    <p class="about-text editable-content" data-field="about1">
                         I'm a passionate Computer Science student with a strong interest in web development, artificial intelligence, 
                         and cybersecurity. My journey in tech began when I was 15, teaching myself how to code through online resources.
                         Today, I'm focused on building innovative solutions that solve real-world problems.
                     </p>
-                    <p class="about-text">
+                    <p class="about-text editable-content" data-field="about2">
                         When I'm not coding, you can find me exploring new technologies, contributing to open-source projects,
                         or mentoring junior developers. I believe in continuous learning and pushing the boundaries of what's possible with technology.
                     </p>
@@ -125,122 +119,143 @@
 
             <section id="education" class="portfolio-section">
                 <h2 class="section-title">Education</h2>
-                <div class="timeline">
-                    <div class="timeline-item">
+                <div class="timeline" id="educationTimeline">
+                    <div class="timeline-item" data-item-id="edu1">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-date">2021 - Present</div>
+                        <div class="timeline-date editable-content" data-field="edu1_date">2021 - Present</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title">BSc in Computer Science</h3>
-                            <p class="timeline-subtitle">British Columbia Institute of Technology</p>
-                            <p class="timeline-description">Focusing on Software Development, Data Structures, and Algorithms</p>
+                            <h3 class="timeline-title editable-content" data-field="edu1_degree">BSc in Computer Science</h3>
+                            <p class="timeline-subtitle editable-content" data-field="edu1_school">British Columbia Institute of Technology</p>
+                            <p class="timeline-description editable-content" data-field="edu1_description">Focusing on Software Development, Data Structures, and Algorithms</p>
                         </div>
                     </div>
-                    <div class="timeline-item">
+                    <div class="timeline-item" data-item-id="edu2">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-date">2020 - 2021</div>
+                        <div class="timeline-date editable-content" data-field="edu2_date">2020 - 2021</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title">Web Development Bootcamp</h3>
-                            <p class="timeline-subtitle">Lighthouse Labs</p>
-                            <p class="timeline-description">Intensive training in full-stack web development</p>
+                            <h3 class="timeline-title editable-content" data-field="edu2_degree">Web Development Bootcamp</h3>
+                            <p class="timeline-subtitle editable-content" data-field="edu2_school">Lighthouse Labs</p>
+                            <p class="timeline-description editable-content" data-field="edu2_description">Intensive training in full-stack web development</p>
                         </div>
                     </div>
-                    <div class="timeline-item">
+                    <div class="timeline-item" data-item-id="edu3">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-date">2019</div>
+                        <div class="timeline-date editable-content" data-field="edu3_date">2019</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title">High School Diploma</h3>
-                            <p class="timeline-subtitle">Burnaby North Secondary</p>
-                            <p class="timeline-description">Graduated with honors, Math and Computer Science focus</p>
+                            <h3 class="timeline-title editable-content" data-field="edu3_degree">High School Diploma</h3>
+                            <p class="timeline-subtitle editable-content" data-field="edu3_school">Burnaby North Secondary</p>
+                            <p class="timeline-description editable-content" data-field="edu3_description">Graduated with honors, Math and Computer Science focus</p>
                         </div>
                     </div>
                 </div>
+                <!-- Add education button (visible only in edit mode) -->
+                <button class="add-item-button" id="addEducationButton" style="display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Add Education
+                </button>
             </section>
 
             <section id="skills" class="portfolio-section">
                 <h2 class="section-title">Technical Skills</h2>
                 <div class="skills-container">
                     <div class="skill-category">
-                        <h3 class="skill-category-title">Programming Languages</h3>
-                        <div class="skill-grid">
-                            <div class="skill-item">
+                        <h3 class="skill-category-title editable-content" data-field="skill_cat1">Programming Languages</h3>
+                        <div class="skill-grid" id="skillsGrid1">
+                            <div class="skill-item" data-item-id="skill1">
                                 <div class="skill-progress" data-progress="90">
                                     <div class="skill-progress-bar" style="width: 90%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">JavaScript</span>
-                                    <span class="skill-level">Advanced</span>
+                                    <span class="skill-name editable-content" data-field="skill1_name">JavaScript</span>
+                                    <span class="skill-level editable-content" data-field="skill1_level">Advanced</span>
                                 </div>
                             </div>
-                            <div class="skill-item">
+                            <div class="skill-item" data-item-id="skill2">
                                 <div class="skill-progress" data-progress="85">
                                     <div class="skill-progress-bar" style="width: 85%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">Python</span>
-                                    <span class="skill-level">Advanced</span>
+                                    <span class="skill-name editable-content" data-field="skill2_name">Python</span>
+                                    <span class="skill-level editable-content" data-field="skill2_level">Advanced</span>
                                 </div>
                             </div>
-                            <div class="skill-item">
+                            <div class="skill-item" data-item-id="skill3">
                                 <div class="skill-progress" data-progress="75">
                                     <div class="skill-progress-bar" style="width: 75%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">Java</span>
-                                    <span class="skill-level">Intermediate</span>
+                                    <span class="skill-name editable-content" data-field="skill3_name">Java</span>
+                                    <span class="skill-level editable-content" data-field="skill3_level">Intermediate</span>
                                 </div>
                             </div>
-                            <div class="skill-item">
+                            <div class="skill-item" data-item-id="skill4">
                                 <div class="skill-progress" data-progress="60">
                                     <div class="skill-progress-bar" style="width: 60%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">C++</span>
-                                    <span class="skill-level">Intermediate</span>
+                                    <span class="skill-name editable-content" data-field="skill4_name">C++</span>
+                                    <span class="skill-level editable-content" data-field="skill4_level">Intermediate</span>
                                 </div>
                             </div>
                         </div>
+                        <!-- Add skill button (visible only in edit mode) -->
+                        <button class="add-item-button" id="addSkill1Button" style="display: none;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Add Skill
+                        </button>
                     </div>
 
                     <div class="skill-category">
-                        <h3 class="skill-category-title">Web Technologies</h3>
-                        <div class="skill-grid">
-                            <div class="skill-item">
+                        <h3 class="skill-category-title editable-content" data-field="skill_cat2">Web Technologies</h3>
+                        <div class="skill-grid" id="skillsGrid2">
+                            <div class="skill-item" data-item-id="skill5">
                                 <div class="skill-progress" data-progress="95">
                                     <div class="skill-progress-bar" style="width: 95%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">HTML5/CSS3</span>
-                                    <span class="skill-level">Expert</span>
+                                    <span class="skill-name editable-content" data-field="skill5_name">HTML5/CSS3</span>
+                                    <span class="skill-level editable-content" data-field="skill5_level">Expert</span>
                                 </div>
                             </div>
-                            <div class="skill-item">
+                            <div class="skill-item" data-item-id="skill6">
                                 <div class="skill-progress" data-progress="85">
                                     <div class="skill-progress-bar" style="width: 85%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">React</span>
-                                    <span class="skill-level">Advanced</span>
+                                    <span class="skill-name editable-content" data-field="skill6_name">React</span>
+                                    <span class="skill-level editable-content" data-field="skill6_level">Advanced</span>
                                 </div>
                             </div>
-                            <div class="skill-item">
+                            <div class="skill-item" data-item-id="skill7">
                                 <div class="skill-progress" data-progress="80">
                                     <div class="skill-progress-bar" style="width: 80%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">Node.js</span>
-                                    <span class="skill-level">Advanced</span>
+                                    <span class="skill-name editable-content" data-field="skill7_name">Node.js</span>
+                                    <span class="skill-level editable-content" data-field="skill7_level">Advanced</span>
                                 </div>
                             </div>
-                            <div class="skill-item">
+                            <div class="skill-item" data-item-id="skill8">
                                 <div class="skill-progress" data-progress="70">
                                     <div class="skill-progress-bar" style="width: 70%"></div>
                                 </div>
                                 <div class="skill-info">
-                                    <span class="skill-name">Vue.js</span>
-                                    <span class="skill-level">Intermediate</span>
+                                    <span class="skill-name editable-content" data-field="skill8_name">Vue.js</span>
+                                    <span class="skill-level editable-content" data-field="skill8_level">Intermediate</span>
                                 </div>
                             </div>
                         </div>
+                        <!-- Add skill button (visible only in edit mode) -->
+                        <button class="add-item-button" id="addSkill2Button" style="display: none;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Add Skill
+                        </button>
                     </div>
 
                     <div class="skill-tags-container">
@@ -262,43 +277,50 @@
 
             <section id="experience" class="portfolio-section">
                 <h2 class="section-title">Work Experience</h2>
-                <div class="timeline">
-                    <div class="timeline-item">
+                <div class="timeline" id="experienceTimeline">
+                    <div class="timeline-item" data-item-id="exp1">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-date">2022 - Present</div>
+                        <div class="timeline-date editable-content" data-field="exp1_date">2022 - Present</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title">Junior Web Developer</h3>
-                            <p class="timeline-subtitle">TechVision Labs, Vancouver</p>
-                            <p class="timeline-description">Developing responsive web applications using React and Node.js. Collaborating with designers and back-end developers to create seamless user experiences.</p>
+                            <h3 class="timeline-title editable-content" data-field="exp1_title">Junior Web Developer</h3>
+                            <p class="timeline-subtitle editable-content" data-field="exp1_company">TechVision Labs, Vancouver</p>
+                            <p class="timeline-description editable-content" data-field="exp1_description">Developing responsive web applications using React and Node.js. Collaborating with designers and back-end developers to create seamless user experiences.</p>
                         </div>
                     </div>
-                    <div class="timeline-item">
+                    <div class="timeline-item" data-item-id="exp2">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-date">2021 - 2022</div>
+                        <div class="timeline-date editable-content" data-field="exp2_date">2021 - 2022</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title">Web Development Intern</h3>
-                            <p class="timeline-subtitle">CodeCraft Studios</p>
-                            <p class="timeline-description">Assisted in developing and maintaining websites for clients. Gained experience in responsive design, cross-browser compatibility, and performance optimization.</p>
+                            <h3 class="timeline-title editable-content" data-field="exp2_title">Web Development Intern</h3>
+                            <p class="timeline-subtitle editable-content" data-field="exp2_company">CodeCraft Studios</p>
+                            <p class="timeline-description editable-content" data-field="exp2_description">Assisted in developing and maintaining websites for clients. Gained experience in responsive design, cross-browser compatibility, and performance optimization.</p>
                         </div>
                     </div>
-                    <div class="timeline-item">
+                    <div class="timeline-item" data-item-id="exp3">
                         <div class="timeline-dot"></div>
-                        <div class="timeline-date">2020</div>
+                        <div class="timeline-date editable-content" data-field="exp3_date">2020</div>
                         <div class="timeline-content">
-                            <h3 class="timeline-title">Teaching Assistant</h3>
-                            <p class="timeline-subtitle">BCIT, Computer Science Department</p>
-                            <p class="timeline-description">Assisted professors in teaching introductory programming courses. Held office hours to help students with assignments and conceptual understanding.</p>
+                            <h3 class="timeline-title editable-content" data-field="exp3_title">Teaching Assistant</h3>
+                            <p class="timeline-subtitle editable-content" data-field="exp3_company">BCIT, Computer Science Department</p>
+                            <p class="timeline-description editable-content" data-field="exp3_description">Assisted professors in teaching introductory programming courses. Held office hours to help students with assignments and conceptual understanding.</p>
                         </div>
                     </div>
                 </div>
+                <!-- Add experience button (visible only in edit mode) -->
+                <button class="add-item-button" id="addExperienceButton" style="display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Add Experience
+                </button>
             </section>
 
             <section id="projects" class="portfolio-section">
                 <h2 class="section-title">Featured Projects</h2>
-                <div class="portfolio-projects">
-                    <div class="portfolio-project-card">
+                <div class="portfolio-projects" id="projectsContainer">
+                    <div class="portfolio-project-card" data-item-id="proj1">
                         <div class="portfolio-project-image">
-                            <span class="project-badge">Web App</span>
+                            <span class="project-badge editable-content" data-field="proj1_badge">Web App</span>
                             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                                 <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -306,46 +328,46 @@
                             </svg>
                         </div>
                         <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title">Task Management Platform</h3>
-                            <p class="portfolio-project-description">A comprehensive task management application with real-time updates, team collaboration features, and analytics dashboard.</p>
-                            <div class="portfolio-project-tech">
-                                <span class="tech-tag">React</span>
-                                <span class="tech-tag">Node.js</span>
-                                <span class="tech-tag">MongoDB</span>
-                                <span class="tech-tag">Socket.io</span>
+                            <h3 class="portfolio-project-title editable-content" data-field="proj1_title">Task Management Platform</h3>
+                            <p class="portfolio-project-description editable-content" data-field="proj1_description">A comprehensive task management application with real-time updates, team collaboration features, and analytics dashboard.</p>
+                            <div class="portfolio-project-tech" data-project="proj1">
+                                <span class="tech-tag" data-tag="React">React</span>
+                                <span class="tech-tag" data-tag="Node.js">Node.js</span>
+                                <span class="tech-tag" data-tag="MongoDB">MongoDB</span>
+                                <span class="tech-tag" data-tag="Socket.io">Socket.io</span>
                             </div>
                             <div class="portfolio-project-links">
-                                <a href="#" class="project-link">View Project</a>
-                                <a href="#" class="project-link">GitHub</a>
+                                <a href="#" class="project-link editable-content" data-field="proj1_link">View Project</a>
+                                <a href="#" class="project-link editable-content" data-field="proj1_github">GitHub</a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="portfolio-project-card">
+                    <div class="portfolio-project-card" data-item-id="proj2">
                         <div class="portfolio-project-image">
-                            <span class="project-badge">Mobile App</span>
+                            <span class="project-badge editable-content" data-field="proj2_badge">Mobile App</span>
                             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 18.0001V14.0001M12 14.0001V10.0001M12 14.0001H16M12 14.0001H8M21 12.0001C21 16.9707 16.9706 21.0001 12 21.0001C7.02944 21.0001 3 16.9707 3 12.0001C3 7.02956 7.02944 3.00012 12 3.00012C16.9706 3.00012 21 7.02956 21 12.0001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
                         <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title">Health Tracker App</h3>
-                            <p class="portfolio-project-description">A mobile application that helps users track their health metrics, set fitness goals, and monitor their progress over time.</p>
-                            <div class="portfolio-project-tech">
-                                <span class="tech-tag">Flutter</span>
-                                <span class="tech-tag">Firebase</span>
-                                <span class="tech-tag">TensorFlow Lite</span>
+                            <h3 class="portfolio-project-title editable-content" data-field="proj2_title">Health Tracker App</h3>
+                            <p class="portfolio-project-description editable-content" data-field="proj2_description">A mobile application that helps users track their health metrics, set fitness goals, and monitor their progress over time.</p>
+                            <div class="portfolio-project-tech" data-project="proj2">
+                                <span class="tech-tag" data-tag="Flutter">Flutter</span>
+                                <span class="tech-tag" data-tag="Firebase">Firebase</span>
+                                <span class="tech-tag" data-tag="TensorFlow Lite">TensorFlow Lite</span>
                             </div>
                             <div class="portfolio-project-links">
-                                <a href="#" class="project-link">View Project</a>
-                                <a href="#" class="project-link">GitHub</a>
+                                <a href="#" class="project-link editable-content" data-field="proj2_link">View Project</a>
+                                <a href="#" class="project-link editable-content" data-field="proj2_github">GitHub</a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="portfolio-project-card">
+                    <div class="portfolio-project-card" data-item-id="proj3">
                         <div class="portfolio-project-image">
-                            <span class="project-badge">AI Project</span>
+                            <span class="project-badge editable-content" data-field="proj3_badge">AI Project</span>
                             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" stroke-width="2"/>
                                 <path d="M7 16.5H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -355,21 +377,30 @@
                             </svg>
                         </div>
                         <div class="portfolio-project-content">
-                            <h3 class="portfolio-project-title">Sentiment Analysis Tool</h3>
-                            <p class="portfolio-project-description">An AI-powered tool that analyzes customer feedback and social media mentions to determine sentiment and provide actionable insights.</p>
-                            <div class="portfolio-project-tech">
-                                <span class="tech-tag">Python</span>
-                                <span class="tech-tag">TensorFlow</span>
-                                <span class="tech-tag">NLTK</span>
-                                <span class="tech-tag">Flask</span>
+                            <h3 class="portfolio-project-title editable-content" data-field="proj3_title">Sentiment Analysis Tool</h3>
+                            <p class="portfolio-project-description editable-content" data-field="proj3_description">An AI-powered tool that analyzes customer feedback and social media mentions to determine sentiment and provide actionable insights.</p>
+                            <div class="portfolio-project-tech" data-project="proj3">
+                                <span class="tech-tag" data-tag="Python">Python</span>
+                                <span class="tech-tag" data-tag="TensorFlow">TensorFlow</span>
+                                <span class="tech-tag" data-tag="NLTK">NLTK</span>
+                                <span class="tech-tag" data-tag="Flask">Flask</span>
                             </div>
                             <div class="portfolio-project-links">
-                                <a href="#" class="project-link">View Project</a>
-                                <a href="#" class="project-link">GitHub</a>
+                                <a href="#" class="project-link editable-content" data-field="proj3_link">View Project</a>
+                                <a href="#" class="project-link editable-content" data-field="proj3_github">GitHub</a>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- Add project button (visible only in edit mode) -->
+                <button class="add-item-button" id="addProjectButton" style="display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Add Project
+                </button>
+                
                 <div class="view-all-link">
                     <a href="projects.html" class="btn-primary">View All Projects</a>
                 </div>
@@ -503,6 +534,18 @@
                 <span>Connect</span>
             </a>
         </nav>
+    </div>
+
+    <!-- Edit controls bar -->
+    <div class="edit-controls">
+        <button class="btn-save" id="saveProfileButton">Save Changes</button>
+        <button class="btn-cancel" id="cancelEditButton">Cancel</button>
+    </div>
+
+    <!-- Saving indicator -->
+    <div class="saving-indicator" id="savingIndicator">
+        <div class="spinner"></div>
+        <span>Saving changes...</span>
     </div>
 
     <script src="app.js" type="module"></script>

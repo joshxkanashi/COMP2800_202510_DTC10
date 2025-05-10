@@ -34,7 +34,7 @@ async function checkAuth() {
 }
 
 // Handle logout
-async function handleLogout() {
+export async function handleLogout() {
     const { error } = await supabase.auth.signOut();
     
     if (error) {
@@ -233,18 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         alert('Please fill in all required fields.');
       }
-    });
-  }
-  
-  // Handle logout button
-  const logoutButton = document.getElementById('logoutButton');
-  
-  if (logoutButton) {
-    logoutButton.addEventListener('click', function() {
-      // In a real application, you would perform a logout action here
-      // For demo purposes, we'll just redirect to the login page
-      console.log('Logging out...');
-      // window.location.href = 'login.html';
     });
   }
   

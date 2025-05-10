@@ -1,7 +1,9 @@
+console.log('navbar.js loaded');
 // Load navbar.html and highlight the active link
 fetch('navbar.html')
   .then(res => res.text())
   .then(html => {
+    console.log('navbar.html loaded, inserting into DOM');
     document.getElementById('navbar-placeholder').innerHTML = html;
     // Highlight active nav link
     const path = window.location.pathname.split('/').pop();
@@ -14,36 +16,26 @@ fetch('navbar.html')
     });
     // Attach logout event listener after navbar is loaded
     const logoutBtn = document.getElementById('logoutButton');
+    console.log('Attaching logout event to', logoutBtn);
     if (logoutBtn) {
       logoutBtn.addEventListener('click', async () => {
-        let sb = window.supabase;
-        if (!sb) {
-          try {
-            const module = await import('./supabaseAPI.js');
-            sb = module.supabase;
-          } catch (e) {
-            sb = null;
-          }
-        }
-        if (sb && sb.auth && typeof sb.auth.signOut === 'function') {
-          try {
-            await sb.auth.signOut();
-          } catch (e) {
-            // ignore signOut errors
-          }
-        }
-        const currentPage = window.location.pathname.split('/').pop();
-        if (currentPage !== 'login.html') {
-          window.location.href = 'login.html';
-        } else {
-          window.location.reload();
+        console.log('Logout button clicked');
+        // Show logout modal
+        const logoutModal = document.getElementById('logout-modal');
+        if (logoutModal) logoutModal.style.display = 'flex';
+        
+        try {
+          // Import and use the handleLogout function from app.js
+          const { handleLogout } = await import('./app.js');
+          await handleLogout();
+        } catch (error) {
+          console.error('Error during logout:', error);
+        } finally {
+          // Hide modal after a short delay
+          setTimeout(() => {
+            if (logoutModal) logoutModal.style.display = 'none';
+          }, 300);
         }
       });
-    }
-    // Update avatar after navbar loads (if function exists)
-    if (window.updateUserAvatar) {
-      window.updateUserAvatar();
-    } else if (typeof updateUserAvatar === 'function') {
-      updateUserAvatar();
     }
   }); 

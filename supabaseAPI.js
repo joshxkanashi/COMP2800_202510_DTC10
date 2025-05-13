@@ -19,7 +19,36 @@ console.error = (...args) => {
     originalConsoleError.apply(console, args);
 };
 
-// Create Supabase client
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+// Create Supabase client with fallback support for both module and script tag usage
+let supabase;
+
+// Check if we have access to the global Supabase client
+if (typeof window !== 'undefined' && window.supabase) {
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    console.log('Using global Supabase client');
+} else {
+    // Try to import as a module
+    try {
+        const { createClient } = require('@supabase/supabase-js');
+        supabase = createClient(supabaseUrl, supabaseKey);
+        console.log('Using module import Supabase client');
+    } catch (e) {
+        console.error('Failed to initialize Supabase client:', e);
+        
+        // Create an empty placeholder to prevent errors
+        supabase = {
+            auth: {
+                getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+                signIn: () => Promise.resolve({ error: new Error('Supabase not initialized') }),
+                signOut: () => Promise.resolve({ error: null })
+            },
+            from: () => ({
+                select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null, error: null }) }) }),
+                update: () => ({ eq: () => Promise.resolve({ error: null }) }),
+                insert: () => Promise.resolve({ error: null })
+            })
+        };
+    }
+}
 
 export { supabase }

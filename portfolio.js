@@ -3,10 +3,20 @@ import { supabase } from './supabaseAPI.js';
 // Wait for the DOM to be fully loaded
 document.addEventListener("DOMContentLoaded", function () {
   // Import Supabase client
+  let supabaseLoaded = false;
+
+  // Try importing Supabase
   import("./supabaseAPI.js")
     .then((module) => {
       const supabase = module.supabase;
+      if (supabase) {
+        console.log("Supabase client successfully imported");
+        supabaseLoaded = true;
       initializePortfolio(supabase);
+      } else {
+        console.error("Error: Supabase module imported but client is undefined");
+        initializePortfolio(null);
+      }
     })
     .catch((error) => {
       console.error("Error importing Supabase:", error);
@@ -14,7 +24,42 @@ document.addEventListener("DOMContentLoaded", function () {
       initializePortfolio(null);
     });
 
+  // Safety timeout - if Supabase doesn't load in 3 seconds, initialize without it
+  setTimeout(() => {
+    if (!supabaseLoaded) {
+      console.warn("Supabase client didn't load in time, initializing without it");
+      initializePortfolio(null);
+    }
+  }, 3000);
+
   function initializePortfolio(supabase) {
+    // Check if portfolio is already initialized
+    if (window.portfolioInitialized) {
+      console.log("Portfolio already initialized, skipping");
+      return;
+    }
+    window.portfolioInitialized = true;
+    
+    // Make sure Supabase is properly initialized or fallback to localStorage only
+    if (supabase) {
+      // Test the Supabase connection before proceeding
+      supabase.auth.getSession()
+        .then(response => {
+          if (response.error) {
+            console.error("Supabase session test failed:", response.error);
+            console.warn("Continuing with localStorage only");
+          } else {
+            console.log("Supabase connection verified");
+          }
+        })
+        .catch(error => {
+          console.error("Error testing Supabase connection:", error);
+          console.warn("Continuing with localStorage only");
+        });
+    } else {
+      console.warn("Supabase not available, using localStorage only");
+    }
+
     // Global variables
     let isEditMode = false;
     let originalData = {};
@@ -122,9 +167,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Load portfolio data from Supabase
     async function loadFromSupabase() {
-      if (!supabase) return null;
+      if (!supabase) {
+        console.warn("Supabase client not available, skipping load from Supabase");
+        return null;
+      }
       
       try {
+        console.log("Attempting to load data from Supabase...");
         const user = await getCurrentUser();
         
         if (!user) {
@@ -132,28 +181,105 @@ document.addEventListener("DOMContentLoaded", function () {
           return null;
         }
         
+        console.log("User authenticated, querying portfolios table...");
+        
+        // Check if portfolios table exists by attempting to fetch
+        // Use .limit(1) to ensure we only get one result, even if multiple exist
           const { data, error } = await supabase
             .from("portfolios")
           .select("data")
             .eq("user_id", user.id)
-            .single();
-
+          .limit(1)
+          .maybeSingle(); // Use maybeSingle instead of single to avoid errors if no rows exist
+        
         if (error) {
-          if (error.code === "PGRST116") {
-            // No portfolio found for this user
-            console.log("No portfolio found for this user in Supabase");
+          console.warn("Error querying portfolios:", error);
+          
+          // Check for specific error codes
+          if (error.code === "PGRST116" || error.code === "406") {
+            console.log("No portfolio found for this user, creating new one");
+            // Create default portfolio data
+            const defaultData = {
+              updated_at: new Date().toISOString(),
+              name: user.email?.split('@')[0] || 'CS Student',
+              title: "Full Stack Developer & Computer Science Enthusiast",
+              location: "City, Country",
+              email: user.email,
+              about1: "I'm a passionate Computer Science student with a strong interest in web development, artificial intelligence, and cybersecurity.",
+              about2: "When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, or mentoring junior developers."
+            };
+            
+            // Insert a new portfolio for this user
+            const { error: insertError } = await supabase
+              .from("portfolios")
+              .insert([{ 
+                user_id: user.id,
+                data: defaultData
+              }]);
+              
+            if (insertError) {
+              // Handle errors when inserting
+              console.error("Error creating portfolio:", insertError);
+              
+              if (insertError.code === "42703") {
+                console.error("The portfolios table might be missing the data column");
+              }
+              
+              return null;
+            }
+            
+            console.log("New portfolio created successfully");
+            return defaultData;
+          } else if (error.code === "42703") {
+            // This is likely a column error
+            console.error("Column not found - The portfolios table might be missing the data column");
             return null;
+          } else if (error.code === "PGRST115") {
+            // Multiple results found when single was expected
+            console.warn("Multiple portfolio entries found for this user. Trying to get the first one.");
+            
+            // Try again without using .single()
+            const { data: multiData, error: multiError } = await supabase
+              .from("portfolios")
+              .select("data")
+              .eq("user_id", user.id)
+              .limit(1);
+              
+            if (multiError) {
+              console.error("Error getting first portfolio:", multiError);
+              return null;
+            }
+            
+            if (multiData && multiData.length > 0 && multiData[0].data) {
+              console.log("Successfully retrieved first portfolio entry");
+              return multiData[0].data;
+            }
           }
-          throw error;
+          
+          console.error("Unhandled error querying portfolios:", error);
+          return null;
         }
         
         if (data && data.data) {
+          console.log("Portfolio data successfully loaded from Supabase");
           return data.data;
         }
         
+        console.log("No portfolio data found in Supabase response");
         return null;
       } catch (error) {
         console.error("Error loading from Supabase:", error);
+        
+        // Check if it's a connection error
+        if (error.message && (error.message.includes('Failed to fetch') || error.message.includes('Network error'))) {
+          console.error("Supabase connection error. Please check your internet connection.");
+        }
+        
+        // Check if it's a permission error
+        if (error.code && (error.code === '42501' || error.code === '42403')) {
+          console.error("Permission denied. Check your Supabase Row Level Security policies.");
+        }
+        
         return null;
       }
     }
@@ -240,6 +366,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
+      // Load avatar image if exists
+      if (portfolioData.avatarImage) {
+        const profileAvatar = document.getElementById("profileAvatar");
+        if (profileAvatar) {
+          // Check if img already exists
+          let avatarImg = profileAvatar.querySelector("img");
+          
+          if (!avatarImg) {
+            // Create new image if it doesn't exist
+            avatarImg = document.createElement("img");
+            profileAvatar.appendChild(avatarImg);
+          }
+          
+          // Set image source
+          avatarImg.src = portfolioData.avatarImage;
+        }
+      }
+
       // Update skill progress bars
       const skillItems = document.querySelectorAll(".skill-item");
       skillItems.forEach((item) => {
@@ -298,6 +442,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
+      // Get avatar image data if exists
+      const avatarImg = document.querySelector(".avatar.large img");
+      if (avatarImg && avatarImg.src) {
+        data.avatarImage = avatarImg.src;
+      }
+
       // Get skill progress
       const skillItems = document.querySelectorAll(".skill-item");
       skillItems.forEach((item) => {
@@ -354,6 +504,9 @@ document.addEventListener("DOMContentLoaded", function () {
         editProfileButton.classList.add("active");
         editControls.classList.add("active");
         document.body.classList.add("edit-mode");
+
+        // Enable profile avatar editing
+        setupProfileAvatarEdit();
 
         // Make elements editable
         editableElements.forEach((element) => {
@@ -433,6 +586,60 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
+    // Setup profile avatar edit functionality
+    function setupProfileAvatarEdit() {
+      const profileAvatar = document.getElementById("profileAvatar");
+      const avatarFileInput = document.getElementById("avatarFileInput");
+      
+      if (profileAvatar && avatarFileInput) {
+        // Add click event to trigger file input
+        profileAvatar.addEventListener("click", function() {
+          if (isEditMode) {
+            avatarFileInput.click();
+          }
+        });
+        
+        // Handle file selection
+        avatarFileInput.addEventListener("change", function(event) {
+          const file = event.target.files[0];
+          if (file && file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+              // Check if img already exists
+              let avatarImg = profileAvatar.querySelector("img");
+              
+              if (!avatarImg) {
+                // Create new image if it doesn't exist
+                avatarImg = document.createElement("img");
+                profileAvatar.appendChild(avatarImg);
+              }
+              
+              // Set image source
+              avatarImg.src = e.target.result;
+              
+              // Store the image data in a format that can be saved
+              portfolioData.avatarImage = e.target.result;
+              
+              // Add success animation
+              profileAvatar.classList.add("avatar-upload-success");
+              setTimeout(() => {
+                profileAvatar.classList.remove("avatar-upload-success");
+              }, 1000);
+              
+              // Show notification
+              showSavingIndicator("Profile picture updated! Don't forget to save your changes.", "success");
+              setTimeout(() => {
+                hideSavingIndicator();
+              }, 3000);
+            };
+            
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+    }
+
     // Disable edit mode
     function disableEditMode() {
       if (isEditMode) {
@@ -441,6 +648,12 @@ document.addEventListener("DOMContentLoaded", function () {
         editProfileButton.classList.remove("active");
         editControls.classList.remove("active");
         document.body.classList.remove("edit-mode");
+
+        // Disable profile avatar editing
+        const profileAvatar = document.getElementById("profileAvatar");
+        if (profileAvatar) {
+          profileAvatar.removeEventListener("click", function() {});
+        }
 
         // Make elements non-editable
         editableElements.forEach((element) => {
@@ -2279,18 +2492,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Get current user from Supabase
     async function getCurrentUser() {
-      if (!supabase) return null;
+      if (!supabase) {
+        console.warn("Supabase client not available, cannot get current user");
+        return null;
+      }
       
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        console.log("Attempting to get current user...");
+        const { data, error } = await supabase.auth.getUser();
+        
         if (error) {
           console.error("Error getting user:", error);
+          
+          // Check for specific auth errors
+          if (error.message.includes('JWT')) {
+            console.error("JWT token invalid or expired. User may need to log in again.");
+          }
+          
           return null;
         }
         
-        return user;
+        if (data && data.user) {
+          console.log("User authenticated successfully");
+          return data.user;
+        } else {
+          console.log("No user found in session");
+          return null;
+        }
       } catch (error) {
-        console.error("Error getting user:", error);
+        console.error("Exception getting user:", error);
+        
+        // Handle network errors
+        if (error.message && error.message.includes('fetch')) {
+          console.error("Network error connecting to Supabase. Check your internet connection.");
+        }
+        
         return null;
       }
     }
@@ -2300,16 +2536,37 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!supabase) return { success: false, error: "Supabase not initialized" };
       
       try {
+        console.log("Attempting to save portfolio to Supabase...");
         const user = await getCurrentUser();
         
         if (!user) {
+          console.warn("Not authenticated, can't save to Supabase");
           return { success: false, error: "Not authenticated" };
         }
         
         // Add user ID to data
         data.user_id = user.id;
         
+        // Add timestamp for when this data was saved
+        data.updated_at = new Date().toISOString();
+        
+        // Handle avatar image
+        if (data.avatarImage) {
+          console.log("Saving avatar image to Supabase");
+          
+          // Also update the profile avatar_url
+          try {
+            await supabase
+              .from("profiles")
+              .update({ avatar_url: data.avatarImage, updated_at: new Date() })
+              .eq("id", user.id);
+          } catch (e) {
+            console.warn("Could not update profile avatar:", e);
+          }
+        }
+        
         // Check if user already has a portfolio entry
+        console.log("Checking for existing portfolio...");
         const { data: existingData, error: fetchError } = await supabase
           .from("portfolios")
           .select("id")
@@ -2317,7 +2574,12 @@ document.addEventListener("DOMContentLoaded", function () {
           .single();
         
         if (fetchError && fetchError.code !== "PGRST116") {
+          if (fetchError.code === "42703") {
+            console.error("Column error when checking for existing portfolio. The portfolios table might be misconfigured.");
+            return { success: false, error: fetchError, details: "Database schema issue" };
+          }
           // Some error other than "not found"
+          console.error("Error checking for existing portfolio:", fetchError);
           return { success: false, error: fetchError };
         }
         
@@ -2325,24 +2587,46 @@ document.addEventListener("DOMContentLoaded", function () {
         
         if (existingData) {
           // Update existing portfolio
+          console.log("Updating existing portfolio...");
           result = await supabase
             .from("portfolios")
             .update({ data: data })
             .eq("user_id", user.id);
         } else {
           // Insert new portfolio
+          console.log("Creating new portfolio...");
           result = await supabase
             .from("portfolios")
             .insert([{ user_id: user.id, data: data }]);
         }
         
         if (result.error) {
+          console.error("Error saving portfolio:", result.error);
           throw result.error;
         }
         
+        console.log("Portfolio saved successfully to Supabase");
         return { success: true };
       } catch (error) {
-        console.error("Error saving to Supabase:", error);
+        console.error("Exception saving to Supabase:", error);
+        
+        // Provide better error information based on error type
+        if (error.code === "42703") {
+          return { 
+            success: false, 
+            error, 
+            details: "Database column missing. Make sure your portfolios table has a 'data' column of type JSONB." 
+          };
+        }
+        
+        if (error.code === "42P01") {
+          return { 
+            success: false, 
+            error, 
+            details: "Table not found. Make sure your database has a 'portfolios' table." 
+          };
+        }
+        
         return { success: false, error };
       }
     }
@@ -2622,25 +2906,115 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function loadPortfolioHeader() {
+    try {
     // Get the logged-in user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch profile from Supabase (only full_name, no location)
-    const { data: profile, error } = await supabase
+      console.log("User authenticated, attempting to load profile data");
+      
+      // First, check if the profiles table exists and has the correct structure
+      let profileExists = false;
+      let hasAvatarColumn = false;
+      
+      // Attempt to query the profile without using avatar_url column
+      try {
+        const { data: checkProfile, error: checkError } = await supabase
         .from('profiles')
-        .select('full_name')
+          .select('id')
         .eq('id', user.id)
-        .single();
+          .limit(1);
+          
+        if (!checkError) {
+          profileExists = true;
+          
+          // Now let's test if avatar_url exists
+          try {
+            const { error: colError } = await supabase
+              .from('profiles')
+              .select('avatar_url')
+              .eq('id', user.id)
+              .limit(1);
+              
+            if (!colError) {
+              hasAvatarColumn = true;
+            }
+          } catch (e) {
+            console.warn("The avatar_url column doesn't exist:", e);
+          }
+        }
+      } catch (e) {
+        console.warn("Error checking profile table:", e);
+      }
+      
+      let profile = null;
+      
+      // If profile table exists, try to get profile data
+      if (profileExists) {
+        // Depending on whether avatar_url exists, construct the query differently
+        const fields = hasAvatarColumn ? 'full_name, avatar_url' : 'full_name';
+        
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select(fields)
+          .eq('id', user.id)
+          .limit(1)
+          .maybeSingle();
+          
+        if (!error) {
+          profile = profileData;
+        } else {
+          console.warn("Error loading profile:", error);
+        }
+      }
+      
+      // If profile doesn't exist or couldn't be loaded, create it
+      if (!profile) {
+        console.log("Attempting to create profile for user");
+        
+        // Prepare profile data
+        const profileData = {
+          id: user.id,
+          full_name: user.email?.split('@')[0] || 'CS Student',
+          updated_at: new Date().toISOString()
+        };
+        
+        // Add avatar_url field only if the column exists
+        if (hasAvatarColumn) {
+          profileData.avatar_url = null;
+        }
+        
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert(profileData);
+        
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+        } else {
+          console.log("Profile created successfully");
+          profile = profileData;
+        }
+      }
 
-    if (error) {
-        console.error('Error loading profile:', error);
-        return;
-    }
-
-    // Set avatar circle to first letter of full name
+      // Set avatar circle to first letter of full name or load profile image
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) {
+        // If we have an avatar URL from the profile and the column exists, use it
+        if (hasAvatarColumn && profile?.avatar_url) {
+          let avatarImg = profileAvatar.querySelector("img");
+          
+          if (!avatarImg) {
+            avatarImg = document.createElement("img");
+            profileAvatar.appendChild(avatarImg);
+          }
+          
+          avatarImg.src = profile.avatar_url;
+        } else {
+          // Otherwise, use the initials
     const initials = (profile?.full_name || user.email || 'U')[0].toUpperCase();
-    document.querySelector('.avatar.large').textContent = initials;
+          profileAvatar.textContent = initials;
+        }
+      }
 
     // Set name to full name
     document.querySelector('.portfolio-title').textContent = profile?.full_name || 'CS Student';
@@ -2650,9 +3024,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Set location to a static value for now
     document.querySelector('[data-field="location"]').textContent = 'Location';
-
-    // Do not make title editable by default
-    // This will be handled by the edit mode toggle
+    } catch (err) {
+      console.error("Error in loadPortfolioHeader:", err);
+    }
   }
 
   // Call it directly, since we're already inside DOMContentLoaded
@@ -2847,6 +3221,12 @@ document.addEventListener("DOMContentLoaded", function () {
           updates[field] = element.textContent;
         }
       });
+
+      // Get avatar image if it exists
+      const avatarImg = document.querySelector(".avatar.large img");
+      if (avatarImg && avatarImg.src) {
+        updates.avatar_url = avatarImg.src;
+      }
 
       // Update profile in Supabase
       const { error } = await supabase

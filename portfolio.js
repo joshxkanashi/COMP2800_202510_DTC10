@@ -343,7 +343,73 @@ document.addEventListener("DOMContentLoaded", function () {
       // Exit if no data
       if (!portfolioData || Object.keys(portfolioData).length === 0) return;
 
-      // Update each editable element based on field
+      // --- Dynamically Render Sections ---
+      const mainContainer = document.querySelector('main.container');
+      const existingSections = Array.from(document.querySelectorAll('.portfolio-section'));
+      const sectionIds = portfolioData.sections ? portfolioData.sections.map(s => s.id) : [];
+
+      // Remove sections not in the data
+      existingSections.forEach(section => {
+        if (!sectionIds.includes(section.id)) {
+          section.remove();
+        }
+      });
+
+      // Add or update sections from the data
+      if (portfolioData.sections && Array.isArray(portfolioData.sections)) {
+        portfolioData.sections.forEach(sectionData => {
+          let section = document.getElementById(sectionData.id);
+          if (!section) {
+            section = document.createElement('section');
+            section.id = sectionData.id;
+            section.className = 'portfolio-section';
+            section.dataset.sectionType = sectionData.type;
+            let templateHTML = '';
+            if (sectionData.type === 'custom') {
+              templateHTML = `<div class=\"custom-section-content editable-content\" data-field=\"${sectionData.id}_content\">${sectionData.content || ''}</div>`;
+            } else if (sectionTemplateHTML && sectionTemplateHTML[sectionData.type]) {
+              templateHTML = sectionTemplateHTML[sectionData.type];
+            }
+            section.innerHTML = `
+              <div class="section-header">
+                <h2 class="section-title">${sectionData.title}</h2>
+                <div class="section-actions"></div>
+              </div>
+              ${templateHTML}
+            `;
+            // Insert in correct order
+            // Find the next section in the order
+            let nextSection = null;
+            for (let i = sectionIds.indexOf(sectionData.id) + 1; i < sectionIds.length; i++) {
+              nextSection = document.getElementById(sectionIds[i]);
+              if (nextSection) break;
+            }
+            if (nextSection) {
+              mainContainer.insertBefore(section, nextSection);
+            } else {
+              mainContainer.appendChild(section);
+            }
+          } else {
+            // Update title/type
+            const titleEl = section.querySelector('.section-title');
+            if (titleEl) titleEl.textContent = sectionData.title;
+            section.dataset.sectionType = sectionData.type;
+            if (sectionData.type === 'custom') {
+              const customContent = section.querySelector('.custom-section-content');
+              if (customContent) customContent.innerHTML = sectionData.content || '';
+            }
+          }
+          // Set visibility
+          if (sectionData.visible === false) {
+            section.classList.add('hidden');
+          } else {
+            section.classList.remove('hidden');
+          }
+        });
+      }
+
+      // Update each editable element based on field (for about, meta, etc.)
+      const editableElements = document.querySelectorAll('.editable-content');
       editableElements.forEach((element) => {
         const field = element.dataset.field;
         if (field && portfolioData[field]) {
@@ -351,67 +417,139 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
 
+      // --- Render Education Timeline ---
+      const educationTimeline = document.getElementById('educationTimeline');
+      if (educationTimeline && Array.isArray(portfolioData.education)) {
+        educationTimeline.innerHTML = '';
+        portfolioData.education.forEach(edu => {
+          const item = document.createElement('div');
+          item.className = 'timeline-item';
+          item.dataset.itemId = edu.id;
+          item.innerHTML = `
+            <div class="timeline-dot"></div>
+            <div class="timeline-date editable-content" data-field="${edu.id}_date">${edu.date || ''}</div>
+            <div class="timeline-content">
+              <h3 class="timeline-title editable-content" data-field="${edu.id}_degree">${edu.degree || ''}</h3>
+              <p class="timeline-subtitle editable-content" data-field="${edu.id}_school">${edu.school || ''}</p>
+              <p class="timeline-description editable-content" data-field="${edu.id}_description">${edu.description || ''}</p>
+            </div>
+          `;
+          educationTimeline.appendChild(item);
+        });
+      }
+
+      // --- Render Experience Timeline ---
+      const experienceTimeline = document.getElementById('experienceTimeline');
+      if (experienceTimeline && Array.isArray(portfolioData.experience)) {
+        experienceTimeline.innerHTML = '';
+        portfolioData.experience.forEach(exp => {
+          const item = document.createElement('div');
+          item.className = 'timeline-item';
+          item.dataset.itemId = exp.id;
+          item.innerHTML = `
+            <div class="timeline-dot"></div>
+            <div class="timeline-date editable-content" data-field="${exp.id}_date">${exp.date || ''}</div>
+            <div class="timeline-content">
+              <h3 class="timeline-title editable-content" data-field="${exp.id}_title">${exp.title || ''}</h3>
+              <p class="timeline-subtitle editable-content" data-field="${exp.id}_company">${exp.company || ''}</p>
+              <p class="timeline-description editable-content" data-field="${exp.id}_description">${exp.description || ''}</p>
+            </div>
+          `;
+          experienceTimeline.appendChild(item);
+        });
+      }
+
+      // --- Render Skills ---
+      const skillsGrid1 = document.getElementById('skillsGrid1');
+      const skillsGrid2 = document.getElementById('skillsGrid2');
+      if (Array.isArray(portfolioData.skills)) {
+        if (skillsGrid1) skillsGrid1.innerHTML = '';
+        if (skillsGrid2) skillsGrid2.innerHTML = '';
+        // Split skills into two categories if possible
+        portfolioData.skills.forEach((skill, idx) => {
+          const item = document.createElement('div');
+          item.className = 'skill-item';
+          item.dataset.itemId = skill.id;
+          item.innerHTML = `
+            <div class="skill-progress" data-progress="${skill.progress || 0}">
+              <div class="skill-progress-bar" style="width: ${skill.progress || 0}%"></div>
+            </div>
+            <div class="skill-info">
+              <span class="skill-name editable-content" data-field="${skill.id}_name">${skill.name || ''}</span>
+              <span class="skill-level editable-content" data-field="${skill.id}_level">${skill.level || ''}</span>
+            </div>
+          `;
+          // Distribute to grid1 or grid2 based on index (or your own logic)
+          if (skillsGrid1 && idx < 4) skillsGrid1.appendChild(item);
+          else if (skillsGrid2) skillsGrid2.appendChild(item);
+        });
+      }
+
+      // --- Render Projects ---
+      const projectsContainer = document.getElementById('projectsContainer');
+      if (projectsContainer && Array.isArray(portfolioData.projects)) {
+        projectsContainer.innerHTML = '';
+        portfolioData.projects.forEach(proj => {
+          const card = document.createElement('div');
+          card.className = 'portfolio-project-card';
+          card.dataset.itemId = proj.id;
+          card.innerHTML = `
+            <div class="portfolio-project-image">
+              <span class="project-badge editable-content" data-field="${proj.id}_badge">${proj.badge || ''}</span>
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="#e5e7eb"/>
+              </svg>
+            </div>
+            <div class="portfolio-project-content">
+              <h3 class="portfolio-project-title editable-content" data-field="${proj.id}_title">${proj.title || ''}</h3>
+              <p class="portfolio-project-description editable-content" data-field="${proj.id}_description">${proj.description || ''}</p>
+              <div class="portfolio-project-tech" data-project="${proj.id}">
+                ${(proj.tech || []).map(tag => `<span class="tech-tag" data-tag="${tag}">${tag}</span>`).join('')}
+              </div>
+              <div class="portfolio-project-links">
+                <a href="#" class="project-link editable-content" data-field="${proj.id}_link">${proj.link || 'View Project'}</a>
+                <a href="#" class="project-link editable-content" data-field="${proj.id}_github">${proj.github || 'GitHub'}</a>
+              </div>
+            </div>
+          `;
+          projectsContainer.appendChild(card);
+        });
+      }
+
       // Load avatar image if exists
       if (portfolioData.avatarImage) {
-        const profileAvatar = document.getElementById("profileAvatar");
+        const profileAvatar = document.getElementById('profileAvatar');
         if (profileAvatar) {
-          // Check if img already exists
-          let avatarImg = profileAvatar.querySelector("img");
-          
+          let avatarImg = profileAvatar.querySelector('img');
           if (!avatarImg) {
-            // Create new image if it doesn't exist
-            avatarImg = document.createElement("img");
+            avatarImg = document.createElement('img');
             profileAvatar.appendChild(avatarImg);
           }
-          
-          // Set image source
           avatarImg.src = portfolioData.avatarImage;
         }
       }
 
-      // Update skill progress bars
-      const skillItems = document.querySelectorAll(".skill-item");
+      // Update skill progress bars (redundant, but ensures correct width)
+      const skillItems = document.querySelectorAll('.skill-item');
       skillItems.forEach((item) => {
         const itemId = item.dataset.itemId;
         const progress = portfolioData[`${itemId}_progress`];
         if (progress) {
-          const progressBar = item.querySelector(".skill-progress");
-          progressBar.setAttribute("data-progress", progress);
-          const progressBarFill = item.querySelector(".skill-progress-bar");
+          const progressBar = item.querySelector('.skill-progress');
+          progressBar.setAttribute('data-progress', progress);
+          const progressBarFill = item.querySelector('.skill-progress-bar');
           progressBarFill.style.width = `${progress}%`;
         }
       });
-      
-      // Restore section order and visibility if available
+
+      // Restore section order and navigation
       if (portfolioData.sections && Array.isArray(portfolioData.sections)) {
         sectionOrder = portfolioData.sections;
-        console.log("Restoring section order from saved data:", sectionOrder);
-        
-        // Get all sections
-        const mainContainer = document.querySelector("main.container");
-        const sections = Array.from(document.querySelectorAll(".portfolio-section"));
-        
-        // First handle section visibility
-        sections.forEach(section => {
-          const sectionData = sectionOrder.find(s => s.id === section.id);
-          if (sectionData && sectionData.visible === false) {
-            section.classList.add("hidden");
-          } else {
-            section.classList.remove("hidden");
-          }
-        });
-        
-        // Then reorder sections according to saved order
-        sectionOrder.forEach(entry => {
-          const section = document.getElementById(entry.id);
-          if (section) {
-            // Move to end of container to maintain order
-            mainContainer.appendChild(section);
-          }
-        });
-        
-        // Update navigation after reordering
         updatePortfolioNavigation();
+      }
+      // If in edit mode, re-apply editable setup
+      if (isEditMode) {
+        makeEditableElementsEditable();
       }
     }
 
@@ -419,33 +557,116 @@ document.addEventListener("DOMContentLoaded", function () {
     function gatherPortfolioData() {
       const data = {};
 
-      // Get data from editable elements
+      // --- Education Timeline ---
+      data.education = [];
+      const educationItems = document.querySelectorAll('#educationTimeline .timeline-item');
+      educationItems.forEach(item => {
+        const itemId = item.dataset.itemId;
+        const edu = {
+          id: itemId,
+          date: item.querySelector('[data-field$="_date"]')?.textContent || '',
+          degree: item.querySelector('[data-field$="_degree"]')?.textContent || '',
+          school: item.querySelector('[data-field$="_school"]')?.textContent || '',
+          description: item.querySelector('[data-field$="_description"]')?.textContent || ''
+        };
+        data[`$${itemId}_date`] = edu.date;
+        data[`$${itemId}_degree`] = edu.degree;
+        data[`$${itemId}_school`] = edu.school;
+        data[`$${itemId}_description`] = edu.description;
+        data.education.push(edu);
+      });
+
+      // --- Experience Timeline ---
+      data.experience = [];
+      const experienceItems = document.querySelectorAll('#experienceTimeline .timeline-item');
+      experienceItems.forEach(item => {
+        const itemId = item.dataset.itemId;
+        const exp = {
+          id: itemId,
+          date: item.querySelector('[data-field$="_date"]')?.textContent || '',
+          title: item.querySelector('[data-field$="_title"]')?.textContent || '',
+          company: item.querySelector('[data-field$="_company"]')?.textContent || '',
+          description: item.querySelector('[data-field$="_description"]')?.textContent || ''
+        };
+        data[`$${itemId}_date`] = exp.date;
+        data[`$${itemId}_title`] = exp.title;
+        data[`$${itemId}_company`] = exp.company;
+        data[`$${itemId}_description`] = exp.description;
+        data.experience.push(exp);
+      });
+
+      // --- Skills ---
+      data.skills = [];
+      const skillItems = document.querySelectorAll('.skill-item');
+      skillItems.forEach(item => {
+        const itemId = item.dataset.itemId;
+        const name = item.querySelector('[data-field$="_name"]')?.textContent || '';
+        const level = item.querySelector('[data-field$="_level"]')?.textContent || '';
+        const progressBar = item.querySelector('.skill-progress');
+        const progress = progressBar ? progressBar.getAttribute('data-progress') : '0';
+        data[`$${itemId}_name`] = name;
+        data[`$${itemId}_level`] = level;
+        data[`$${itemId}_progress`] = progress;
+        data.skills.push({ id: itemId, name, level, progress });
+      });
+
+      // --- Projects ---
+      data.projects = [];
+      const projectCards = document.querySelectorAll('.portfolio-project-card');
+      projectCards.forEach(card => {
+        const itemId = card.dataset.itemId;
+        const badge = card.querySelector('[data-field$="_badge"]')?.textContent || '';
+        const title = card.querySelector('[data-field$="_title"]')?.textContent || '';
+        const description = card.querySelector('[data-field$="_description"]')?.textContent || '';
+        const link = card.querySelector('[data-field$="_link"]')?.textContent || '';
+        const github = card.querySelector('[data-field$="_github"]')?.textContent || '';
+        // Tech tags
+        const techTags = [];
+        const techContainer = card.querySelector('.portfolio-project-tech');
+        if (techContainer) {
+          techContainer.querySelectorAll('.tech-tag').forEach(tag => {
+            if (tag.dataset.tag) techTags.push(tag.dataset.tag);
+            else if (tag.textContent) techTags.push(tag.textContent.trim());
+          });
+        }
+        data[`$${itemId}_badge`] = badge;
+        data[`$${itemId}_title`] = title;
+        data[`$${itemId}_description`] = description;
+        data[`$${itemId}_link`] = link;
+        data[`$${itemId}_github`] = github;
+        data[`$${itemId}_tech`] = techTags;
+        data.projects.push({ id: itemId, badge, title, description, link, github, tech: techTags });
+      });
+
+      // --- Other editable fields (about, meta, etc.) ---
+      const editableElements = document.querySelectorAll('.editable-content');
       editableElements.forEach((element) => {
         const field = element.dataset.field;
-        if (field) {
+        if (field && !data.hasOwnProperty(field)) {
           data[field] = element.textContent;
         }
       });
 
-      // Get avatar image data if exists
-      const avatarImg = document.querySelector(".avatar.large img");
+      // Avatar image
+      const avatarImg = document.querySelector('.avatar.large img');
       if (avatarImg && avatarImg.src) {
         data.avatarImage = avatarImg.src;
       }
 
-      // Get skill progress
-      const skillItems = document.querySelectorAll(".skill-item");
-      skillItems.forEach((item) => {
-        const itemId = item.dataset.itemId;
-        const progressBar = item.querySelector(".skill-progress");
-        const progress = progressBar ? progressBar.getAttribute("data-progress") : "0";
-        data[`${itemId}_progress`] = progress;
+      // Section order
+      data.sections = sectionOrder.map(section => {
+        if (section.type === 'custom') {
+          // Get the current content from the DOM
+          const customContentEl = document.querySelector(`#${section.id} .custom-section-content`);
+          return {
+            ...section,
+            content: customContentEl ? customContentEl.innerHTML : section.content || ''
+          };
+        }
+        return { ...section };
       });
-      
-      // Include section order
-      data.sections = sectionOrder;
-      
-      // Update timestamp
+
+      // Timestamp
       data.updated_at = new Date().toISOString();
 
       return data;
@@ -477,40 +698,50 @@ document.addEventListener("DOMContentLoaded", function () {
       savingIndicator.classList.remove("show");
     }
 
-    // Enable edit mode
+    // Utility to make all editable elements and section titles editable
+    function makeEditableElementsEditable() {
+      // Make all .editable-content elements editable
+      const editableElements = document.querySelectorAll('.editable-content');
+      editableElements.forEach((element) => {
+        element.setAttribute('contenteditable', 'true');
+        element.setAttribute('spellcheck', 'true');
+        // Add placeholder if empty
+        if (element.textContent.trim() === '') {
+          element.textContent = `Enter ${element.dataset.field || 'text'}...`;
+          element.classList.add('edit-placeholder');
+        }
+        // Remove old listeners to avoid duplicates
+        element.removeEventListener('focus', handleElementFocus);
+        element.removeEventListener('blur', handleElementBlur);
+        // Add listeners
+        element.addEventListener('focus', handleElementFocus);
+        element.addEventListener('blur', handleElementBlur);
+      });
+      // Make section titles editable
+      const sectionTitles = document.querySelectorAll('.section-title');
+      sectionTitles.forEach((title) => {
+        title.setAttribute('contenteditable', 'true');
+        title.setAttribute('spellcheck', 'true');
+        // Remove old listeners
+        title.removeEventListener('focus', handleElementFocus);
+        title.removeEventListener('blur', handleElementBlur);
+        // Add listeners
+        title.addEventListener('focus', handleElementFocus);
+        title.addEventListener('blur', handleElementBlur);
+      });
+    }
+
+    // In enableEditMode, call makeEditableElementsEditable()
     function enableEditMode() {
       if (!isEditMode) {
-        // Store original data for canceling
         originalData = JSON.parse(JSON.stringify(gatherPortfolioData()));
-
-        // Update UI
         isEditMode = true;
-        editProfileButton.classList.add("active");
-        editControls.classList.add("active");
-        document.body.classList.add("edit-mode");
-
-        // Enable profile avatar editing
+        editProfileButton.classList.add('active');
+        editControls.classList.add('active');
+        document.body.classList.add('edit-mode');
         setupProfileAvatarEdit();
-
-        // Make elements editable
-        editableElements.forEach((element) => {
-          element.setAttribute("contenteditable", "true");
-          element.setAttribute("spellcheck", "true");
-
-          // Add placeholder if empty
-          if (element.textContent.trim() === "") {
-            element.textContent = `Enter ${element.dataset.field}...`;
-            element.classList.add("edit-placeholder");
-          }
-
-          // Handle focus to remove placeholder
-          element.addEventListener("focus", handleElementFocus);
-
-          // Handle blur to restore placeholder if empty
-          element.addEventListener("blur", handleElementBlur);
-        });
-
-        // Show add buttons
+        makeEditableElementsEditable();
+        // ... rest of enableEditMode ...
         addEducationButton.style.display = "flex";
         addExperienceButton.style.display = "flex";
         addSkill1Button.style.display = "flex";
@@ -2009,23 +2240,25 @@ document.addEventListener("DOMContentLoaded", function () {
     function addCustomSection() {
       const title = document.getElementById("customSectionTitle").value.trim();
       const content = document.getElementById("customSectionContent").value.trim();
-      
       if (!title) {
         alert("Please enter a section title");
         return;
       }
-      
-      // Generate unique ID for the section
       const timestamp = new Date().getTime();
       const sectionId = `custom_${timestamp}`;
-      
+      // Add to sectionOrder with content
+      sectionOrder.push({
+        id: sectionId,
+        type: "custom",
+        title: title,
+        visible: true,
+        content: content
+      });
       // Create new section
       const newSection = document.createElement("section");
       newSection.id = sectionId;
       newSection.className = "portfolio-section adding";
       newSection.dataset.sectionType = "custom";
-      
-      // Add section content
       newSection.innerHTML = `
         <div class="section-header">
           <h2 class="section-title">${title}</h2>
@@ -2051,49 +2284,29 @@ document.addEventListener("DOMContentLoaded", function () {
           ${content || "Custom section content goes here..."}
         </div>
       `;
-      
       // Add to the main container before the contact section
       const mainContainer = document.querySelector("main.container");
       const contactSection = document.getElementById("contact");
-      
       if (contactSection) {
         mainContainer.insertBefore(newSection, contactSection);
       } else {
         mainContainer.appendChild(newSection);
       }
-      
       // Setup action buttons for the new section
       setupSectionActionButtons(newSection);
-      
       // Update section order
       updateSectionOrder();
-      
       // Update navigation
       updatePortfolioNavigation();
-      
       // Make new section elements editable if in edit mode
       if (isEditMode) {
-        const newEditableElements = newSection.querySelectorAll(".editable-content");
-        newEditableElements.forEach(element => {
-          element.setAttribute("contenteditable", "true");
-          element.setAttribute("spellcheck", "true");
-          
-          // Handle focus to remove placeholder
-          element.addEventListener("focus", handleElementFocus);
-          
-          // Handle blur to restore placeholder if empty
-          element.addEventListener("blur", handleElementBlur);
-        });
+        makeEditableElementsEditable();
       }
-      
       // Close the modal
       closeAddSectionModal();
-      
       // Scroll to the new section
       setTimeout(() => {
         newSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        
-        // Remove animation class after animation completes
         setTimeout(() => {
           newSection.classList.remove("adding");
         }, 500);

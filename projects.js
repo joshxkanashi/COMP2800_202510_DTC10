@@ -82,8 +82,13 @@ function createProjectCard(project) {
     tech.className = 'project-tech';
     tech.textContent = `Technology Used: ${project.languages.join(', ')}`;
 
+    const description = document.createElement('p');
+    description.className = 'project-description';
+    description.textContent = project.description || 'No description available';
+
     contentSection.appendChild(title);
     contentSection.appendChild(tech);
+    contentSection.appendChild(description);
 
     // Add click event to view project details
     card.addEventListener('click', () => {

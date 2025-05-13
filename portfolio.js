@@ -184,12 +184,11 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log("User authenticated, querying portfolios table...");
         
         // Check if portfolios table exists by attempting to fetch
-        // Use .limit(1) to ensure we only get one result, even if multiple exist
+        // Use .maybeSingle() to ensure we only get one result, even if multiple exist
           const { data, error } = await supabase
             .from("portfolios")
           .select("data")
             .eq("user_id", user.id)
-          .limit(1)
           .maybeSingle(); // Use maybeSingle instead of single to avoid errors if no rows exist
         
         if (error) {
@@ -405,6 +404,28 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             section.classList.remove('hidden');
           }
+
+          // Ensure section-actions has the three buttons (move up, move down, remove)
+          const actionsDiv = section.querySelector('.section-actions');
+          if (actionsDiv && actionsDiv.children.length < 3) {
+            actionsDiv.innerHTML = `
+              <button class="section-action-btn move-up-btn" aria-label="Move section up">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="section-action-btn move-down-btn" aria-label="Move section down">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="section-action-btn remove-section-btn" aria-label="Remove section">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            `;
+          }
         });
       }
 
@@ -436,6 +457,16 @@ document.addEventListener("DOMContentLoaded", function () {
           `;
           educationTimeline.appendChild(item);
         });
+      }
+      // Update hero education summary to match most recent timeline entry
+      if (portfolioData.education.length > 0) {
+        const latest = portfolioData.education[0];
+        portfolioData.education_summary = `${latest.degree} at ${latest.school}`;
+        // Also update the hero field in the DOM if present
+        const heroEducation = document.querySelector('[data-field="education"]');
+        if (heroEducation) {
+          heroEducation.textContent = portfolioData.education_summary;
+        }
       }
 
       // --- Render Experience Timeline ---
@@ -486,35 +517,37 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // --- Render Projects ---
-      const projectsContainer = document.getElementById('projectsContainer');
-      if (projectsContainer && Array.isArray(portfolioData.projects)) {
-        projectsContainer.innerHTML = '';
-        portfolioData.projects.forEach(proj => {
-          const card = document.createElement('div');
-          card.className = 'portfolio-project-card';
-          card.dataset.itemId = proj.id;
-          card.innerHTML = `
-            <div class="portfolio-project-image">
-              <span class="project-badge editable-content" data-field="${proj.id}_badge">${proj.badge || ''}</span>
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="#e5e7eb"/>
-              </svg>
-            </div>
-            <div class="portfolio-project-content">
-              <h3 class="portfolio-project-title editable-content" data-field="${proj.id}_title">${proj.title || ''}</h3>
-              <p class="portfolio-project-description editable-content" data-field="${proj.id}_description">${proj.description || ''}</p>
-              <div class="portfolio-project-tech" data-project="${proj.id}">
-                ${(proj.tech || []).map(tag => `<span class="tech-tag" data-tag="${tag}">${tag}</span>`).join('')}
-              </div>
-              <div class="portfolio-project-links">
-                <a href="#" class="project-link editable-content" data-field="${proj.id}_link">${proj.link || 'View Project'}</a>
-                <a href="#" class="project-link editable-content" data-field="${proj.id}_github">${proj.github || 'GitHub'}</a>
-              </div>
-            </div>
-          `;
-          projectsContainer.appendChild(card);
-        });
-      }
+      // const projectsContainer = document.getElementById('projectsContainer');
+      // if (projectsContainer && Array.isArray(portfolioData.projects)) {
+      //   projectsContainer.innerHTML = '';
+      //   portfolioData.projects.forEach(proj => {
+      //     const card = document.createElement('div');
+      //     card.className = 'portfolio-project-card';
+      //     card.dataset.itemId = proj.id;
+      //     card.innerHTML = `
+      //       <div class="portfolio-project-image">
+      //         <span class="project-badge editable-content" data-field="${proj.id}_badge">${proj.badge || ''}</span>
+      //         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      //           <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="#e5e7eb"/>
+      //         </svg>
+      //       </div>
+      //       <div class="portfolio-project-content">
+      //         <h3 class="portfolio-project-title editable-content" data-field="${proj.id}_title">${proj.title || ''}</h3>
+      //         <p class="portfolio-project-description editable-content" data-field="${proj.id}_description">${proj.description || ''}</p>
+      //         <div class="portfolio-project-tech" data-project="${proj.id}">
+      //           ${(proj.tech || []).map(tag => `<span class="tech-tag" data-tag="${tag}">${tag}</span>`).join('')}
+      //         </div>
+      //         <div class="portfolio-project-links">
+      //           <a href="#" class="project-link editable-content" data-field="${proj.id}_link">${proj.link || 'View Project'}</a>
+      //           <a href="#" class="project-link editable-content" data-field="${proj.id}_github">${proj.github || 'GitHub'}</a>
+      //         </div>
+      //       </div>
+      //     `;
+      //     projectsContainer.appendChild(card);
+      //   });
+      // }
+      // Instead, always fetch and render projects from Supabase
+      loadFeaturedProjects();
 
       // Load avatar image if exists
       if (portfolioData.avatarImage) {
@@ -551,6 +584,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (isEditMode) {
         makeEditableElementsEditable();
       }
+
+      // Ensure all section action buttons are set up (fix for custom sections loaded from data)
+      setupSectionActionButtons();
     }
 
     // Gather all current portfolio data
@@ -575,6 +611,16 @@ document.addEventListener("DOMContentLoaded", function () {
         data[`$${itemId}_description`] = edu.description;
         data.education.push(edu);
       });
+      // Update hero education summary to match most recent timeline entry
+      if (data.education.length > 0) {
+        const latest = data.education[0];
+        data.education_summary = `${latest.degree} at ${latest.school}`;
+        // Also update the hero field in the DOM if present
+        const heroEducation = document.querySelector('[data-field="education"]');
+        if (heroEducation) {
+          heroEducation.textContent = data.education_summary;
+        }
+      }
 
       // --- Experience Timeline ---
       data.experience = [];
@@ -611,32 +657,32 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       // --- Projects ---
-      data.projects = [];
-      const projectCards = document.querySelectorAll('.portfolio-project-card');
-      projectCards.forEach(card => {
-        const itemId = card.dataset.itemId;
-        const badge = card.querySelector('[data-field$="_badge"]')?.textContent || '';
-        const title = card.querySelector('[data-field$="_title"]')?.textContent || '';
-        const description = card.querySelector('[data-field$="_description"]')?.textContent || '';
-        const link = card.querySelector('[data-field$="_link"]')?.textContent || '';
-        const github = card.querySelector('[data-field$="_github"]')?.textContent || '';
-        // Tech tags
-        const techTags = [];
-        const techContainer = card.querySelector('.portfolio-project-tech');
-        if (techContainer) {
-          techContainer.querySelectorAll('.tech-tag').forEach(tag => {
-            if (tag.dataset.tag) techTags.push(tag.dataset.tag);
-            else if (tag.textContent) techTags.push(tag.textContent.trim());
-          });
-        }
-        data[`$${itemId}_badge`] = badge;
-        data[`$${itemId}_title`] = title;
-        data[`$${itemId}_description`] = description;
-        data[`$${itemId}_link`] = link;
-        data[`$${itemId}_github`] = github;
-        data[`$${itemId}_tech`] = techTags;
-        data.projects.push({ id: itemId, badge, title, description, link, github, tech: techTags });
-      });
+      // data.projects = [];
+      // const projectCards = document.querySelectorAll('.portfolio-project-card');
+      // projectCards.forEach(card => {
+      //   const itemId = card.dataset.itemId;
+      //   const badge = card.querySelector('[data-field$="_badge"]')?.textContent || '';
+      //   const title = card.querySelector('[data-field$="_title"]')?.textContent || '';
+      //   const description = card.querySelector('[data-field$="_description"]')?.textContent || '';
+      //   const link = card.querySelector('[data-field$="_link"]')?.textContent || '';
+      //   const github = card.querySelector('[data-field$="_github"]')?.textContent || '';
+      //   // Tech tags
+      //   const techTags = [];
+      //   const techContainer = card.querySelector('.portfolio-project-tech');
+      //   if (techContainer) {
+      //     techContainer.querySelectorAll('.tech-tag').forEach(tag => {
+      //       if (tag.dataset.tag) techTags.push(tag.dataset.tag);
+      //       else if (tag.textContent) techTags.push(tag.textContent.trim());
+      //     });
+      //   }
+      //   data[`$${itemId}_badge`] = badge;
+      //   data[`$${itemId}_title`] = title;
+      //   data[`$${itemId}_description`] = description;
+      //   data[`$${itemId}_link`] = link;
+      //   data[`$${itemId}_github`] = github;
+      //   data[`$${itemId}_tech`] = techTags;
+      //   data.projects.push({ id: itemId, badge, title, description, link, github, tech: techTags });
+      // });
 
       // --- Other editable fields (about, meta, etc.) ---
       const editableElements = document.querySelectorAll('.editable-content');
@@ -768,7 +814,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Show section controls for section management
         document.querySelector(".section-controls").style.display = "flex";
         
-        // Make section actions visible
+        // Make section actions visible ONLY in edit mode
         document.querySelectorAll(".section-actions").forEach(actions => {
           actions.style.opacity = "1";
         });
@@ -908,7 +954,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Hide section controls
         document.querySelector(".section-controls").style.display = "none";
         
-        // Hide section actions
+        // Hide section actions in non-edit mode
         document.querySelectorAll(".section-actions").forEach(actions => {
           actions.style.opacity = "0";
         });
@@ -990,7 +1036,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const deleteButton = document.createElement("button");
         deleteButton.className = "delete-item-button";
         deleteButton.innerHTML =
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         deleteButton.setAttribute("type", "button");
         deleteButton.setAttribute("aria-label", "Delete item");
 
@@ -2128,17 +2174,25 @@ document.addEventListener("DOMContentLoaded", function () {
       `,
       projects: `
         <div class="projects-grid" id="projectsContainer">
-          <div class="project-card">
-            <div class="project-image">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div class="portfolio-project-card">
+            <div class="portfolio-project-photo">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            <div class="project-content">
-              <h3 class="project-title editable-content" data-field="project_new1_title">Project Title</h3>
-              <p class="project-tech editable-content" data-field="project_new1_tech">Technology: React, Node.js</p>
+            <div class="portfolio-project-info">
+              <h3 class="portfolio-project-title editable-content" data-field="project_new1_title">Project Title</h3>
+              <p class="portfolio-project-description editable-content" data-field="project_new1_description">Project description...</p>
+              <div class="portfolio-project-languages">
+                <span class="tech-tag">React</span>
+                <span class="tech-tag">Node.js</span>
+              </div>
+              <div class="portfolio-project-links">
+                <a href="#" class="project-link editable-content" data-field="project_new1_link">View</a>
+                <a href="#" class="project-link editable-content" data-field="project_new1_github">GitHub</a>
+              </div>
             </div>
           </div>
         </div>
@@ -3250,7 +3304,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .from('profiles')
           .select('id')
         .eq('id', user.id)
-          .limit(1);
+          .single();
           
         if (!checkError) {
           profileExists = true;
@@ -3261,7 +3315,7 @@ document.addEventListener("DOMContentLoaded", function () {
               .from('profiles')
               .select('avatar_url')
               .eq('id', user.id)
-              .limit(1);
+              .single();
               
             if (!colError) {
               hasAvatarColumn = true;
@@ -3285,7 +3339,6 @@ document.addEventListener("DOMContentLoaded", function () {
           .from('profiles')
           .select(fields)
           .eq('id', user.id)
-          .limit(1)
           .maybeSingle();
           
         if (!error) {
@@ -3399,38 +3452,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function createFeaturedProjectCard(project) {
     const card = document.createElement('div');
-    card.className = 'project-card';
+    card.className = 'portfolio-project-card';
 
-    // Thumbnail
-    const thumb = document.createElement('div');
-    thumb.className = 'project-thumb';
+    // Photo section
+    const photoSection = document.createElement('div');
+    photoSection.className = 'portfolio-project-photo';
     if (project.photo_url) {
         const img = document.createElement('img');
         img.src = project.photo_url;
         img.alt = project.title;
-        thumb.appendChild(img);
+        photoSection.appendChild(img);
     } else {
-        thumb.style.background = '#e5e7eb';
+        // Default SVG if no photo
+        photoSection.innerHTML = `
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        `;
     }
 
-    // Title
-    const title = document.createElement('div');
-    title.className = 'project-title';
-    title.textContent = project.title;
+    // Info section
+    const infoSection = document.createElement('div');
+    infoSection.className = 'portfolio-project-info';
 
-    // Languages
-    const langs = document.createElement('div');
-    langs.className = 'project-languages';
+    // Title
+    const title = document.createElement('h3');
+    title.className = 'portfolio-project-title';
+    title.textContent = project.title;
+    infoSection.appendChild(title);
+
+    // Languages/Tech
+    const techSection = document.createElement('div');
+    techSection.className = 'portfolio-project-languages';
     (project.languages || []).forEach(lang => {
         const tag = document.createElement('span');
-        tag.className = 'language-tag';
+        tag.className = 'tech-tag';
         tag.textContent = lang;
-        langs.appendChild(tag);
+        techSection.appendChild(tag);
     });
+    infoSection.appendChild(techSection);
 
-    card.appendChild(thumb);
-    card.appendChild(title);
-    card.appendChild(langs);
+    // Assemble card
+    card.appendChild(photoSection);
+    card.appendChild(infoSection);
 
     return card;
   }

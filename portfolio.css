@@ -1227,50 +1227,106 @@ body.edit-mode .avatar.large:active {
 
 /* Project card editing styles */
 .portfolio-project-card {
-  position: relative;
-}
-
-.project-actions {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  width: 300px;
+  height: 300px;
+  min-width: 300px;
+  min-height: 300px;
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  background: white;
   display: flex;
-  gap: 6px;
-  z-index: 3;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  flex-direction: column;
+  padding: 18px;
+  box-sizing: border-box;
+  transition: box-shadow 0.2s;
 }
 
-.portfolio-project-card:hover .project-actions {
-  opacity: 1;
+.portfolio-project-card:hover {
+  box-shadow: 0 8px 32px rgba(99,102,241,0.15);
 }
 
-.project-edit-btn, 
-.project-delete-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.portfolio-project-photo {
+  flex: 0 0 50%;
+  height: 50%;
+  width: 100%;
+  background: #eee;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
 }
 
-.project-edit-btn {
-  background-color: rgba(99, 102, 241, 0.9);
-  color: white;
+.portfolio-project-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.project-delete-btn {
-  background-color: rgba(239, 68, 68, 0.9);
-  color: white;
+.portfolio-project-info {
+  flex: 1 1 0;
+  padding: 8px 10px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.project-edit-btn:hover, 
-.project-delete-btn:hover {
-  transform: scale(1.1);
+.portfolio-project-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.portfolio-project-description {
+  font-size: 0.8rem;
+  color: #555;
+  margin-bottom: 4px;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-project-languages {
+  margin-bottom: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.tech-tag {
+  display: inline-block;
+  background: #f3f4f6;
+  color: #6366f1;
+  border-radius: 8px;
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  margin-right: 2px;
+  margin-bottom: 2px;
+}
+
+.portfolio-project-links {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.portfolio-project-links a {
+  font-size: 0.75rem;
+  color: #6366f1;
+  text-decoration: underline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Section Management Styles */
@@ -2002,4 +2058,28 @@ input:checked + .section-visibility-slider:before {
 .save-notification-text {
   font-weight: 500;
   font-size: 14px;
+}
+
+/* --- Edit mode visibility for section-actions --- */
+body:not(.edit-mode) .section-actions {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s;
+}
+body.edit-mode .section-actions {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Remove hover-based visibility for section-actions */
+/* .portfolio-section:hover .section-actions {
+  opacity: 0 !important;
+} */
+
+/* --- Project Card Layout: Spacious 300x300px, Modern Grid --- */
+.projects-grid, .portfolio-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  justify-items: center;
 }

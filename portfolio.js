@@ -284,55 +284,37 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
     
-    // Initialize portfolio data from localStorage or Supabase if available
+    // Initialize portfolio data from Supabase only
     async function initializePortfolioData() {
       // Show loading indicator
       showSavingIndicator("Loading profile...");
       
       try {
-        // Try to load from localStorage first
-        const localData = localStorage.getItem('portfolioData');
-        let localParsedData = null;
-        
-        if (localData) {
-          try {
-            localParsedData = JSON.parse(localData);
-            console.log("Portfolio data loaded from localStorage:", localParsedData);
-          } catch (e) {
-            console.error("Error parsing localStorage data:", e);
-          }
-        }
-        
-        // Try to load from Supabase if available
-        let supabaseData = null;
+        // Only load from Supabase
         if (supabase) {
-          supabaseData = await loadFromSupabase();
+          const supabaseData = await loadFromSupabase();
           console.log("Portfolio data loaded from Supabase:", supabaseData);
-        }
-        
-        // Use the most recent data based on updated_at timestamp or prioritize Supabase data
-        if (supabaseData && localParsedData) {
-          // If we have both, compare timestamps if available
-          const supabaseUpdatedAt = supabaseData.updated_at ? new Date(supabaseData.updated_at) : null;
-          const localUpdatedAt = localParsedData.updated_at ? new Date(localParsedData.updated_at) : null;
           
-          if (supabaseUpdatedAt && localUpdatedAt) {
-            // Use the most recently updated data
-            portfolioData = supabaseUpdatedAt > localUpdatedAt ? supabaseData : localParsedData;
-          } else {
-            // Default to Supabase data if timestamps not available
+          if (supabaseData) {
+            // If we have Supabase data, use it
             portfolioData = supabaseData;
+          } else {
+            // No data, initialize with empty object
+            portfolioData = {};
+            console.log("No data found in Supabase, initializing empty portfolio");
           }
         } else {
-          // Use whichever data source is available
-          portfolioData = supabaseData || localParsedData || {};
+          // Supabase not available - show error
+          console.error("Supabase is not available. Unable to load portfolio data.");
+          showSavingIndicator("Error: Unable to connect to database", "error");
+          setTimeout(() => {
+            hideSavingIndicator();
+          }, 2000);
+          return Promise.reject(new Error("Supabase not available"));
         }
         
         // Add current timestamp for future comparisons
         portfolioData.updated_at = new Date().toISOString();
-        
-        // Save the result back to localStorage for consistency
-        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
         
         // Render the data
         renderPortfolioData();
@@ -348,7 +330,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return Promise.resolve();
       } catch (error) {
         console.error("Error initializing portfolio data:", error);
+        showSavingIndicator("Error loading profile", "error");
+        setTimeout(() => {
         hideSavingIndicator();
+        }, 2000);
         return Promise.reject(error);
       }
     }
@@ -461,7 +446,6 @@ document.addEventListener("DOMContentLoaded", function () {
       data.sections = sectionOrder;
       
       // Update timestamp
-      updateProfileTimestamp();
       data.updated_at = new Date().toISOString();
 
       return data;
@@ -783,6 +767,9 @@ document.addEventListener("DOMContentLoaded", function () {
         deleteButton.addEventListener("click", function () {
           if (confirm("Are you sure you want to delete this item?")) {
             item.remove();
+            
+            // Save changes after deletion
+            saveItemDeletion();
           }
         });
 
@@ -805,11 +792,41 @@ document.addEventListener("DOMContentLoaded", function () {
         deleteButton.addEventListener("click", function () {
           if (confirm("Are you sure you want to delete this skill?")) {
             item.remove();
+            
+            // Save changes after deletion
+            saveItemDeletion();
           }
         });
 
         item.appendChild(deleteButton);
       });
+      
+      // Helper function to save changes after an item is deleted
+      function saveItemDeletion() {
+        // Gather updated data
+        portfolioData = gatherPortfolioData();
+        
+        // Save to Supabase
+        if (supabase) {
+          console.log("Saving item deletion to Supabase");
+          saveToSupabase(portfolioData)
+            .then(result => {
+              if (result.success) {
+                console.log("Item deletion saved to Supabase successfully");
+              } else {
+                console.error("Error saving item deletion to Supabase:", result.error);
+                showSaveNotification("Error saving changes. Please try again.");
+              }
+            })
+            .catch(error => {
+              console.error("Exception saving item deletion to Supabase:", error);
+              showSaveNotification("Error saving changes. Please try again.");
+            });
+        } else {
+          console.error("Supabase is not available. Unable to save item deletion.");
+          showSaveNotification("Error: Unable to connect to database");
+        }
+      }
     }
 
     // Remove delete buttons
@@ -996,6 +1013,30 @@ document.addEventListener("DOMContentLoaded", function () {
         deleteBtn.addEventListener("click", function () {
           if (confirm("Are you sure you want to delete this project?")) {
             card.remove();
+            
+            // Gather updated data
+            portfolioData = gatherPortfolioData();
+            
+            // Save to Supabase
+            if (supabase) {
+              console.log("Saving project deletion to Supabase");
+              saveToSupabase(portfolioData)
+                .then(result => {
+                  if (result.success) {
+                    console.log("Project deletion saved to Supabase successfully");
+                  } else {
+                    console.error("Error saving project deletion to Supabase:", result.error);
+                    showSaveNotification("Error saving changes. Please try again.");
+                  }
+                })
+                .catch(error => {
+                  console.error("Exception saving project deletion to Supabase:", error);
+                  showSaveNotification("Error saving changes. Please try again.");
+                });
+            } else {
+              console.error("Supabase is not available. Unable to save project deletion.");
+              showSaveNotification("Error: Unable to connect to database");
+            }
           }
         });
 
@@ -1054,39 +1095,38 @@ document.addEventListener("DOMContentLoaded", function () {
         showSavingIndicator("Saving changes...");
 
         try {
-          // Save to localStorage
-          localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
-          console.log("Portfolio data saved to localStorage:", portfolioData);
-
-        // Save to Supabase if available
-        if (supabase) {
+          // Save only to Supabase
+          if (supabase) {
             const result = await saveToSupabase(portfolioData);
             
             if (!result.success) {
               console.error("Error saving to Supabase:", result.error);
-              // Show as warning but don't prevent continuing since localStorage saved
-              showSavingIndicator("Saved locally but not to cloud", "warning");
+              showSavingIndicator("Error saving changes", "error");
               setTimeout(() => {
-            hideSavingIndicator();
-            disableEditMode();
+                hideSavingIndicator();
               }, 2500);
               return;
-          }
-          }
-
-          // Show success message
-          showSavingIndicator("Changes saved successfully!", "success");
-          
-          // Hide success message and disable edit mode after a delay
-          setTimeout(() => {
-            hideSavingIndicator();
-            // Show success notification
-            showSaveNotification("Portfolio saved successfully!");
-            disableEditMode();
-          }, 2000);
-          
-        } catch (error) {
-          console.error("Error saving portfolio:", error);
+            }
+            
+            // Show success message
+            showSavingIndicator("Changes saved successfully!", "success");
+            
+            // Hide success message and disable edit mode after a delay
+            setTimeout(() => {
+              hideSavingIndicator();
+              // Show success notification
+              showSaveNotification("Portfolio saved successfully!");
+              disableEditMode();
+            }, 2000);
+              } else {
+            console.error("Supabase is not available. Unable to save changes.");
+            showSavingIndicator("Error: Unable to connect to database", "error");
+            setTimeout(() => {
+              hideSavingIndicator();
+            }, 2500);
+            }
+          } catch (error) {
+            console.error("Error saving portfolio:", error);
           
           // Show error in saving indicator
           showSavingIndicator("Error saving changes", "error");
@@ -2161,11 +2201,31 @@ document.addEventListener("DOMContentLoaded", function () {
         // Check if empty state should be shown
         checkEmptyPortfolio();
         
-        // Save the updated data to localStorage
+        // Gather updated data
         portfolioData = gatherPortfolioData();
-        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
         
-        console.log("Section removed and saved to localStorage");
+        // Save to Supabase
+        if (supabase) {
+          console.log("Saving section removal to Supabase");
+          saveToSupabase(portfolioData)
+            .then(result => {
+              if (result.success) {
+                console.log("Section removal saved to Supabase successfully");
+              } else {
+                console.error("Error saving section removal to Supabase:", result.error);
+                showSaveNotification("Error saving changes. Please try again.");
+              }
+            })
+            .catch(error => {
+              console.error("Exception saving section removal to Supabase:", error);
+              showSaveNotification("Error saving changes. Please try again.");
+            });
+        } else {
+          console.error("Supabase is not available. Unable to save section removal.");
+          showSaveNotification("Error: Unable to connect to database");
+        }
+        
+        console.log("Section removed");
       }, 500);
     }
     
@@ -2179,18 +2239,8 @@ document.addEventListener("DOMContentLoaded", function () {
         visible: !section.classList.contains("hidden")
       }));
       
-      // Save updated section order to localStorage
-      const currentData = localStorage.getItem('portfolioData');
-      if (currentData) {
-        try {
-          const data = JSON.parse(currentData);
-          data.sections = sectionOrder;
-          localStorage.setItem('portfolioData', JSON.stringify(data));
-          console.log("Section order updated in localStorage:", sectionOrder);
-        } catch (error) {
-          console.error("Error updating section order in localStorage:", error);
-        }
-      }
+      // No longer saving to localStorage
+      console.log("Section order updated:", sectionOrder);
     }
     
     // Update portfolio navigation
@@ -2392,10 +2442,45 @@ document.addEventListener("DOMContentLoaded", function () {
       // Update navigation
       updatePortfolioNavigation();
       
-      // Save the updated data to localStorage
+      // Gather updated data
       portfolioData = gatherPortfolioData();
-      localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
-      console.log("Section order saved to localStorage");
+      console.log("Section order updated");
+      
+      // Save to Supabase
+      if (supabase) {
+        console.log("Saving section order to Supabase");
+        showSavingIndicator("Saving changes...");
+        
+        saveToSupabase(portfolioData)
+          .then(result => {
+            if (result.success) {
+              console.log("Section order saved to Supabase successfully");
+              showSavingIndicator("Changes saved successfully!", "success");
+              setTimeout(() => {
+                hideSavingIndicator();
+              }, 1500);
+            } else {
+              console.error("Error saving section order to Supabase:", result.error);
+              showSavingIndicator("Error saving changes", "error");
+              setTimeout(() => {
+                hideSavingIndicator();
+              }, 1500);
+            }
+          })
+          .catch(error => {
+            console.error("Exception saving section order to Supabase:", error);
+            showSavingIndicator("Error saving changes", "error");
+            setTimeout(() => {
+              hideSavingIndicator();
+            }, 1500);
+          });
+      } else {
+        console.error("Supabase is not available. Unable to save section order.");
+        showSavingIndicator("Error: Unable to connect to database", "error");
+        setTimeout(() => {
+          hideSavingIndicator();
+        }, 1500);
+      }
       
       // Close modal
       closeReorderModal();
@@ -2445,10 +2530,44 @@ document.addEventListener("DOMContentLoaded", function () {
       // Update section order
       updateSectionOrder();
       
-      // Save the updated data to localStorage
+      // Gather updated data
       portfolioData = gatherPortfolioData();
-      localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
-      console.log("Section settings saved to localStorage");
+      
+      // Save to Supabase
+      if (supabase) {
+        console.log("Saving section settings to Supabase");
+        showSavingIndicator("Saving changes...");
+        
+        saveToSupabase(portfolioData)
+          .then(result => {
+            if (result.success) {
+              console.log("Section settings saved to Supabase successfully");
+              showSavingIndicator("Changes saved successfully!", "success");
+              setTimeout(() => {
+                hideSavingIndicator();
+              }, 1500);
+            } else {
+              console.error("Error saving section settings to Supabase:", result.error);
+              showSavingIndicator("Error saving changes", "error");
+              setTimeout(() => {
+                hideSavingIndicator();
+              }, 1500);
+            }
+          })
+          .catch(error => {
+            console.error("Exception saving section settings to Supabase:", error);
+            showSavingIndicator("Error saving changes", "error");
+            setTimeout(() => {
+              hideSavingIndicator();
+            }, 1500);
+          });
+      } else {
+        console.error("Supabase is not available. Unable to save section settings.");
+        showSavingIndicator("Error: Unable to connect to database", "error");
+        setTimeout(() => {
+          hideSavingIndicator();
+        }, 1500);
+      }
       
       // Close modal
       closeSectionSettingsModal();
@@ -2648,11 +2767,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateProfileTimestamp() {
       // Add current timestamp for tracking updates
       portfolioData.updated_at = new Date().toISOString();
-      
-      // Track update in localStorage even if we're not saving the whole object yet
-      const metadata = JSON.parse(localStorage.getItem('portfolioMetadata') || '{}');
-      metadata.last_modified = new Date().toISOString();
-      localStorage.setItem('portfolioMetadata', JSON.stringify(metadata));
     }
   }
 

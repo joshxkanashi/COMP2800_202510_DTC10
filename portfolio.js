@@ -1402,8 +1402,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Set email to user's email
     document.querySelector('[data-field="email"]').textContent = user.email;
 
-    // Set location to a static value for now
-    document.querySelector('[data-field="location"]').textContent = 'Location';
+    // Defensive fallback: only set to 'Location' if not already set
+    const locationEl = document.querySelector('[data-field="location"]');
+    if (locationEl && !locationEl.textContent.trim()) {
+      locationEl.textContent = 'Location';
+    }
 
     // Make title editable
     const titleEl = document.querySelector('.portfolio-subtitle');

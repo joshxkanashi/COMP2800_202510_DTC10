@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let isEditMode = false;
     let originalData = {};
     let portfolioData = {};
+    let selectedSectionTemplate = null;
+    let currentEditingSection = null;
+    let sectionOrder = [];
 
     // DOM Elements
     const editProfileButton = document.getElementById("editProfileButton");
@@ -32,46 +35,199 @@ document.addEventListener("DOMContentLoaded", function () {
     const addSkill1Button = document.getElementById("addSkill1Button");
     const addSkill2Button = document.getElementById("addSkill2Button");
 
-    // Initialize portfolio data from Supabase if available
-    async function initializePortfolioData() {
-      if (!supabase) return;
+    // Ensure all editable elements are not contenteditable on page load
+    editableElements.forEach((element) => {
+      element.removeAttribute("contenteditable");
+    });
 
-      // Show loading indicator
-      showSavingIndicator("Loading profile...");
+    // Section Management Elements
+    const addSectionButton = document.getElementById("addSectionButton");
+    const addSectionModal = document.getElementById("addSectionModal");
+    const reorderSectionsModal = document.getElementById("reorderSectionsModal");
+    const sectionSettingsModal = document.getElementById("sectionSettingsModal");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const sectionTemplates = document.querySelectorAll(".section-template");
+    const confirmAddSectionButton = document.getElementById("confirmAddSection");
+    const cancelAddSectionButton = document.getElementById("cancelAddSection");
+    const customSectionForm = document.getElementById("customSectionForm");
+    const backToTemplatesButton = document.getElementById("backToTemplates");
+    const addCustomSectionButton = document.getElementById("addCustomSection");
+    const modalCloseButtons = document.querySelectorAll(".section-modal-close");
+    const sectionOrderList = document.getElementById("sectionOrderList");
+    const saveSectionOrderButton = document.getElementById("saveSectionOrder");
+    const cancelSectionReorderButton = document.getElementById("cancelSectionReorder");
+    const sectionTitleInput = document.getElementById("sectionTitle");
+    const sectionIconSelect = document.getElementById("sectionIcon");
+    const saveSectionSettingsButton = document.getElementById("saveSectionSettings");
+    const cancelSectionSettingsButton = document.getElementById("cancelSectionSettings");
+    
+    // Hide actions initially for better UX
+    document.querySelectorAll(".section-actions").forEach(actions => {
+      actions.style.opacity = "0";
+    });
+    
+    // Initialize portfolio data
+    initializePortfolioData().then(() => {
+      // Initialize section management after portfolio data is loaded
+      initializeSectionManagement();
+      
+      // Ensure edit mode is disabled initially
+      disableEditMode();
+    });
+    
+    // Setup smooth scrolling
+    setupSmoothScrolling();
+    
+    // Function to setup smooth scrolling
+    function setupSmoothScrolling() {
+      // Portfolio navigation smooth scrolling
+      const portfolioNavLinks = document.querySelectorAll(".portfolio-nav-item");
 
+      portfolioNavLinks.forEach((link) => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          // Remove active class from all links
+          portfolioNavLinks.forEach((item) => item.classList.remove("active"));
+
+          // Add active class to clicked link
+          this.classList.add("active");
+
+          // Get the target section id from the href attribute
+          const targetId = this.getAttribute("href");
+          const targetSection = document.querySelector(targetId);
+
+          // Smooth scroll to target section
+          if (targetSection) {
+            scrollToElement(targetSection);
+          }
+        });
+      });
+
+      // Connect button smooth scrolling
+      const connectButtons = document.querySelectorAll(
+        '.connect-button, a[href="#contact"]'
+      );
+
+      connectButtons.forEach((button) => {
+        button.addEventListener("click", function (e) {
+          e.preventDefault();
+          const contactSection = document.getElementById("contact");
+          if (contactSection) {
+            scrollToElement(contactSection);
+          }
+        });
+      });
+    }
+
+    // Load portfolio data from Supabase
+    async function loadFromSupabase() {
+      if (!supabase) return null;
+      
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (user) {
+        const user = await getCurrentUser();
+        
+        if (!user) {
+          console.log("Not authenticated, can't load from Supabase");
+          return null;
+        }
+        
           const { data, error } = await supabase
             .from("portfolios")
-            .select("*")
+          .select("data")
             .eq("user_id", user.id)
             .single();
 
-          if (error && error.code !== "PGRST116") {
-            console.error("Error loading portfolio:", error);
+        if (error) {
+          if (error.code === "PGRST116") {
+            // No portfolio found for this user
+            console.log("No portfolio found for this user in Supabase");
+            return null;
           }
-
-          if (data) {
-            portfolioData = data.portfolio_data || {};
-            renderPortfolioData();
-          } else {
-            // Create new portfolio record if none exists
-            portfolioData = gatherPortfolioData();
+          throw error;
+        }
+        
+        if (data && data.data) {
+          return data.data;
+        }
+        
+        return null;
+      } catch (error) {
+        console.error("Error loading from Supabase:", error);
+        return null;
+      }
+    }
+    
+    // Initialize portfolio data from localStorage or Supabase if available
+    async function initializePortfolioData() {
+      // Show loading indicator
+      showSavingIndicator("Loading profile...");
+      
+      try {
+        // Try to load from localStorage first
+        const localData = localStorage.getItem('portfolioData');
+        let localParsedData = null;
+        
+        if (localData) {
+          try {
+            localParsedData = JSON.parse(localData);
+            console.log("Portfolio data loaded from localStorage:", localParsedData);
+          } catch (e) {
+            console.error("Error parsing localStorage data:", e);
           }
         }
+        
+        // Try to load from Supabase if available
+        let supabaseData = null;
+        if (supabase) {
+          supabaseData = await loadFromSupabase();
+          console.log("Portfolio data loaded from Supabase:", supabaseData);
+        }
+        
+        // Use the most recent data based on updated_at timestamp or prioritize Supabase data
+        if (supabaseData && localParsedData) {
+          // If we have both, compare timestamps if available
+          const supabaseUpdatedAt = supabaseData.updated_at ? new Date(supabaseData.updated_at) : null;
+          const localUpdatedAt = localParsedData.updated_at ? new Date(localParsedData.updated_at) : null;
+          
+          if (supabaseUpdatedAt && localUpdatedAt) {
+            // Use the most recently updated data
+            portfolioData = supabaseUpdatedAt > localUpdatedAt ? supabaseData : localParsedData;
+          } else {
+            // Default to Supabase data if timestamps not available
+            portfolioData = supabaseData;
+          }
+        } else {
+          // Use whichever data source is available
+          portfolioData = supabaseData || localParsedData || {};
+        }
+        
+        // Add current timestamp for future comparisons
+        portfolioData.updated_at = new Date().toISOString();
+        
+        // Save the result back to localStorage for consistency
+        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+        
+        // Render the data
+        renderPortfolioData();
+        
+        // Hide loading indicator when done
+        setTimeout(() => {
+          showSavingIndicator("Profile loaded successfully!", "success");
+          setTimeout(() => {
+            hideSavingIndicator();
+          }, 1500);
+        }, 500);
+        
+        return Promise.resolve();
       } catch (error) {
-        console.error("Error initializing portfolio:", error);
-      } finally {
-        // Hide loading indicator
+        console.error("Error initializing portfolio data:", error);
         hideSavingIndicator();
+        return Promise.reject(error);
       }
     }
 
-    // Render portfolio data from Supabase
+    // Render portfolio data from localStorage or Supabase
     function renderPortfolioData() {
       // Exit if no data
       if (!portfolioData || Object.keys(portfolioData).length === 0) return;
@@ -96,52 +252,89 @@ document.addEventListener("DOMContentLoaded", function () {
           progressBarFill.style.width = `${progress}%`;
         }
       });
+      
+      // Restore section order and visibility if available
+      if (portfolioData.sections && Array.isArray(portfolioData.sections)) {
+        sectionOrder = portfolioData.sections;
+        console.log("Restoring section order from saved data:", sectionOrder);
+        
+        // Get all sections
+        const mainContainer = document.querySelector("main.container");
+        const sections = Array.from(document.querySelectorAll(".portfolio-section"));
+        
+        // First handle section visibility
+        sections.forEach(section => {
+          const sectionData = sectionOrder.find(s => s.id === section.id);
+          if (sectionData && sectionData.visible === false) {
+            section.classList.add("hidden");
+          } else {
+            section.classList.remove("hidden");
+          }
+        });
+        
+        // Then reorder sections according to saved order
+        sectionOrder.forEach(entry => {
+          const section = document.getElementById(entry.id);
+          if (section) {
+            // Move to end of container to maintain order
+            mainContainer.appendChild(section);
+          }
+        });
+        
+        // Update navigation after reordering
+        updatePortfolioNavigation();
+      }
     }
 
     // Gather all current portfolio data
     function gatherPortfolioData() {
       const data = {};
 
-      // Get all editable field values
+      // Get data from editable elements
       editableElements.forEach((element) => {
         const field = element.dataset.field;
         if (field) {
-          data[field] = element.textContent.trim();
+          data[field] = element.textContent;
         }
       });
 
-      // Get all skill progress values
+      // Get skill progress
       const skillItems = document.querySelectorAll(".skill-item");
       skillItems.forEach((item) => {
         const itemId = item.dataset.itemId;
         const progressBar = item.querySelector(".skill-progress");
-        if (progressBar) {
-          data[`${itemId}_progress`] =
-            progressBar.getAttribute("data-progress");
-        }
+        const progress = progressBar ? progressBar.getAttribute("data-progress") : "0";
+        data[`${itemId}_progress`] = progress;
       });
-
-      // Get all project tech tags
-      const techContainers = document.querySelectorAll(
-        ".portfolio-project-tech"
-      );
-      techContainers.forEach((container) => {
-        const projectId = container.dataset.project;
-        const tags = container.querySelectorAll(".tech-tag");
-
-        // Store tags as an array
-        data[`${projectId}_tags`] = Array.from(tags).map((tag) => {
-          return tag.getAttribute("data-tag") || tag.textContent.trim();
-        });
-      });
+      
+      // Include section order
+      data.sections = sectionOrder;
+      
+      // Update timestamp
+      updateProfileTimestamp();
+      data.updated_at = new Date().toISOString();
 
       return data;
     }
 
-    // Show saving indicator
-    function showSavingIndicator(message = "Saving changes...") {
+    // Show saving indicator with support for success messages
+    function showSavingIndicator(message = "Saving changes...", type = "loading") {
       const messageElement = savingIndicator.querySelector("span");
+      const spinner = savingIndicator.querySelector(".spinner");
+      
       messageElement.textContent = message;
+      
+      // Handle success message differently
+      if (type === "success") {
+        spinner.style.display = "none";
+        savingIndicator.style.background = "linear-gradient(135deg, var(--success), #20d997)";
+        savingIndicator.style.boxShadow = "0 4px 15px rgba(16, 185, 129, 0.3)";
+      } else {
+        spinner.style.display = "block";
+        savingIndicator.style.background = "linear-gradient(135deg, var(--primary), var(--primary-light))";
+        savingIndicator.style.boxShadow = "0 4px 15px rgba(99, 102, 241, 0.3)";
+      }
+      
       savingIndicator.classList.add("show");
     }
 
@@ -203,6 +396,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Add project action buttons
         addProjectActionButtons();
+        
+        // Show section controls for section management
+        document.querySelector(".section-controls").style.display = "flex";
+        
+        // Make section actions visible
+        document.querySelectorAll(".section-actions").forEach(actions => {
+          actions.style.opacity = "1";
+        });
+        
+        // Make section titles clickable for settings
+        document.querySelectorAll(".section-title").forEach(title => {
+          title.style.cursor = "pointer";
+          title.setAttribute("title", "Click to edit section settings");
+        });
+        
+        // Add reorder sections button to controls
+        if (!document.getElementById("reorderSectionsButton")) {
+          const reorderButton = document.createElement("button");
+          reorderButton.id = "reorderSectionsButton";
+          reorderButton.className = "btn-secondary";
+          reorderButton.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Reorder Sections
+          `;
+          reorderButton.style.display = "flex";
+          reorderButton.style.alignItems = "center";
+          reorderButton.style.gap = "8px";
+          
+          reorderButton.addEventListener("click", openReorderModal);
+          
+          editControls.insertBefore(reorderButton, cancelEditButton);
+        }
       }
     }
 
@@ -249,6 +476,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Remove project action buttons
         removeProjectActionButtons();
+        
+        // Hide section controls
+        document.querySelector(".section-controls").style.display = "none";
+        
+        // Hide section actions
+        document.querySelectorAll(".section-actions").forEach(actions => {
+          actions.style.opacity = "0";
+        });
+        
+        // Make section titles non-clickable
+        document.querySelectorAll(".section-title").forEach(title => {
+          title.style.cursor = "default";
+          title.removeAttribute("title");
+        });
+        
+        // Remove reorder sections button
+        const reorderButton = document.getElementById("reorderSectionsButton");
+        if (reorderButton) {
+          reorderButton.remove();
+        }
+        
+        // Close any open modals
+        closeAllModals();
       }
     }
 
@@ -588,52 +838,51 @@ document.addEventListener("DOMContentLoaded", function () {
         portfolioData = gatherPortfolioData();
 
         // Show saving indicator
-        showSavingIndicator();
+        showSavingIndicator("Saving changes...");
+
+        try {
+          // Save to localStorage
+          localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+          console.log("Portfolio data saved to localStorage:", portfolioData);
 
         // Save to Supabase if available
         if (supabase) {
-          try {
-            const {
-              data: { user },
-            } = await supabase.auth.getUser();
-
-            if (user) {
-              const { data, error } = await supabase.from("portfolios").upsert(
-                {
-                  user_id: user.id,
-                  portfolio_data: portfolioData,
-                  updated_at: new Date().toISOString(),
-                },
-                {
-                  onConflict: "user_id",
-                }
-              );
-
-              if (error) {
-                console.error("Error saving portfolio:", error);
-                alert("Failed to save your profile. Please try again.");
-              } else {
-                console.log("Portfolio saved successfully!");
-              }
-            } else {
-              alert("You must be logged in to save your profile.");
-            }
-          } catch (error) {
-            console.error("Error saving portfolio:", error);
-            alert("Failed to save your profile. Please try again.");
-          } finally {
+            const result = await saveToSupabase(portfolioData);
+            
+            if (!result.success) {
+              console.error("Error saving to Supabase:", result.error);
+              // Show as warning but don't prevent continuing since localStorage saved
+              showSavingIndicator("Saved locally but not to cloud", "warning");
+              setTimeout(() => {
             hideSavingIndicator();
             disableEditMode();
+              }, 2500);
+              return;
           }
-        } else {
-          // For demo/development without Supabase
-          console.log("Portfolio data saved to local variable:", portfolioData);
+          }
 
-          // Simulate API delay
+          // Show success message
+          showSavingIndicator("Changes saved successfully!", "success");
+          
+          // Hide success message and disable edit mode after a delay
           setTimeout(() => {
             hideSavingIndicator();
+            // Show success notification
+            showSaveNotification("Portfolio saved successfully!");
             disableEditMode();
-          }, 1000);
+          }, 2000);
+          
+        } catch (error) {
+          console.error("Error saving portfolio:", error);
+          
+          // Show error in saving indicator
+          showSavingIndicator("Error saving changes", "error");
+          
+          setTimeout(() => {
+            hideSavingIndicator();
+            // Show error notification
+            showSaveNotification("Error saving changes. Please try again.");
+          }, 3000);
         }
       });
     }
@@ -1100,31 +1349,1028 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize portfolio
     initializePortfolioData();
-  }
 
-  // Portfolio navigation smooth scrolling
-  const portfolioNavLinks = document.querySelectorAll(".portfolio-nav-item");
+    // Section Management Functions
+    
+    // Initialize section management
+    function initializeSectionManagement() {
+      // Store initial section order
+      updateSectionOrder();
+      
+      // Add event listeners for section management
+      addSectionButton.addEventListener("click", openAddSectionModal);
+      confirmAddSectionButton.addEventListener("click", addNewSection);
+      cancelAddSectionButton.addEventListener("click", closeAddSectionModal);
+      
+      // Template selection
+      sectionTemplates.forEach(template => {
+        template.addEventListener("click", () => {
+          // If it's a custom section, show the custom form
+          if (template.dataset.sectionType === "custom") {
+            selectedSectionTemplate = "custom";
+            document.querySelector(".section-template-grid").style.display = "none";
+            customSectionForm.style.display = "block";
+            confirmAddSectionButton.style.display = "none";
+          } else {
+            // Otherwise, select the template
+            selectedSectionTemplate = template.dataset.sectionType;
+            sectionTemplates.forEach(t => t.classList.remove("selected"));
+            template.classList.add("selected");
+            
+            // If custom form is showing, hide it
+            customSectionForm.style.display = "none";
+            document.querySelector(".section-template-grid").style.display = "grid";
+            confirmAddSectionButton.style.display = "block";
+          }
+        });
+      });
+      
+      // Back to templates button
+      backToTemplatesButton.addEventListener("click", () => {
+        customSectionForm.style.display = "none";
+        document.querySelector(".section-template-grid").style.display = "grid";
+        confirmAddSectionButton.style.display = "block";
+        selectedSectionTemplate = null;
+        sectionTemplates.forEach(t => t.classList.remove("selected"));
+      });
+      
+      // Add custom section button
+      addCustomSectionButton.addEventListener("click", addCustomSection);
+      
+      // Close modals with X button
+      modalCloseButtons.forEach(button => {
+        button.addEventListener("click", () => {
+          closeAllModals();
+        });
+      });
+      
+      // Save section order button
+      saveSectionOrderButton.addEventListener("click", saveNewSectionOrder);
+      
+      // Cancel section reorder button
+      cancelSectionReorderButton.addEventListener("click", closeReorderModal);
+      
+      // Save section settings button
+      saveSectionSettingsButton.addEventListener("click", saveSectionSettings);
+      
+      // Cancel section settings button
+      cancelSectionSettingsButton.addEventListener("click", closeSectionSettingsModal);
+      
+      // Setup section action buttons for existing sections
+      setupSectionActionButtons();
+    }
+    
+    // Open add section modal
+    function openAddSectionModal() {
+      addSectionModal.classList.add("active");
+      modalBackdrop.classList.add("active");
+      selectedSectionTemplate = null;
+      
+      // Reset selections
+      sectionTemplates.forEach(t => t.classList.remove("selected"));
+      
+      // Reset custom form
+      customSectionForm.style.display = "none";
+      document.querySelector(".section-template-grid").style.display = "grid";
+      confirmAddSectionButton.style.display = "block";
+      document.getElementById("customSectionTitle").value = "";
+      document.getElementById("customSectionContent").value = "";
+    }
+    
+    // Close add section modal
+    function closeAddSectionModal() {
+      addSectionModal.classList.remove("active");
+      modalBackdrop.classList.remove("active");
+    }
+    
+    // Close all modals
+    function closeAllModals() {
+      addSectionModal.classList.remove("active");
+      reorderSectionsModal.classList.remove("active");
+      sectionSettingsModal.classList.remove("active");
+      modalBackdrop.classList.remove("active");
+    }
+    
+    // Add new section
+    function addNewSection() {
+      if (!selectedSectionTemplate || !sectionTemplateHTML[selectedSectionTemplate]) {
+        alert("Please select a section template");
+        return;
+      }
+      
+      // Generate unique ID for the section
+      const timestamp = new Date().getTime();
+      const sectionId = `${selectedSectionTemplate}_${timestamp}`;
+      
+      // Get section title
+      const sectionTitle = getSectionTitle(selectedSectionTemplate);
+      
+      // Create new section
+      const newSection = document.createElement("section");
+      newSection.id = sectionId;
+      newSection.className = "portfolio-section adding";
+      newSection.dataset.sectionType = selectedSectionTemplate;
+      
+      // Add section content
+      newSection.innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">${sectionTitle}</h2>
+          <div class="section-actions">
+            <button class="section-action-btn move-up-btn" aria-label="Move section up">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="section-action-btn move-down-btn" aria-label="Move section down">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="section-action-btn remove-section-btn" aria-label="Remove section">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        ${sectionTemplateHTML[selectedSectionTemplate]}
+      `;
+      
+      // Add to the main container before the contact section
+      const mainContainer = document.querySelector("main.container");
+      const contactSection = document.getElementById("contact");
+      
+      if (contactSection) {
+        mainContainer.insertBefore(newSection, contactSection);
+      } else {
+        mainContainer.appendChild(newSection);
+      }
+      
+      // Setup action buttons for the new section
+      setupSectionActionButtons(newSection);
+      
+      // Update section order
+      updateSectionOrder();
+      
+      // Update navigation
+      updatePortfolioNavigation();
+      
+      // Make new section elements editable if in edit mode
+      if (isEditMode) {
+        const newEditableElements = newSection.querySelectorAll(".editable-content");
+        newEditableElements.forEach(element => {
+          element.setAttribute("contenteditable", "true");
+          element.setAttribute("spellcheck", "true");
+          
+          // Add placeholder if empty
+          if (element.textContent.trim() === "") {
+            element.textContent = `Enter ${element.dataset.field}...`;
+            element.classList.add("edit-placeholder");
+          }
+          
+          // Handle focus to remove placeholder
+          element.addEventListener("focus", handleElementFocus);
+          
+          // Handle blur to restore placeholder if empty
+          element.addEventListener("blur", handleElementBlur);
+        });
+        
+        // Show add buttons in the new section
+        const addButtons = newSection.querySelectorAll(".add-item-button");
+        addButtons.forEach(button => {
+          button.style.display = "flex";
+        });
+      }
+      
+      // Close the modal
+      closeAddSectionModal();
+      
+      // Save the updated data to localStorage
+      portfolioData = gatherPortfolioData();
+      localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+      
+      // Scroll to the new section
+      setTimeout(() => {
+        newSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          newSection.classList.remove("adding");
+        }, 500);
+      }, 100);
+    }
+    
+    // Section template HTML - Updated to match index page styling
+    const sectionTemplateHTML = {
+      about: `
+        <div class="about-content">
+          <p class="about-text editable-content" data-field="${Date.now()}_about1">
+            I'm a passionate Computer Science student with a strong interest in web development, artificial intelligence, 
+            and cybersecurity. My journey in tech began when I was 15, teaching myself how to code through online resources.
+          </p>
+          <p class="about-text editable-content" data-field="${Date.now()}_about2">
+            When I'm not coding, you can find me exploring new technologies, contributing to open-source projects,
+            or mentoring junior developers. I believe in continuous learning and pushing the boundaries of what's possible with technology.
+          </p>
+        </div>
+      `,
+      education: `
+        <div class="timeline" id="educationTimeline">
+          <div class="timeline-item" data-item-id="edu_new1">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date editable-content" data-field="edu_new1_date">2021 - Present</div>
+            <div class="timeline-content">
+              <h3 class="timeline-title editable-content" data-field="edu_new1_degree">Degree Name</h3>
+              <p class="timeline-subtitle editable-content" data-field="edu_new1_school">Institution Name</p>
+              <p class="timeline-description editable-content" data-field="edu_new1_description">Description of your education</p>
+            </div>
+          </div>
+        </div>
+        <button class="add-item-button" id="addEducationButton" style="display: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Add Education
+        </button>
+      `,
+      skills: `
+        <div class="skills-container">
+          <div class="skill-category">
+            <h3 class="skill-category-title editable-content" data-field="skill_cat_new">Skills Category</h3>
+            <div class="skill-grid" id="skillsGrid_new">
+              <div class="skill-item" data-item-id="skill_new1">
+                <div class="skill-progress" data-progress="80">
+                  <div class="skill-progress-bar" style="width: 80%"></div>
+                </div>
+                <div class="skill-info">
+                  <span class="skill-name editable-content" data-field="skill_new1_name">Skill Name</span>
+                  <span class="skill-level editable-content" data-field="skill_new1_level">Advanced</span>
+                </div>
+              </div>
+            </div>
+            <button class="add-item-button" id="addSkillButton" style="display: none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Add Skill
+            </button>
+          </div>
 
-  portfolioNavLinks.forEach((link) => {
-    link.addEventListener("click", function (e) {
+          <div class="skill-tags-container">
+            <div class="skill-tag">Tag 1</div>
+            <div class="skill-tag">Tag 2</div>
+            <div class="skill-tag">Tag 3</div>
+          </div>
+        </div>
+      `,
+      experience: `
+        <div class="timeline" id="experienceTimeline">
+          <div class="timeline-item" data-item-id="exp_new1">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date editable-content" data-field="exp_new1_date">2022 - Present</div>
+            <div class="timeline-content">
+              <h3 class="timeline-title editable-content" data-field="exp_new1_title">Position Title</h3>
+              <p class="timeline-subtitle editable-content" data-field="exp_new1_company">Company Name</p>
+              <p class="timeline-description editable-content" data-field="exp_new1_description">Description of your responsibilities and achievements</p>
+            </div>
+          </div>
+        </div>
+        <button class="add-item-button" id="addExperienceButton" style="display: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Add Experience
+        </button>
+      `,
+      projects: `
+        <div class="projects-grid" id="projectsContainer">
+          <div class="project-card">
+            <div class="project-image">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div class="project-content">
+              <h3 class="project-title editable-content" data-field="project_new1_title">Project Title</h3>
+              <p class="project-tech editable-content" data-field="project_new1_tech">Technology: React, Node.js</p>
+            </div>
+          </div>
+        </div>
+        <button class="add-item-button" id="addProjectButton" style="display: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Add Project
+        </button>
+        <div class="view-all-link">
+          <a href="projects.html" class="btn-primary">View All Projects</a>
+        </div>
+      `,
+      contact: `
+        <div class="contact-container">
+          <div class="contact-info">
+            <h3 class="contact-subtitle">Let's Connect</h3>
+            <p class="contact-text editable-content" data-field="contact_text">
+              I'm currently open to new opportunities and collaborations. Whether you have a project in mind, 
+              a question about my work, or just want to say hello, feel free to reach out!
+            </p>
+            
+            <div class="contact-methods">
+              <div class="contact-method">
+                <div class="contact-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="contact-detail">
+                  <h4 class="contact-label">Email</h4>
+                  <p class="contact-value editable-content" data-field="contact_email">youremail@example.com</p>
+                </div>
+              </div>
+              
+              <div class="contact-method">
+                <div class="contact-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="contact-detail">
+                  <h4 class="contact-label">Location</h4>
+                  <p class="contact-value editable-content" data-field="contact_location">City, Country</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="social-links">
+              <a href="#" class="social-link">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5229 6.47715 22 12 22C17.5229 22 22 17.5229 22 12C22 6.47715 17.5229 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14.3333 19V17.137C14.3583 16.8275 14.3154 16.5163 14.2073 16.2242C14.0993 15.9321 13.9286 15.6657 13.7067 15.4428C15.8 15.2156 18 14.4431 18 10.8989C17.9998 9.99256 17.6418 9.12101 17 8.46461C17.3039 7.67171 17.2824 6.79528 16.94 6.01739C16.94 6.01739 16.1533 5.7902 14.3333 6.97433C12.8053 6.57853 11.1947 6.57853 9.66666 6.97433C7.84666 5.7902 7.05999 6.01739 7.05999 6.01739C6.71757 6.79528 6.69609 7.67171 6.99999 8.46461C6.35341 9.12588 5.99501 10.0053 5.99999 10.9183C5.99999 14.4366 8.19999 15.2091 10.2933 15.4622C10.074 15.6829 9.90483 15.9461 9.79686 16.2347C9.68889 16.5232 9.64453 16.8306 9.66666 17.137V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9.66667 17.7018C7.66667 18.3335 6 17.7018 5 16.0684" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+              <a href="#" class="social-link">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M6 9H2V21H6V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+          
+          <div class="contact-form-container">
+            <form class="contact-form" novalidate>
+              <div class="form-group">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" id="name" class="form-input" placeholder="Your name" required>
+              </div>
+              <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" class="form-input" placeholder="Your email" required>
+              </div>
+              <div class="form-group">
+                <label for="subject" class="form-label">Subject</label>
+                <input type="text" id="subject" class="form-input" placeholder="Subject">
+              </div>
+              <div class="form-group">
+                <label for="message" class="form-label">Message</label>
+                <textarea id="message" class="form-textarea" placeholder="Your message" rows="5" required></textarea>
+              </div>
+              <button type="submit" class="btn-primary form-submit">Send Message</button>
+            </form>
+          </div>
+        </div>
+      `,
+      custom: `
+        <div class="custom-section-content editable-content" data-field="custom_${Date.now()}_content">
+          Custom section content goes here...
+        </div>
+      `
+    };
+
+    // Add custom section
+    function addCustomSection() {
+      const title = document.getElementById("customSectionTitle").value.trim();
+      const content = document.getElementById("customSectionContent").value.trim();
+      
+      if (!title) {
+        alert("Please enter a section title");
+        return;
+      }
+      
+      // Generate unique ID for the section
+      const timestamp = new Date().getTime();
+      const sectionId = `custom_${timestamp}`;
+      
+      // Create new section
+      const newSection = document.createElement("section");
+      newSection.id = sectionId;
+      newSection.className = "portfolio-section adding";
+      newSection.dataset.sectionType = "custom";
+      
+      // Add section content
+      newSection.innerHTML = `
+        <div class="section-header">
+          <h2 class="section-title">${title}</h2>
+          <div class="section-actions">
+            <button class="section-action-btn move-up-btn" aria-label="Move section up">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="section-action-btn move-down-btn" aria-label="Move section down">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="section-action-btn remove-section-btn" aria-label="Remove section">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="custom-section-content editable-content" data-field="${sectionId}_content">
+          ${content || "Custom section content goes here..."}
+        </div>
+      `;
+      
+      // Add to the main container before the contact section
+      const mainContainer = document.querySelector("main.container");
+      const contactSection = document.getElementById("contact");
+      
+      if (contactSection) {
+        mainContainer.insertBefore(newSection, contactSection);
+      } else {
+        mainContainer.appendChild(newSection);
+      }
+      
+      // Setup action buttons for the new section
+      setupSectionActionButtons(newSection);
+      
+      // Update section order
+      updateSectionOrder();
+      
+      // Update navigation
+      updatePortfolioNavigation();
+      
+      // Make new section elements editable if in edit mode
+      if (isEditMode) {
+        const newEditableElements = newSection.querySelectorAll(".editable-content");
+        newEditableElements.forEach(element => {
+          element.setAttribute("contenteditable", "true");
+          element.setAttribute("spellcheck", "true");
+          
+          // Handle focus to remove placeholder
+          element.addEventListener("focus", handleElementFocus);
+          
+          // Handle blur to restore placeholder if empty
+          element.addEventListener("blur", handleElementBlur);
+        });
+      }
+      
+      // Close the modal
+      closeAddSectionModal();
+      
+      // Scroll to the new section
+      setTimeout(() => {
+        newSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          newSection.classList.remove("adding");
+        }, 500);
+      }, 100);
+    }
+    
+    // Get section title based on section type
+    function getSectionTitle(sectionType) {
+      const titles = {
+        about: "About Me",
+        education: "Education",
+        skills: "Technical Skills",
+        experience: "Work Experience",
+        projects: "Featured Projects",
+        contact: "Get In Touch",
+        custom: "Custom Section"
+      };
+      
+      return titles[sectionType] || "New Section";
+    }
+    
+    // Setup section action buttons
+    function setupSectionActionButtons(targetSection = null) {
+      const sections = targetSection ? [targetSection] : document.querySelectorAll(".portfolio-section");
+      
+      sections.forEach(section => {
+        // Move up button
+        const moveUpBtn = section.querySelector(".move-up-btn");
+        if (moveUpBtn) {
+          moveUpBtn.addEventListener("click", function() {
+            moveSection(section, "up");
+          });
+        }
+        
+        // Move down button
+        const moveDownBtn = section.querySelector(".move-down-btn");
+        if (moveDownBtn) {
+          moveDownBtn.addEventListener("click", function() {
+            moveSection(section, "down");
+          });
+        }
+        
+        // Remove button
+        const removeBtn = section.querySelector(".remove-section-btn");
+        if (removeBtn) {
+          removeBtn.addEventListener("click", function() {
+            if (confirm("Are you sure you want to remove this section?")) {
+              removeSection(section);
+            }
+          });
+        }
+        
+        // Section title click for settings
+        const sectionTitle = section.querySelector(".section-title");
+        if (sectionTitle && isEditMode) {
+          sectionTitle.addEventListener("click", function(event) {
+            // Only open settings if in edit mode and not editing other content
+            if (isEditMode && !event.target.hasAttribute("contenteditable")) {
+              openSectionSettings(section);
+            }
+          });
+        }
+      });
+    }
+    
+    // Move section up or down
+    function moveSection(section, direction) {
+      const mainContainer = document.querySelector("main.container");
+      const sections = Array.from(mainContainer.querySelectorAll(".portfolio-section"));
+      const index = sections.indexOf(section);
+      
+      if (direction === "up" && index > 0) {
+        // Move up
+        mainContainer.insertBefore(section, sections[index - 1]);
+      } else if (direction === "down" && index < sections.length - 1) {
+        // Move down - need to insert after the next element
+        if (index + 2 < sections.length) {
+          mainContainer.insertBefore(section, sections[index + 2]);
+        } else {
+          mainContainer.appendChild(section);
+        }
+      }
+      
+      // Update order
+      updateSectionOrder();
+      
+      // Update navigation
+      updatePortfolioNavigation();
+    }
+    
+    // Remove section
+    function removeSection(section) {
+      section.classList.add("removing");
+      
+      // Wait for animation to complete
+      setTimeout(() => {
+        section.remove();
+        
+        // Update order
+        updateSectionOrder();
+        
+        // Update navigation
+        updatePortfolioNavigation();
+        
+        // Check if empty state should be shown
+        checkEmptyPortfolio();
+        
+        // Save the updated data to localStorage
+        portfolioData = gatherPortfolioData();
+        localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+        
+        console.log("Section removed and saved to localStorage");
+      }, 500);
+    }
+    
+    // Update section order array
+    function updateSectionOrder() {
+      const sections = document.querySelectorAll(".portfolio-section");
+      sectionOrder = Array.from(sections).map(section => ({
+        id: section.id,
+        type: section.dataset.sectionType,
+        title: section.querySelector(".section-title").textContent,
+        visible: !section.classList.contains("hidden")
+      }));
+      
+      // Save updated section order to localStorage
+      const currentData = localStorage.getItem('portfolioData');
+      if (currentData) {
+        try {
+          const data = JSON.parse(currentData);
+          data.sections = sectionOrder;
+          localStorage.setItem('portfolioData', JSON.stringify(data));
+          console.log("Section order updated in localStorage:", sectionOrder);
+        } catch (error) {
+          console.error("Error updating section order in localStorage:", error);
+        }
+      }
+    }
+    
+    // Update portfolio navigation
+    function updatePortfolioNavigation() {
+      const portfolioNav = document.querySelector(".portfolio-nav");
+      const sections = document.querySelectorAll(".portfolio-section");
+      
+      // Clear current navigation
+      portfolioNav.innerHTML = "";
+      
+      // Add navigation items for each visible section
+      sections.forEach(section => {
+        if (!section.classList.contains("hidden")) {
+          const navItem = document.createElement("a");
+          navItem.href = `#${section.id}`;
+          navItem.className = "portfolio-nav-item";
+          navItem.textContent = section.querySelector(".section-title").textContent;
+          
+          // Add active class to first item by default
+          if (portfolioNav.children.length === 0) {
+            navItem.classList.add("active");
+          }
+          
+          // Add click handler for smooth scrolling
+          navItem.addEventListener("click", function(e) {
       e.preventDefault();
 
       // Remove active class from all links
-      portfolioNavLinks.forEach((item) => item.classList.remove("active"));
+            document.querySelectorAll(".portfolio-nav-item").forEach(item => item.classList.remove("active"));
 
       // Add active class to clicked link
       this.classList.add("active");
 
-      // Get the target section id from the href attribute
-      const targetId = this.getAttribute("href");
-      const targetSection = document.querySelector(targetId);
-
       // Smooth scroll to target section
+            const targetSection = document.querySelector(this.getAttribute("href"));
       if (targetSection) {
         scrollToElement(targetSection);
       }
     });
-  });
+          
+          portfolioNav.appendChild(navItem);
+        }
+      });
+    }
+    
+    // Open reorder sections modal
+    function openReorderModal() {
+      reorderSectionsModal.classList.add("active");
+      modalBackdrop.classList.add("active");
+      
+      // Populate the section order list
+      populateSectionOrderList();
+      
+      // Make the list sortable
+      makeListSortable();
+    }
+    
+    // Close reorder modal
+    function closeReorderModal() {
+      reorderSectionsModal.classList.remove("active");
+      modalBackdrop.classList.remove("active");
+    }
+    
+    // Populate section order list
+    function populateSectionOrderList() {
+      const sections = document.querySelectorAll(".portfolio-section");
+      sectionOrderList.innerHTML = "";
+      
+      sections.forEach(section => {
+        const li = document.createElement("li");
+        li.className = "section-order-item";
+        li.dataset.sectionId = section.id;
+        
+        li.innerHTML = `
+          <div class="section-order-handle">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="section-order-title">${section.querySelector(".section-title").textContent}</div>
+          <div class="section-order-visibility">
+            <span>Visible</span>
+            <label class="section-visibility-toggle">
+              <input type="checkbox" ${!section.classList.contains("hidden") ? "checked" : ""}>
+              <span class="section-visibility-slider"></span>
+            </label>
+          </div>
+        `;
+        
+        sectionOrderList.appendChild(li);
+      });
+      
+      // Add visibility toggle functionality
+      const toggles = sectionOrderList.querySelectorAll(".section-visibility-toggle input");
+      toggles.forEach(toggle => {
+        toggle.addEventListener("change", function() {
+          const sectionId = this.closest(".section-order-item").dataset.sectionId;
+          const section = document.getElementById(sectionId);
+          
+          if (this.checked) {
+            section.classList.remove("hidden");
+          } else {
+            section.classList.add("hidden");
+          }
+        });
+      });
+    }
+    
+    // Make order list sortable
+    function makeListSortable() {
+      let draggedItem = null;
+      
+      const items = sectionOrderList.querySelectorAll(".section-order-item");
+      
+      items.forEach(item => {
+        // Make handle trigger drag
+        const handle = item.querySelector(".section-order-handle");
+        
+        handle.addEventListener("mousedown", () => {
+          item.setAttribute("draggable", "true");
+        });
+        
+        handle.addEventListener("mouseup", () => {
+          item.removeAttribute("draggable");
+        });
+        
+        // Handle drag start
+        item.addEventListener("dragstart", function() {
+          draggedItem = this;
+          setTimeout(() => {
+            this.classList.add("dragging");
+          }, 0);
+        });
+        
+        // Handle drag end
+        item.addEventListener("dragend", function() {
+          draggedItem = null;
+          this.classList.remove("dragging");
+          this.removeAttribute("draggable");
+        });
+        
+        // Handle drag over
+        item.addEventListener("dragover", function(e) {
+          e.preventDefault();
+          if (draggedItem !== this) {
+            const boundingRect = this.getBoundingClientRect();
+            const offset = boundingRect.y + (boundingRect.height / 2);
+            
+            if (e.clientY - offset > 0) {
+              if (this.nextSibling !== draggedItem) {
+                sectionOrderList.insertBefore(draggedItem, this.nextSibling);
+              }
+            } else {
+              if (this !== draggedItem) {
+                sectionOrderList.insertBefore(draggedItem, this);
+              }
+            }
+          }
+        });
+      });
+    }
+    
+    // Save new section order
+    function saveNewSectionOrder() {
+      const newOrder = [];
+      const items = sectionOrderList.querySelectorAll(".section-order-item");
+      
+      // Get new order and visibility from the list
+      items.forEach(item => {
+        newOrder.push({
+          id: item.dataset.sectionId,
+          visible: item.querySelector(".section-visibility-toggle input").checked
+        });
+      });
+      
+      // Reorder the actual sections
+      const mainContainer = document.querySelector("main.container");
+      const sections = Array.from(document.querySelectorAll(".portfolio-section"));
+      
+      // Sort sections according to new order
+      newOrder.forEach(entry => {
+        const section = document.getElementById(entry.id);
+        if (section) {
+          // Update visibility
+          if (entry.visible) {
+            section.classList.remove("hidden");
+          } else {
+            section.classList.add("hidden");
+          }
+          
+          // Move to end of container to maintain order
+          mainContainer.appendChild(section);
+        }
+      });
+      
+      // Update stored section order
+      updateSectionOrder();
+      
+      // Update navigation
+      updatePortfolioNavigation();
+      
+      // Save the updated data to localStorage
+      portfolioData = gatherPortfolioData();
+      localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+      console.log("Section order saved to localStorage");
+      
+      // Close modal
+      closeReorderModal();
+    }
+    
+    // Open section settings
+    function openSectionSettings(section) {
+      currentEditingSection = section;
+      sectionSettingsModal.classList.add("active");
+      modalBackdrop.classList.add("active");
+      
+      // Populate settings
+      sectionTitleInput.value = section.querySelector(".section-title").textContent;
+      sectionIconSelect.value = section.dataset.sectionType || "custom";
+    }
+    
+    // Close section settings modal
+    function closeSectionSettingsModal() {
+      sectionSettingsModal.classList.remove("active");
+      modalBackdrop.classList.remove("active");
+      currentEditingSection = null;
+    }
+    
+    // Save section settings
+    function saveSectionSettings() {
+      if (!currentEditingSection) return;
+      
+      // Update section title
+      const title = sectionTitleInput.value.trim();
+      if (title) {
+        currentEditingSection.querySelector(".section-title").textContent = title;
+      }
+      
+      // Update section icon type
+      const iconType = sectionIconSelect.value;
+      currentEditingSection.dataset.sectionType = iconType;
+      
+      // Update section ID if needed to match type
+      if (!currentEditingSection.id.startsWith(iconType)) {
+        const timestamp = new Date().getTime();
+        currentEditingSection.id = `${iconType}_${timestamp}`;
+      }
+      
+      // Update navigation
+      updatePortfolioNavigation();
+      
+      // Update section order
+      updateSectionOrder();
+      
+      // Save the updated data to localStorage
+      portfolioData = gatherPortfolioData();
+      localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+      console.log("Section settings saved to localStorage");
+      
+      // Close modal
+      closeSectionSettingsModal();
+    }
+    
+    // Check if portfolio is empty and show empty state if needed
+    function checkEmptyPortfolio() {
+      const sections = document.querySelectorAll(".portfolio-section");
+      const mainContainer = document.querySelector("main.container");
+      
+      if (sections.length === 0) {
+        // Create empty state
+        const emptyState = document.createElement("div");
+        emptyState.className = "empty-portfolio-state";
+        emptyState.innerHTML = `
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 18.5V19.5M7 3H17C18.1046 3 19 3.89543 19 5V21H5V5C5 3.89543 5.89543 3 7 3ZM5 8H19H5ZM8 11.5H16H8ZM8 15H13H8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>Your portfolio is empty</h3>
+          <p>Add sections to showcase your skills, experience, and projects.</p>
+          <button class="section-control-btn add-section-btn" id="emptyStateAddButton">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Add Section
+          </button>
+        `;
+        
+        mainContainer.appendChild(emptyState);
+        
+        // Add event listener to add button
+        document.getElementById("emptyStateAddButton").addEventListener("click", openAddSectionModal);
+      } else {
+        // Remove empty state if it exists
+        const emptyState = document.querySelector(".empty-portfolio-state");
+        if (emptyState) {
+          emptyState.remove();
+        }
+      }
+    }
+
+    // Get current user from Supabase
+    async function getCurrentUser() {
+      if (!supabase) return null;
+      
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error("Error getting user:", error);
+          return null;
+        }
+        
+        return user;
+      } catch (error) {
+        console.error("Error getting user:", error);
+        return null;
+      }
+    }
+    
+    // Save portfolio data to Supabase
+    async function saveToSupabase(data) {
+      if (!supabase) return { success: false, error: "Supabase not initialized" };
+      
+      try {
+        const user = await getCurrentUser();
+        
+        if (!user) {
+          return { success: false, error: "Not authenticated" };
+        }
+        
+        // Add user ID to data
+        data.user_id = user.id;
+        
+        // Check if user already has a portfolio entry
+        const { data: existingData, error: fetchError } = await supabase
+          .from("portfolios")
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
+        
+        if (fetchError && fetchError.code !== "PGRST116") {
+          // Some error other than "not found"
+          return { success: false, error: fetchError };
+        }
+        
+        let result;
+        
+        if (existingData) {
+          // Update existing portfolio
+          result = await supabase
+            .from("portfolios")
+            .update({ data: data })
+            .eq("user_id", user.id);
+        } else {
+          // Insert new portfolio
+          result = await supabase
+            .from("portfolios")
+            .insert([{ user_id: user.id, data: data }]);
+        }
+        
+        if (result.error) {
+          throw result.error;
+        }
+        
+        return { success: true };
+      } catch (error) {
+        console.error("Error saving to Supabase:", error);
+        return { success: false, error };
+      }
+    }
+
+    // Show save notification
+    function showSaveNotification(message = "Changes saved successfully!") {
+      const saveNotification = document.querySelector(".save-notification");
+      const messageElement = saveNotification.querySelector(".save-notification-text");
+      
+      messageElement.textContent = message;
+      saveNotification.classList.add("show");
+      
+      setTimeout(() => {
+        saveNotification.classList.remove("show");
+      }, 3000);
+    }
+
+    // Update profile timestamp
+    function updateProfileTimestamp() {
+      // Add current timestamp for tracking updates
+      portfolioData.updated_at = new Date().toISOString();
+      
+      // Track update in localStorage even if we're not saving the whole object yet
+      const metadata = JSON.parse(localStorage.getItem('portfolioMetadata') || '{}');
+      metadata.last_modified = new Date().toISOString();
+      localStorage.setItem('portfolioMetadata', JSON.stringify(metadata));
+    }
+  }
 
   // Handle skill tag clicks
   const skillTags = document.querySelectorAll(".skill-tag");
@@ -1408,11 +2654,8 @@ document.addEventListener("DOMContentLoaded", function () {
       locationEl.textContent = 'Location';
     }
 
-    // Make title editable
-    const titleEl = document.querySelector('.portfolio-subtitle');
-    titleEl.contentEditable = true;
-    titleEl.classList.add('editable-content');
-    // Optionally, add a save button or save on blur logic
+    // Do not make title editable by default
+    // This will be handled by the edit mode toggle
   }
 
   // Call it directly, since we're already inside DOMContentLoaded

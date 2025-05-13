@@ -3494,6 +3494,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     infoSection.appendChild(techSection);
 
+    // View button (not functional yet)
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'portfolio-project-view-btn';
+    viewBtn.textContent = 'View';
+    infoSection.appendChild(viewBtn);
+
     // Assemble card
     card.appendChild(photoSection);
     card.appendChild(infoSection);

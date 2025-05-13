@@ -588,14 +588,6 @@ body {
   display: block;
 }
 
-.project-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1f2937;
-  padding: 1rem 1rem 0.5rem 1rem;
-  text-align: left;
-}
-
 .project-languages {
   display: flex;
   flex-wrap: wrap;

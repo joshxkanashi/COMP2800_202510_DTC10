@@ -1297,7 +1297,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       tagInputContainers.forEach((container) => container.remove());
     }
-    
+
     // Function to remove project action buttons
     function removeProjectActionButtons() {
       // Kept for compatibility with disableEditMode function

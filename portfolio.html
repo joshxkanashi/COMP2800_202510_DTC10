@@ -755,5 +755,21 @@
         <!-- Modal Backdrop -->
         <div id="modalBackdrop" class="modal-backdrop"></div>
     </div>
+
+    <!-- AI Advice Button and Chat Window -->
+    <div id="ai-advice-root">
+      <button id="aiAdviceBtn" class="ai-advice-btn">Get Advice!</button>
+      <div id="aiAdviceChat" class="ai-advice-chat hidden">
+        <div class="ai-advice-header">
+          <span>AI Portfolio Advisor</span>
+          <button id="aiAdviceClose" class="ai-advice-close">&times;</button>
+        </div>
+        <div id="aiAdviceMessages" class="ai-advice-messages"></div>
+        <div class="ai-advice-input-row">
+          <input id="aiAdviceInput" type="text" placeholder="Ask a follow-up question..." disabled />
+          <button id="aiAdviceAsk" class="ai-advice-ask">Ask for Advice</button>
+        </div>
+      </div>
+    </div>
 </body>
 </html> 

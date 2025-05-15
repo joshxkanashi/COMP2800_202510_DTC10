@@ -73,7 +73,7 @@ function createFeaturedProjectCard(project, index) {
     // Info section
     const infoSection = document.createElement('div');
     infoSection.className = 'portfolio-project-info';
-
+    
     // Title
     const title = document.createElement('h3');
     title.className = 'portfolio-project-title';
@@ -103,7 +103,7 @@ function createFeaturedProjectCard(project, index) {
     // Links
     const linksSection = document.createElement('div');
     linksSection.className = 'portfolio-project-links';
-    
+
     // View button (opens modal)
     const viewButton = document.createElement('button');
     viewButton.className = 'portfolio-project-view-btn';

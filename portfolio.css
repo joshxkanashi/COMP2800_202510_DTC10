@@ -1259,6 +1259,7 @@ body.edit-mode .avatar.large:active {
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 12px;
+  overflow: hidden;
 }
 
 .portfolio-project-photo img {
@@ -1268,19 +1269,21 @@ body.edit-mode .avatar.large:active {
 }
 
 .portfolio-project-info {
-  flex: 1 1 0;
-  padding: 8px 10px 6px 10px;
+  flex: 0 0 50%;
+  height: 50%;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: space-between;
   width: 100%;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .portfolio-project-title {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1290,14 +1293,33 @@ body.edit-mode .avatar.large:active {
   font-size: 0.8rem;
   color: #555;
   margin-bottom: 4px;
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  line-height: 1.4;
+}
+
+/* Custom scrollbar for description */
+.portfolio-project-description::-webkit-scrollbar {
+  width: 4px;
+}
+
+.portfolio-project-description::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.portfolio-project-description::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.portfolio-project-description::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .portfolio-project-languages {
-  margin-bottom: 4px;
+  margin: 4px 0;
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
@@ -2183,7 +2205,7 @@ body.edit-mode .section-actions {
 .project-modal-gallery {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 50vh;
   background-color: #f5f5f5;
   overflow: hidden;
 }
@@ -2268,6 +2290,10 @@ body.edit-mode .section-actions {
 
 .project-modal-content {
   padding: 24px;
+  height: 50vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .project-modal-description {
@@ -2275,52 +2301,135 @@ body.edit-mode .section-actions {
   line-height: 1.6;
   color: #444;
   margin-bottom: 24px;
+  flex: 1;
+  overflow-y: auto;
 }
 
-.project-modal-tech {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
+/* Custom scrollbar for modal content */
+.project-modal-content::-webkit-scrollbar,
+.project-modal-description::-webkit-scrollbar {
+  width: 6px;
 }
 
-.project-modal-tech .tech-tag {
-  font-size: 0.9rem;
+.project-modal-content::-webkit-scrollbar-track,
+.project-modal-description::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 6px;
 }
 
-.project-modal-links {
-  display: flex;
-  gap: 16px;
+.project-modal-content::-webkit-scrollbar-thumb,
+.project-modal-description::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 6px;
 }
 
-.project-modal-link {
-  padding: 8px 18px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: white;
-  border-radius: 8px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.project-modal-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-}
-
-body.modal-open {
-  overflow: hidden;
+.project-modal-content::-webkit-scrollbar-thumb:hover,
+.project-modal-description::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 @media (max-width: 768px) {
   .project-modal-gallery {
-    height: 300px;
+    height: 40vh;
   }
   
-  .project-modal-title {
-    font-size: 1.5rem;
+  .project-modal-content {
+    height: 40vh;
   }
 }
+
+/* === AI Advice Chat Styles === */
+#ai-advice-root {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9999;
+  font-family: inherit;
+}
+.ai-advice-btn {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: background 0.2s;
+}
+.ai-advice-btn:hover { background: #4f46e5; }
+.ai-advice-chat {
+  width: 340px;
+  height: 420px;
+  background: #18181b;
+  color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #27272a;
+}
+.ai-advice-chat.hidden { display: none; }
+.ai-advice-header {
+  background: #27272a;
+  padding: 12px 16px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ai-advice-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+.ai-advice-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  font-size: 0.98rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ai-advice-message {
+  background: #23232b;
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 90%;
+  word-break: break-word;
+}
+.ai-advice-message.user { align-self: flex-end; background: #3730a3; }
+.ai-advice-message.ai { align-self: flex-start; background: #23232b; }
+.ai-advice-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: #23232b;
+}
+#aiAdviceInput {
+  flex: 1;
+  border-radius: 8px;
+  border: 1px solid #444;
+  padding: 8px 10px;
+  font-size: 1rem;
+  background: #18181b;
+  color: #fff;
+}
+.ai-advice-ask {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ai-advice-ask:hover { background: #4f46e5; }

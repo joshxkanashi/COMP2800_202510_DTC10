@@ -103,11 +103,34 @@ function createFeaturedProjectCard(project, index) {
     // Links
     const linksSection = document.createElement('div');
     linksSection.className = 'portfolio-project-links';
+    
+    // View button (opens modal)
+    const viewButton = document.createElement('button');
+    viewButton.className = 'portfolio-project-view-btn';
+    viewButton.textContent = 'View';
+    viewButton.addEventListener('click', () => {
+        // Check if openProjectModal function exists in window scope (from portfolio.js)
+        if (typeof window.openProjectModal === 'function') {
+            window.openProjectModal(project);
+        } else if (typeof openProjectModal === 'function') {
+            openProjectModal(project);
+        } else {
+            console.error('openProjectModal function not found');
+            // Fallback action - you could redirect to a project detail page or external URL
+            if (project.project_url) {
+                window.open(project.project_url, '_blank');
+            }
+        }
+    });
+    linksSection.appendChild(viewButton);
+    
+    // External links (if provided)
     if (project.project_url) {
         const projectLink = document.createElement('a');
         projectLink.href = project.project_url;
         projectLink.className = 'project-link';
-        projectLink.textContent = 'View';
+        projectLink.textContent = 'Live Demo';
+        projectLink.target = '_blank';
         linksSection.appendChild(projectLink);
     }
     if (project.github_url) {
@@ -115,6 +138,7 @@ function createFeaturedProjectCard(project, index) {
         githubLink.href = project.github_url;
         githubLink.className = 'project-link';
         githubLink.textContent = 'GitHub';
+        githubLink.target = '_blank';
         linksSection.appendChild(githubLink);
     }
     infoSection.appendChild(linksSection);

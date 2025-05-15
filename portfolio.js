@@ -793,10 +793,16 @@ document.addEventListener("DOMContentLoaded", function () {
         addSkill1Button.style.display = "flex";
         addSkill2Button.style.display = "flex";
 
-        // Show add project button
+              // Show manage featured projects button
         const addProjectButton = document.getElementById("addProjectButton");
         if (addProjectButton) {
+          addProjectButton.textContent = "Manage Featured Projects";
           addProjectButton.style.display = "flex";
+          
+          // Set click handler to open project selector
+          // First remove any existing event listeners to prevent duplicates
+          addProjectButton.replaceWith(addProjectButton.cloneNode(true));
+          document.getElementById("addProjectButton").addEventListener("click", openProjectSelector);
         }
 
         // Add delete buttons to timeline and skill items
@@ -1265,61 +1271,10 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // Function to add project action buttons
+    // Function to add project action buttons - simplified for optimization
     function addProjectActionButtons() {
-      const projectCards = document.querySelectorAll(".portfolio-project-card");
-
-      projectCards.forEach((card) => {
-        // Skip if already has project actions
-        if (card.querySelector(".project-actions")) return;
-
-        const actionsContainer = document.createElement("div");
-        actionsContainer.className = "project-actions";
-
-        // Create delete button
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "project-delete-btn";
-        deleteBtn.setAttribute("aria-label", "Delete project");
-        deleteBtn.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        `;
-
-        // Add click handler for delete project
-        deleteBtn.addEventListener("click", function () {
-          if (confirm("Are you sure you want to delete this project?")) {
-            card.remove();
-            
-            // Gather updated data
-            portfolioData = gatherPortfolioData();
-            
-            // Save to Supabase
-            if (supabase) {
-              console.log("Saving project deletion to Supabase");
-              saveToSupabase(portfolioData)
-                .then(result => {
-                  if (result.success) {
-                    console.log("Project deletion saved to Supabase successfully");
-                  } else {
-                    console.error("Error saving project deletion to Supabase:", result.error);
-                    showSaveNotification("Error saving changes. Please try again.");
-                  }
-                })
-                .catch(error => {
-                  console.error("Exception saving project deletion to Supabase:", error);
-                  showSaveNotification("Error saving changes. Please try again.");
-                });
-            } else {
-              console.error("Supabase is not available. Unable to save project deletion.");
-              showSaveNotification("Error: Unable to connect to database");
-            }
-          }
-        });
-
-        actionsContainer.appendChild(deleteBtn);
-        card.appendChild(actionsContainer);
-      });
+      // Projects are now managed through the "Manage Featured Projects" functionality
+      // This function is kept for compatibility with the enableEditMode function
     }
 
     // Function to remove tag editing
@@ -1342,11 +1297,10 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       tagInputContainers.forEach((container) => container.remove());
     }
-
+    
     // Function to remove project action buttons
     function removeProjectActionButtons() {
-      const projectActions = document.querySelectorAll(".project-actions");
-      projectActions.forEach((actions) => actions.remove());
+      // Kept for compatibility with disableEditMode function
     }
 
     // Event Listeners
@@ -1653,154 +1607,456 @@ document.addEventListener("DOMContentLoaded", function () {
       editableElements[0].focus();
     }
 
-    // Add new project functionality
+    // Add new project functionality (using project selector)
     if (document.getElementById("addProjectButton")) {
       document
         .getElementById("addProjectButton")
         .addEventListener("click", function () {
-          addNewProject();
+          openProjectSelector();
         });
     }
 
-    // Function to add new project
-    function addNewProject() {
-      const projectsContainer = document.getElementById("projectsContainer");
-      const projects = projectsContainer.querySelectorAll(
-        ".portfolio-project-card"
-      );
-      const newItemId = `proj${projects.length + 1}`;
-
-      // Create new project card
-      const newProject = document.createElement("div");
-      newProject.className = "portfolio-project-card new-item";
-      newProject.dataset.itemId = newItemId;
-
-      // Determine random project icon
-      const icons = [
-        `<path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
-        `<path d="M12 18.0001V14.0001M12 14.0001V10.0001M12 14.0001H16M12 14.0001H8M21 12.0001C21 16.9707 16.9706 21.0001 12 21.0001C7.02944 21.0001 3 16.9707 3 12.0001C3 7.02956 7.02944 3.00012 12 3.00012C16.9706 3.00012 21 7.02956 21 12.0001Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
-        `<path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" stroke-width="2"/><path d="M7 16.5H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 12.5H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 8.5H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 16.5H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
-      ];
-
-      // Randomly select project badge type
-      const badgeTypes = [
-        "Web App",
-        "Mobile App",
-        "AI Project",
-        "Game",
-        "API",
-        "Plugin",
-      ];
-      const randomBadge =
-        badgeTypes[Math.floor(Math.random() * badgeTypes.length)];
-
-      newProject.innerHTML = `
-        <div class="portfolio-project-image">
-          <span class="project-badge editable-content" data-field="${newItemId}_badge">${randomBadge}</span>
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            ${icons[Math.floor(Math.random() * icons.length)]}
+// Project selector modal for choosing which projects to feature
+async function openProjectSelector() {
+  console.log("Opening project selector modal");
+  
+  // First, if the selector grid already exists, clear it to prevent duplicates
+  const existingGrid = document.getElementById('projectSelectorGrid');
+  if (existingGrid) {
+    existingGrid.innerHTML = '<p class="loading-text">Loading projects...</p>';
+  }
+  
+  // Create modal if it doesn't exist
+  if (!document.getElementById('projectSelectorModal')) {
+    console.log("Creating project selector modal");
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.className = 'project-modal-backdrop';
+    modalBackdrop.id = 'projectSelectorBackdrop';
+    
+    const modalHTML = `
+      <div class="project-modal" id="projectSelectorModal" style="max-width: 900px;">
+        <button class="project-modal-close" id="projectSelectorClose" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
+        </button>
+        <div class="project-modal-header">
+          <h2 class="project-modal-title">Manage Featured Projects</h2>
+          <p style="margin-top: 8px; color: #666;">Select the projects you want to feature on your portfolio homepage.</p>
         </div>
-        <div class="portfolio-project-content">
-          <h3 class="portfolio-project-title editable-content" data-field="${newItemId}_title">New Project</h3>
-          <p class="portfolio-project-description editable-content" data-field="${newItemId}_description">Enter project description here...</p>
-          <div class="portfolio-project-tech" data-project="${newItemId}">
-            <span class="tech-tag" data-tag="Tag1">Tag1</span>
+        <div class="project-modal-content" style="padding-top: 0;">
+          <div class="project-selector-grid" id="projectSelectorGrid">
+            <p class="loading-text">Loading projects...</p>
           </div>
-          <div class="portfolio-project-links">
-            <a href="#" class="project-link editable-content" data-field="${newItemId}_link">View Project</a>
-            <a href="#" class="project-link editable-content" data-field="${newItemId}_github">GitHub</a>
+          <div class="project-selector-actions" style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+            <button id="cancelFeaturedProjects" class="btn-secondary">Cancel</button>
+            <button id="saveFeaturedProjects" class="btn-primary">Save Featured Projects</button>
+          </div>
           </div>
         </div>
       `;
 
-      projectsContainer.appendChild(newProject);
-
-      // Make new elements editable
-      const newEditableElements =
-        newProject.querySelectorAll(".editable-content");
-      newEditableElements.forEach((element) => {
-        element.setAttribute("contenteditable", "true");
-        element.setAttribute("spellcheck", "true");
-
-        // Add placeholder styles if needed
-        if (
-          element.textContent.trim() === "New Project" ||
-          element.textContent.trim() === "Enter project description here..."
-        ) {
-          element.classList.add("edit-placeholder");
+    modalBackdrop.innerHTML = modalHTML;
+    document.body.appendChild(modalBackdrop);
+    
+    // Add event listeners
+    document.getElementById('projectSelectorClose').addEventListener('click', closeProjectSelector);
+    document.getElementById('cancelFeaturedProjects').addEventListener('click', closeProjectSelector);
+    document.getElementById('saveFeaturedProjects').addEventListener('click', saveFeaturedProjects);
+    
+    modalBackdrop.addEventListener('click', function(e) {
+      if (e.target === modalBackdrop) {
+        closeProjectSelector();
+      }
+    });
+    
+    // Add styles if needed
+    if (!document.getElementById('projectSelectorStyles')) {
+      const styleEl = document.createElement('style');
+      styleEl.id = 'projectSelectorStyles';
+      styleEl.textContent = `
+        /* Fix for project modal layout with long descriptions */
+        .project-modal {
+          display: flex;
+          flex-direction: column;
+          max-height: 90vh;
         }
-
-        // Handle focus to remove placeholder
-        element.addEventListener("focus", handleElementFocus);
-
-        // Handle blur to restore placeholder if empty
-        element.addEventListener("blur", handleElementBlur);
-      });
-
-      // Add project action buttons
-      const actionsContainer = document.createElement("div");
-      actionsContainer.className = "project-actions";
-
-      // Create delete button
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "project-delete-btn";
-      deleteBtn.setAttribute("aria-label", "Delete project");
-      deleteBtn.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      `;
-
-      // Add click handler for delete project
-      deleteBtn.addEventListener("click", function () {
-        if (confirm("Are you sure you want to delete this project?")) {
-          newProject.remove();
+        .project-modal-gallery {
+          min-height: 40vh;
+          max-height: 50vh;
         }
-      });
-
-      actionsContainer.appendChild(deleteBtn);
-      newProject.appendChild(actionsContainer);
-
-      // Make tags editable
-      const techContainer = newProject.querySelector(".portfolio-project-tech");
-      const tags = techContainer.querySelectorAll(".tech-tag");
-
-      // Add delete button to each tag
-      tags.forEach((tag) => {
-        tag.classList.add("editable");
-
-        const deleteBtn = document.createElement("span");
-        deleteBtn.className = "tech-tag-delete";
-        deleteBtn.innerHTML = "×";
-        deleteBtn.addEventListener("click", function (e) {
-          e.stopPropagation();
-          if (confirm("Delete this tag?")) {
-            tag.remove();
+        .project-modal-content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px;
+          max-height: 40vh;
+        }
+        .project-modal-image img {
+          object-fit: contain;
+          max-height: 50vh;
+        }
+        .project-modal-description.long-description {
+          max-height: none; /* Let the container handle scrolling */
+          border-left: 3px solid var(--primary);
+          padding-left: 15px;
+          margin: 10px 0;
+        }
+        .project-modal-scroll-container {
+          max-height: 35vh;
+          overflow-y: auto;
+          padding-right: 10px;
+        }
+        
+        /* Mobile responsiveness for project modal */
+        @media (max-width: 768px) {
+          .project-modal {
+            max-height: 95vh;
+            width: 95%;
           }
-        });
-
-        tag.appendChild(deleteBtn);
-      });
-
-      // Add "Add Tag" button
-      const addTagButton = document.createElement("button");
-      addTagButton.className = "add-tag-button";
-      addTagButton.innerHTML = `
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Add Tag
+          .project-modal-gallery {
+            min-height: 30vh;
+            max-height: 40vh;
+          }
+          .project-modal-scroll-container {
+            max-height: 40vh;
+          }
+        }
+        .project-selector-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 20px;
+          max-height: 500px;
+          overflow-y: auto;
+          padding: 10px;
+        }
+        .project-select-card {
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          padding: 16px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          position: relative;
+          background: #fff;
+        }
+        .project-select-card:hover {
+          border-color: #d1d5db;
+          box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .project-select-card.selected {
+          border-color: var(--primary);
+          box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+        }
+        .project-select-card.selected:before {
+          content: "";
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background-color: var(--primary);
+          background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 12L10 17L19 8' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+        .project-select-thumb {
+          width: 100%;
+          height: 140px;
+          border-radius: 8px;
+          background-color: #f3f4f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 12px;
+          overflow: hidden;
+        }
+        .project-select-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .project-select-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 4px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .project-select-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          margin-top: 8px;
+        }
+        .project-select-tag {
+          font-size: 12px;
+          padding: 2px 8px;
+          background: #f3f4f6;
+          color: #4b5563;
+          border-radius: 4px;
+        }
+        .loading-text {
+          text-align: center;
+          padding: 24px;
+          color: #6b7280;
+        }
+        .empty-projects {
+          text-align: center;
+          padding: 24px;
+          color: #6b7280;
+        }
       `;
+      document.head.appendChild(styleEl);
+    }
+  } else {
+    console.log("Project selector modal already exists");
+    // If the modal already exists, make sure to clear its content
+    const projectsGrid = document.getElementById('projectSelectorGrid');
+    if (projectsGrid) {
+      projectsGrid.innerHTML = '<p class="loading-text">Loading projects...</p>';
+    }
+  }
+  
+  // Show the modal
+  const modalBackdrop = document.getElementById('projectSelectorBackdrop');
+  modalBackdrop.classList.add('active');
+  document.body.classList.add('modal-open');
+  
+  // Load all projects from database
+  await loadProjectsForSelector();
+}
 
-      addTagButton.addEventListener(
-        "click",
-        createAddTagHandler(techContainer, addTagButton)
+// Close project selector modal
+function closeProjectSelector() {
+  const modalBackdrop = document.getElementById('projectSelectorBackdrop');
+  if (modalBackdrop) {
+    modalBackdrop.classList.remove('active');
+    document.body.classList.remove('modal-open');
+  }
+}
+
+// Load all user's projects for selection
+async function loadProjectsForSelector() {
+  const projectsGrid = document.getElementById('projectSelectorGrid');
+  if (!projectsGrid) return;
+  
+  // Clear previous content and set loading state
+  projectsGrid.innerHTML = '<p class="loading-text">Loading projects...</p>';
+  
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      projectsGrid.innerHTML = '<p class="empty-projects">You need to be logged in to manage projects.</p>';
+      return;
+    }
+    
+    // Get all projects for this user
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error("Error loading projects:", error);
+      projectsGrid.innerHTML = '<p class="empty-projects">Error loading projects. Please try again.</p>';
+      return;
+    }
+    
+    if (!projects || projects.length === 0) {
+      projectsGrid.innerHTML = `
+        <div class="empty-projects">
+          <p>You don't have any projects yet.</p>
+          <p>Add projects in the <a href="projects.html" style="color: var(--primary); text-decoration: underline;">Projects page</a> first.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // IMPORTANT: Clear the grid completely before adding new projects
+    // This prevents duplicate projects from appearing
+    projectsGrid.innerHTML = '';
+    
+        // Get currently featured project IDs from portfolio data instead
+      let featuredProjectIds = [];
+      try {
+        // Get featured project IDs from the portfolios table instead
+        const { data: portfolioData, error: portfolioError } = await supabase
+          .from('portfolios')
+          .select('data')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (portfolioError) {
+          console.warn("Error fetching portfolio:", portfolioError);
+        } else if (portfolioData && portfolioData.data && portfolioData.data.featured_project_ids) {
+          // Get the IDs from portfolio data
+          featuredProjectIds = portfolioData.data.featured_project_ids;
+          console.log("Loaded featured project IDs from portfolio data:", featuredProjectIds);
+        }
+      } catch (error) {
+        console.warn("Exception getting featured projects:", error);
+      }
+    
+    // Debug output of projects and featured IDs
+    console.log("Projects to display:", projects.map(p => ({id: p.id, title: p.title})));
+    console.log("Featured project IDs:", featuredProjectIds);
+    
+    // First clear any existing content to avoid duplication
+    projectsGrid.innerHTML = "";
+    
+    // Create project cards - one per project
+    projects.forEach(project => {
+      const card = document.createElement('div');
+      card.className = 'project-select-card';
+      
+      // Convert to string for comparison if needed
+      const projectId = project.id;
+      
+      // Check if this project is in the featured list
+      // Using more reliable string comparison to avoid type mismatch issues
+      const isSelected = featuredProjectIds.some(featuredId => 
+        featuredId && projectId && featuredId.toString() === projectId.toString()
       );
-      techContainer.appendChild(addTagButton);
+      
+      if (isSelected) {
+        card.classList.add('selected');
+        console.log(`Project ${projectId} (${project.title}) is selected`);
+      }
+      
+      card.setAttribute('data-project-id', project.id);
+      
+      // Create thumbnail
+      const thumb = document.createElement('div');
+      thumb.className = 'project-select-thumb';
+      if (project.photo_url) {
+        const img = document.createElement('img');
+        img.src = project.photo_url;
+        img.alt = project.title;
+        thumb.appendChild(img);
+      } else {
+        // Default icon if no photo
+        thumb.innerHTML = `
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        `;
+      }
+      
+      // Create info
+      const title = document.createElement('div');
+      title.className = 'project-select-title';
+      title.textContent = project.title;
+      
+      // Create tags
+      const tags = document.createElement('div');
+      tags.className = 'project-select-tags';
+      if (project.languages && project.languages.length > 0) {
+        project.languages.slice(0, 3).forEach(lang => {
+          const tag = document.createElement('span');
+          tag.className = 'project-select-tag';
+          tag.textContent = lang;
+          tags.appendChild(tag);
+        });
+        
+        // Add +X more if needed
+        if (project.languages.length > 3) {
+          const moreTag = document.createElement('span');
+          moreTag.className = 'project-select-tag';
+          moreTag.textContent = `+${project.languages.length - 3} more`;
+          tags.appendChild(moreTag);
+        }
+      }
+      
+      // Assemble card
+      card.appendChild(thumb);
+      card.appendChild(title);
+      card.appendChild(tags);
+      
+      // Add click handler to toggle selection
+      card.addEventListener('click', () => {
+        card.classList.toggle('selected');
+      });
+      
+      projectsGrid.appendChild(card);
+    });
+  } catch (error) {
+    console.error("Error in loadProjectsForSelector:", error);
+    projectsGrid.innerHTML = '<p class="empty-projects">An error occurred. Please try again.</p>';
+  }
+}
 
-      // Focus the title for immediate editing
-      newProject.querySelector(".portfolio-project-title").focus();
+// Save featured projects selection
+async function saveFeaturedProjects() {
+  const selectedCards = document.querySelectorAll('.project-select-card.selected');
+  const projectIds = Array.from(selectedCards).map(card => card.getAttribute('data-project-id'));
+  
+  console.log("Saving featured projects:", projectIds);
+  
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("You need to be logged in to save featured projects.");
+      return;
+    }
+    
+    // First get current portfolio data
+    const { data: portfolioData, error: getError } = await supabase
+      .from('portfolios')
+      .select('data')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (getError) {
+      console.error("Error getting portfolio data:", getError);
+      alert("Error saving featured projects. Please try again.");
+      return;
+    }
+    
+    // Create or update portfolio data
+    let updatedData = portfolioData?.data || {};
+    
+    // Store featured project IDs in the main portfolio data structure
+    // This preserves both the selection and the order
+    updatedData.featured_project_ids = projectIds;
+    updatedData.updated_at = new Date().toISOString();
+    
+    console.log("Saving featured project IDs to portfolio data:", projectIds);
+    
+    // Save to portfolios table
+    const { error } = await supabase
+      .from('portfolios')
+      .update({ 
+        data: updatedData
+      })
+      .eq('user_id', user.id);
+    
+    if (error) {
+      console.error("Error saving featured projects:", error);
+      alert("Error saving featured projects. Please try again.");
+      return;
+    }
+    
+    // Close modal
+    closeProjectSelector();
+    
+    // Refresh featured projects
+    loadFeaturedProjects();
+    
+    // Show success notification
+    showSavingIndicator("Featured projects updated!", "success");
+    setTimeout(() => {
+      hideSavingIndicator();
+    }, 2000);
+  } catch (error) {
+    console.error("Error in saveFeaturedProjects:", error);
+    alert("An error occurred. Please try again.");
+  }
     }
 
     // Create a reusable handler for adding tags
@@ -3403,7 +3659,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector('[data-field="email"]').textContent = user.email;
 
     // Set location to a static value for now
-    document.querySelector('[data-field="location"]').textContent = 'Location';
+    // document.querySelector('[data-field="location"]').textContent = 'Location';
     } catch (err) {
       console.error("Error in loadPortfolioHeader:", err);
     }
@@ -3418,7 +3674,57 @@ document.addEventListener("DOMContentLoaded", function () {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch up to 3 most recent projects for the user
+        // First get featured project IDs from portfolio data
+        let featuredProjectIds = [];
+        const { data: portfolioData, error: portfolioError } = await supabase
+          .from('portfolios')
+          .select('data')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (portfolioError) {
+          console.warn("Error fetching portfolio for featured projects:", portfolioError);
+        } else if (portfolioData && portfolioData.data && portfolioData.data.featured_project_ids && portfolioData.data.featured_project_ids.length > 0) {
+          // If we have featured project IDs, use those
+          featuredProjectIds = portfolioData.data.featured_project_ids;
+          console.log("Loading featured projects with IDs:", featuredProjectIds);
+          
+          // Get all featured projects by their IDs
+          const { data: projects, error } = await supabase
+            .from('projects')
+            .select('*')
+            .in('id', featuredProjectIds);
+            
+          if (error) {
+            console.error("Error loading featured projects by ID:", error);
+            throw error;
+          }
+          
+          // If we successfully got the featured projects, render them in the correct order
+          if (projects && projects.length > 0) {
+            const projectsContainer = document.getElementById('projectsContainer');
+            projectsContainer.innerHTML = '';
+            
+            // Sort the projects based on the order in featured_project_ids
+            const orderedProjects = featuredProjectIds.map(id => {
+              // Convert both to strings for safe comparison
+              return projects.find(project => project.id.toString() === id.toString());
+            }).filter(Boolean); // Remove any null/undefined values
+            
+            console.log("Ordered featured projects:", orderedProjects.map(p => p.title));
+            
+            // Render the projects in the specified order
+            orderedProjects.forEach(project => {
+              const card = createFeaturedProjectCard(project);
+              projectsContainer.appendChild(card);
+            });
+            
+            return; // Exit early since we already handled the rendering
+          }
+        }
+        
+        // Fallback: if no featured projects defined, show most recent projects
+        console.log("No featured projects found, showing recent projects instead");
         const { data: projects, error } = await supabase
             .from('projects')
             .select('*')
@@ -3494,10 +3800,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     infoSection.appendChild(techSection);
 
-    // View button (not functional yet)
+    // View button (opens modal)
     const viewBtn = document.createElement('button');
     viewBtn.className = 'portfolio-project-view-btn';
     viewBtn.textContent = 'View';
+    viewBtn.addEventListener('click', () => {
+      openProjectModal(project);
+    });
     infoSection.appendChild(viewBtn);
 
     // Assemble card
@@ -3509,6 +3818,288 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Load featured projects when the page loads
   loadFeaturedProjects();
+  
+  // Project Modal Code
+  // Current image index for the modal
+  let currentImageIndex = 0;
+  let totalImages = 0;
+  
+  function createProjectModal() {
+  // Create modal elements if they don't exist
+  if (!document.getElementById('projectModal')) {
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.className = 'project-modal-backdrop';
+    modalBackdrop.id = 'projectModalBackdrop';
+    
+    const modalHTML = `
+      <div class="project-modal" id="projectModal">
+        <button class="project-modal-close" id="projectModalClose" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="project-modal-header">
+          <h2 class="project-modal-title" id="projectModalTitle">Project Title</h2>
+        </div>
+        <!-- Image gallery section - fixed height -->
+        <div class="project-modal-gallery">
+          <div class="project-modal-images" id="projectModalImages">
+            <!-- Images will be inserted here -->
+          </div>
+          <button class="project-modal-nav project-modal-nav-prev" id="projectModalPrev" aria-label="Previous image">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="project-modal-nav project-modal-nav-next" id="projectModalNext" aria-label="Next image">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="project-modal-dots" id="projectModalDots">
+          <!-- Dots will be inserted here -->
+        </div>
+        <!-- Scrollable content section -->
+        <div class="project-modal-content">
+          <div class="project-modal-scroll-container">
+            <p class="project-modal-description" id="projectModalDescription">Project description</p>
+            <div class="project-modal-tech" id="projectModalTech">
+              <!-- Tech tags will be inserted here -->
+            </div>
+            <div class="project-modal-links" id="projectModalLinks">
+              <!-- Links will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+      
+      modalBackdrop.innerHTML = modalHTML;
+      document.body.appendChild(modalBackdrop);
+      
+      // Add event listeners for closing
+      const closeButton = document.getElementById('projectModalClose');
+      closeButton.addEventListener('click', closeProjectModal);
+      
+      modalBackdrop.addEventListener('click', function(e) {
+        if (e.target === modalBackdrop) {
+          closeProjectModal();
+        }
+      });
+      
+      // Add keyboard support for closing and navigation
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          closeProjectModal();
+        } else if (e.key === 'ArrowLeft') {
+          navigateProjectImages('prev');
+        } else if (e.key === 'ArrowRight') {
+          navigateProjectImages('next');
+        }
+      });
+      
+      // Add navigation button listeners
+      document.getElementById('projectModalPrev').addEventListener('click', () => navigateProjectImages('prev'));
+      document.getElementById('projectModalNext').addEventListener('click', () => navigateProjectImages('next'));
+    }
+  }
+  
+  // Open the project modal - expose globally
+window.openProjectModal = function(project) {
+    createProjectModal();
+    
+    // Set the project title
+    document.getElementById('projectModalTitle').textContent = project.title;
+    
+    // Set the project description with enhanced handling for long text
+    const descriptionEl = document.getElementById('projectModalDescription');
+    if (descriptionEl) {
+      descriptionEl.textContent = project.description || 'No description available';
+      
+      // Add class for long descriptions to enable scrolling
+      if (project.description && project.description.length > 300) {
+        descriptionEl.classList.add('long-description');
+      } else {
+        descriptionEl.classList.remove('long-description');
+      }
+    }
+    
+    // Clear previous images
+    const imagesContainer = document.getElementById('projectModalImages');
+    imagesContainer.innerHTML = '';
+    
+      // Add project images or default image
+  const photoUrls = project.photo_urls || [];
+  
+  // Check for multiple images from photo_urls array first
+  if (photoUrls.length > 0) {
+    photoUrls.forEach(imageSrc => {
+      const imageDiv = document.createElement('div');
+      imageDiv.className = 'project-modal-image';
+      const img = document.createElement('img');
+      img.src = imageSrc;
+      img.alt = project.title;
+      imageDiv.appendChild(img);
+      imagesContainer.appendChild(imageDiv);
+    });
+  } 
+  // Fall back to single photo_url if no photo_urls array
+  else if (project.photo_url) {
+    const imageDiv = document.createElement('div');
+    imageDiv.className = 'project-modal-image';
+    const img = document.createElement('img');
+    img.src = project.photo_url;
+    img.alt = project.title;
+    imageDiv.appendChild(img);
+    imagesContainer.appendChild(imageDiv);
+  } else {
+      // Use default image/icon
+      const imageDiv = document.createElement('div');
+      imageDiv.className = 'project-modal-image';
+      imageDiv.innerHTML = `
+        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+      imagesContainer.appendChild(imageDiv);
+    }
+    
+    // Handle navigation dots
+    const dotsContainer = document.getElementById('projectModalDots');
+    dotsContainer.innerHTML = '';
+    
+      // Set image state
+  currentImageIndex = 0;
+  totalImages = photoUrls.length || (project.photo_url ? 1 : 0);
+    
+    // Show/hide navigation buttons based on image count
+    const prevButton = document.getElementById('projectModalPrev');
+    const nextButton = document.getElementById('projectModalNext');
+    
+    if (totalImages <= 1) {
+      prevButton.style.display = 'none';
+      nextButton.style.display = 'none';
+      dotsContainer.style.display = 'none';
+    } else {
+      prevButton.style.display = 'flex';
+      nextButton.style.display = 'flex';
+      dotsContainer.style.display = 'flex';
+      
+      // Create dots for each image
+      for (let i = 0; i < totalImages; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'project-modal-dot';
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => {
+          setCurrentImage(i);
+        });
+        dotsContainer.appendChild(dot);
+      }
+    }
+    
+    // Add tech tags
+    const techContainer = document.getElementById('projectModalTech');
+    techContainer.innerHTML = '';
+    
+    if (project.languages && project.languages.length > 0) {
+      project.languages.forEach(lang => {
+        const tag = document.createElement('span');
+        tag.className = 'tech-tag';
+        tag.textContent = lang;
+        techContainer.appendChild(tag);
+      });
+    } else {
+      techContainer.style.display = 'none';
+    }
+    
+    // Add links
+    const linksContainer = document.getElementById('projectModalLinks');
+    linksContainer.innerHTML = '';
+    
+    if (project.project_url) {
+      const link = document.createElement('a');
+      link.href = project.project_url;
+      link.className = 'project-modal-link';
+      link.textContent = 'Live Demo';
+      link.target = '_blank';
+      linksContainer.appendChild(link);
+    }
+    
+    if (project.github_url) {
+      const link = document.createElement('a');
+      link.href = project.github_url;
+      link.className = 'project-modal-link';
+      link.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5229 6.47715 22 12 22C17.5229 22 22 17.5229 22 12C22 6.47715 17.5229 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14.3333 19V17.137C14.3583 16.8275 14.3154 16.5163 14.2073 16.2242C14.0993 15.9321 13.9286 15.6657 13.7067 15.4428C15.8 15.2156 18 14.4431 18 10.8989C17.9998 9.99256 17.6418 9.12101 17 8.46461C17.3039 7.67171 17.2824 6.79528 16.94 6.01739C16.94 6.01739 16.1533 5.7902 14.3333 6.97433C12.8053 6.57853 11.1947 6.57853 9.66666 6.97433C7.84666 5.7902 7.05999 6.01739 7.05999 6.01739C6.71757 6.79528 6.69609 7.67171 6.99999 8.46461C6.35341 9.12588 5.99501 10.0053 5.99999 10.9183C5.99999 14.4366 8.19999 15.2091 10.2933 15.4622C10.074 15.6829 9.90483 15.9461 9.79686 16.2347C9.68889 16.5232 9.64453 16.8306 9.66666 17.137V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        GitHub
+      `;
+      link.target = '_blank';
+      linksContainer.appendChild(link);
+    }
+    
+    if (!project.project_url && !project.github_url) {
+      linksContainer.style.display = 'none';
+    }
+    
+    // Show the modal
+    const modalBackdrop = document.getElementById('projectModalBackdrop');
+    modalBackdrop.classList.add('active');
+    document.body.classList.add('modal-open');
+  }
+  
+  // Close the project modal
+  function closeProjectModal() {
+    const modalBackdrop = document.getElementById('projectModalBackdrop');
+    if (modalBackdrop) {
+      modalBackdrop.classList.remove('active');
+      document.body.classList.remove('modal-open');
+    }
+  }
+  
+  // Navigate between project images
+  function navigateProjectImages(direction) {
+    if (totalImages <= 1) return;
+    
+    const imagesContainer = document.getElementById('projectModalImages');
+    const dots = document.querySelectorAll('.project-modal-dot');
+    
+    if (direction === 'next') {
+      currentImageIndex = (currentImageIndex + 1) % totalImages;
+    } else {
+      currentImageIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+    }
+    
+    // Update the transform to show current image
+    imagesContainer.style.transform = `translateX(-${currentImageIndex * 100}%)`;
+    
+    // Update active dot
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentImageIndex);
+    });
+  }
+  
+  // Set current image directly
+  function setCurrentImage(index) {
+    if (index < 0 || index >= totalImages) return;
+    
+    currentImageIndex = index;
+    const imagesContainer = document.getElementById('projectModalImages');
+    const dots = document.querySelectorAll('.project-modal-dot');
+    
+    // Update transform
+    imagesContainer.style.transform = `translateX(-${index * 100}%)`;
+    
+    // Update active dot
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+  }
 
   // === City Display from Supabase and Geolocation ===
   const locationSpan = document.getElementById('location-info');
@@ -3523,6 +4114,31 @@ document.addEventListener("DOMContentLoaded", function () {
           .single();
         if (profile && profile.city) {
           locationSpan.textContent = profile.city;
+        } else if (navigator.geolocation) {
+          // If city not in Supabase, fetch using geolocation
+          navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            const apiKey = '6ed586b1c42a40068db9fc04056a9c90';
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${apiKey}`;
+            try {
+              const res = await fetch(url);
+              const data = await res.json();
+              const components = data.results[0].components;
+              const city = components.city || components.town || components.village || components.county || 'Unknown';
+              locationSpan.textContent = city;
+              // Save city to Supabase profile
+              await supabase
+                .from('profiles')
+                .update({ city })
+                .eq('id', user.id);
+            } catch (err) {
+              locationSpan.textContent = 'City unavailable';
+            }
+          }, (err) => {
+            locationSpan.textContent = 'Location unavailable';
+          });
+        } else {
+          locationSpan.textContent = 'Location unavailable';
         }
       }
     });

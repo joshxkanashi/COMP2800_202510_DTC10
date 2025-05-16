@@ -1658,7 +1658,7 @@ async function openProjectSelector() {
 
     modalBackdrop.innerHTML = modalHTML;
     document.body.appendChild(modalBackdrop);
-    
+
     // Add event listeners
     document.getElementById('projectSelectorClose').addEventListener('click', closeProjectSelector);
     document.getElementById('cancelFeaturedProjects').addEventListener('click', closeProjectSelector);
@@ -1669,7 +1669,7 @@ async function openProjectSelector() {
         closeProjectSelector();
       }
     });
-    
+
     // Add styles if needed
     if (!document.getElementById('projectSelectorStyles')) {
       const styleEl = document.createElement('style');
@@ -1815,7 +1815,7 @@ async function openProjectSelector() {
     const projectsGrid = document.getElementById('projectSelectorGrid');
     if (projectsGrid) {
       projectsGrid.innerHTML = '<p class="loading-text">Loading projects...</p>';
-    }
+        }
   }
   
   // Show the modal
@@ -3276,14 +3276,18 @@ async function saveFeaturedProjects() {
     // Show save notification
     function showSaveNotification(message = "Changes saved successfully!") {
       const saveNotification = document.querySelector(".save-notification");
+      if (!saveNotification) {
+        console.warn("Save notification element not found in DOM.");
+        return;
+      }
       const messageElement = saveNotification.querySelector(".save-notification-text");
-      
-      messageElement.textContent = message;
-      saveNotification.classList.add("show");
-      
-      setTimeout(() => {
-        saveNotification.classList.remove("show");
-      }, 3000);
+      if (messageElement) {
+        messageElement.textContent = message;
+        saveNotification.classList.add("show");
+        setTimeout(() => {
+          saveNotification.classList.remove("show");
+        }, 3000);
+      }
     }
 
     // Update profile timestamp

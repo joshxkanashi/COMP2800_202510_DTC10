@@ -23,6 +23,41 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- AI Advice Chat style fixes -->
+    <style>
+        .ai-advice-message {
+            color: #ffffff !important;
+            background: #2d2d38 !important;
+            padding: 12px 16px !important;
+            border-radius: 10px !important;
+            max-width: 90% !important;
+            word-break: break-word !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+            line-height: 1.5 !important;
+        }
+        
+        .ai-advice-message.user {
+            align-self: flex-end !important;
+            background: #4338ca !important;
+            color: #ffffff !important;
+        }
+        
+        .ai-advice-message.ai {
+            align-self: flex-start !important;
+            background: #2d2d38 !important;
+            color: #ffffff !important;
+            border-left: 3px solid #6366f1 !important;
+        }
+        
+        .ai-advice-chat {
+            background: #1f1f27 !important;
+        }
+        
+        .ai-advice-messages {
+            padding: 20px !important;
+        }
+    </style>
+    
     <!-- Supabase CDN - load this before your application code -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     

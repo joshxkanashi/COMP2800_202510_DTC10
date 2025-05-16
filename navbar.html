@@ -1,25 +1,73 @@
 <header class="header">
-  <div class="header-content">
-      <div class="logo">CSync</div>
-      <nav class="desktop-nav">
-          <a href="index.html" class="desktop-nav-item">Home</a>
-          <a href="portfolio.html" class="desktop-nav-item">Portfolio</a>
-          <a href="projects.html" class="desktop-nav-item">Projects</a>
-          <a href="connect.html" class="desktop-nav-item">Connect</a>
-      </nav>
-  </div>
-  <div class="user-controls">
-      <button class="user-button" aria-label="Notifications">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="currentColor"/>
-          </svg>
-      </button>
-      <div class="user-avatar">CS</div>
-      <button id="logoutButton" class="logout-button" aria-label="Logout">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Logout
-      </button>
-  </div>
-</header> 
+    <div class="header-content">
+        <div class="logo">CSync</div>
+        <nav class="desktop-nav">
+            <a href="index.html" class="desktop-nav-item">Home</a>
+            <a href="portfolio.html" class="desktop-nav-item">Portfolio</a>
+            <a href="projects.html" class="desktop-nav-item">Projects</a>
+            <a href="connect.html" class="desktop-nav-item">Connect</a>
+        </nav>
+    </div>
+    <div class="user-controls">
+        <button class="user-button" aria-label="Notifications">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z"
+                    fill="currentColor" />
+            </svg>
+        </button>
+
+        <!-- Profile Dropdown -->
+        <div class="profile-container">
+            <button id="profileButton" class="profile-button" aria-label="Profile menu">
+                <div class="user-avatar">CS</div>
+            </button>
+
+            <div id="profileDropdown" class="profile-dropdown">
+                <div class="profile-dropdown-header">
+                    <div class="profile-dropdown-avatar">CS</div>
+                    <div class="profile-dropdown-user-info">
+                        <h3>CS Student</h3>
+                        <p>csstudent@example.com</p>
+                    </div>
+                </div>
+
+                <div class="profile-dropdown-content active">
+                    <a href="profile.html" class="profile-dropdown-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span>Profile</span>
+                    </a>
+                </div>
+
+                <div class="profile-dropdown-footer">
+                    <button id="logoutButton" class="profile-dropdown-logout">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<div id="logout-modal"
+    style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:2000; justify-content:center; align-items:center;">
+    <div
+        style="background:white; padding:32px 48px; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.15); display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="logout-spinner"
+            style="width:40px; height:40px; border:4px solid #e5e7eb; border-top:4px solid #6366f1; border-radius:50%; animation: spin 1s linear infinite;">
+        </div>
+        <div style="font-size:1.2rem; color:#333; font-weight:500;">Logging out...</div>
+    </div>
+</div>

@@ -54,7 +54,141 @@ function createProjectCard(project) {
     const imageSection = document.createElement('div');
     imageSection.className = 'project-image';
     
-    if (project.photo_url) {
+    if (project.photo_urls && project.photo_urls.length > 0) {
+        // Create carousel container
+        const carousel = document.createElement('div');
+        carousel.className = 'photo-carousel';
+        
+        // Add all images to carousel
+        project.photo_urls.forEach((url, index) => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = `${project.title} - Image ${index + 1}`;
+            img.className = 'carousel-image';
+            if (index === 0) {
+                img.classList.add('active');
+            }
+            carousel.appendChild(img);
+        });
+
+        // Add navigation arrows if multiple photos
+        if (project.photo_urls.length > 1) {
+            // Left arrow
+            const leftArrow = document.createElement('button');
+            leftArrow.className = 'carousel-arrow carousel-arrow-left';
+            leftArrow.innerHTML = `
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            `;
+            
+            // Right arrow
+            const rightArrow = document.createElement('button');
+            rightArrow.className = 'carousel-arrow carousel-arrow-right';
+            rightArrow.innerHTML = `
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 6L15 12L9 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            `;
+
+            // Add dots indicator
+            const dotsContainer = document.createElement('div');
+            dotsContainer.className = 'carousel-dots';
+            project.photo_urls.forEach((_, index) => {
+                const dot = document.createElement('span');
+                dot.className = 'carousel-dot';
+                dot.classList.toggle('active', index === 0);
+                dotsContainer.appendChild(dot);
+            });
+
+            // Add carousel controls
+            carousel.appendChild(leftArrow);
+            carousel.appendChild(rightArrow);
+            carousel.appendChild(dotsContainer);
+
+            // Carousel functionality
+            let currentIndex = 0;
+            const images = carousel.querySelectorAll('.carousel-image');
+            const dots = carousel.querySelectorAll('.carousel-dot');
+            let isAnimating = false;
+
+            function showImage(index, direction = 'next') {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                const currentImage = images[currentIndex];
+                const nextImage = images[index];
+
+                // Remove active class from current image
+                currentImage.classList.remove('active');
+                if (direction === 'next') {
+                    currentImage.classList.add('prev');
+                }
+
+                // Add active class to next image
+                nextImage.classList.add('active');
+                if (direction === 'prev') {
+                    nextImage.style.transform = 'translateX(-100%)';
+                    // Force reflow
+                    nextImage.offsetHeight;
+                    nextImage.style.transform = 'translateX(0)';
+                }
+
+                // Update dots
+                dots.forEach(dot => dot.classList.remove('active'));
+                dots[index].classList.add('active');
+
+                currentIndex = index;
+
+                // Reset animation flag after transition
+                setTimeout(() => {
+                    isAnimating = false;
+                    currentImage.classList.remove('prev');
+                }, 300);
+            }
+
+            leftArrow.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const newIndex = (currentIndex - 1 + images.length) % images.length;
+                showImage(newIndex, 'prev');
+            });
+
+            rightArrow.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const newIndex = (currentIndex + 1) % images.length;
+                showImage(newIndex, 'next');
+            });
+
+            // Add touch swipe support
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            carousel.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            carousel.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
+
+            function handleSwipe() {
+                if (isAnimating) return;
+                const swipeThreshold = 50;
+                if (touchEndX < touchStartX - swipeThreshold) {
+                    // Swipe left
+                    const newIndex = (currentIndex + 1) % images.length;
+                    showImage(newIndex, 'next');
+                } else if (touchEndX > touchStartX + swipeThreshold) {
+                    // Swipe right
+                    const newIndex = (currentIndex - 1 + images.length) % images.length;
+                    showImage(newIndex, 'prev');
+                }
+            }
+        }
+
+        imageSection.appendChild(carousel);
+    } else if (project.photo_url) {
         const img = document.createElement('img');
         img.src = project.photo_url;
         img.alt = project.title;
@@ -82,8 +216,53 @@ function createProjectCard(project) {
     tech.className = 'project-tech';
     tech.textContent = `Technology Used: ${project.languages.join(', ')}`;
 
+    const description = document.createElement('p');
+    description.className = 'project-description';
+    description.textContent = project.description || 'No description available';
+
+    // Action buttons
+    const actions = document.createElement('div');
+    actions.className = 'project-actions';
+    actions.style.display = 'flex';
+    actions.style.gap = '0.5rem';
+    actions.style.marginTop = '1rem';
+
+    // Edit button
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-btn';
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = (e) => {
+        e.stopPropagation();
+        window.location.href = `editproject.html?id=${project.id}`;
+    };
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete this project?')) {
+            try {
+                const { error } = await supabase
+                    .from('projects')
+                    .delete()
+                    .eq('id', project.id);
+                if (error) throw error;
+                card.remove();
+            } catch (err) {
+                alert('Failed to delete project.');
+            }
+        }
+    };
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
     contentSection.appendChild(title);
     contentSection.appendChild(tech);
+    contentSection.appendChild(description);
+    contentSection.appendChild(actions);
 
     // Add click event to view project details
     card.addEventListener('click', () => {

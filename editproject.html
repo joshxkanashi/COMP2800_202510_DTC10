@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Project - CSync</title>
+    <title>Edit Project - CSync</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="projects.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,161 +19,25 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #374151;
-            font-weight: 500;
-        }
-
-        .form-group input[type="text"],
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .photo-upload {
-            border: 2px dashed #d1d5db;
-            border-radius: 6px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-
-        .photo-upload:hover {
-            border-color: #2563eb;
-        }
-
-        .photo-upload input[type="file"] {
-            display: none;
-        }
-
-        .photo-preview {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .preview-item {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .remove-photo {
-            position: absolute;
-            top: 0.25rem;
-            right: 0.25rem;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .languages-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .language-tag {
-            background: #f3f4f6;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            color: #374151;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .language-tag.selected {
-            background: #2563eb;
-            color: white;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .submit-btn:hover {
-            background-color: #1d4ed8;
-        }
-
-        .submit-btn:disabled {
-            background-color: #93c5fd;
-            cursor: not-allowed;
-        }
-
-        @media (max-width: 768px) {
-            .form-container {
-                padding: 1rem;
-                margin: 1rem;
-            }
-
-            .photo-preview {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            }
-        }
+        /* (reuse addproject.html styles for form) */
     </style>
 </head>
-
 <body>
     <div id="app">
         <div id="navbar-placeholder"></div>
         <script src="navbar.js"></script>
         <main class="container">
             <div class="form-container">
-                <h1>Add New Project</h1>
-                <form id="addProjectForm">
+                <h1>Edit Project</h1>
+                <form id="editProjectForm">
                     <div class="form-group">
                         <label for="projectTitle">Project Name</label>
                         <input type="text" id="projectTitle" name="title" required>
                     </div>
-
                     <div class="form-group">
                         <label for="projectDescription">Project Description</label>
                         <textarea id="projectDescription" name="description" required></textarea>
                     </div>
-
                     <div class="form-group">
                         <label>Project Photos</label>
                         <div class="photo-upload" id="photoUpload">
@@ -189,7 +53,6 @@
                         </div>
                         <div class="photo-preview" id="photoPreview"></div>
                     </div>
-
                     <div class="form-group">
                         <label>Project Languages</label>
                         <div class="languages-container" id="languagesContainer">
@@ -205,12 +68,10 @@
                             <span class="language-tag" data-lang="Rust">Rust</span>
                         </div>
                     </div>
-
-                    <button type="submit" class="submit-btn">Add Project</button>
+                    <button type="submit" class="submit-btn">Save Changes</button>
                 </form>
             </div>
         </main>
-
         <nav class="bottom-nav">
             <a href="#" class="nav-item" aria-label="Home">
                 <div class="nav-icon">
@@ -257,9 +118,7 @@
             </a>
         </nav>
     </div>
-
-    <script type="module" src="addproject.js"></script>
+    <script type="module" src="editproject.js"></script>
     <script type="module" src="profile.js"></script>
 </body>
-
-</html>
+</html> 

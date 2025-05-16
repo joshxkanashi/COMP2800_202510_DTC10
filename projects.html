@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects - CSync</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="projects.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -72,13 +73,29 @@
         .project-title {
             margin: 0 0 0.5rem 0;
             color: #1f2937;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: left;
+            line-height: 1.2;
         }
 
         .project-tech {
             color: #6b7280;
             font-size: 0.875rem;
             margin: 0;
+        }
+
+        .project-description {
+            color: #4b5563;
+            font-size: 0.875rem;
+            margin: 0.75rem 0 0 0;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .empty-state {
@@ -198,6 +215,7 @@
 <body>
     <div id="app">
         <div id="navbar-placeholder"></div>
+        <script src="navbar.js"></script>
         <main class="container">
             <div class="projects-header">
                 <h1>My Projects</h1>
@@ -277,7 +295,6 @@
 
     <script type="module" src="projects.js"></script>
     <script type="module" src="profile.js"></script>
-    <script src="navbar.js"></script>
 </body>
 
 </html>

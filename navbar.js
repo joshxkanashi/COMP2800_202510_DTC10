@@ -23,7 +23,7 @@ fetch('navbar.html')
         // Show logout modal
         const logoutModal = document.getElementById('logout-modal');
         if (logoutModal) logoutModal.style.display = 'flex';
-        
+
         try {
           // Import and use the handleLogout function from app.js
           const { handleLogout } = await import('./app.js');

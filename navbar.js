@@ -42,45 +42,6 @@ const intializeNavbar = () => {
     });
 }
 
-// const initDropdownMenu = () => {
-
-//   const button = document.getElementById('dropDownMenu');
-//   const menu = document.getElementById('dropDownMenu');
-//   let isOpen = false;
-
-//   // Toggle menu on button click
-//   button.addEventListener('click', () => {
-//     isOpen ? closeMenu() : openMenu();
-//   });
-
-//   // Close menu when clicking outside
-//   document.addEventListener('click', (event) => {
-//     if (!button.contains(event.target) && !menu.contains(event.target)) {
-//       closeMenu();
-//     }
-//   });
-
-//   // Close menu when pressing Escape key
-//   document.addEventListener('keydown', (event) => {
-//     if (event.key === 'Escape') {
-//       closeMenu();
-//     }
-//   });
-//   function openMenu() {
-//     menu.classList.add('show');
-//     isOpen = true;
-//     button.setAttribute('aria-expanded', 'true');
-//   }
-
-//   function closeMenu() {
-//     menu.classList.remove('show');
-//     isOpen = false;
-//     button.setAttribute('aria-expanded', 'false');
-//   }
-
-// }
-
-
 
 const loadDropdownMenu = async () => {
   try {

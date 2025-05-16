@@ -1,15 +1,4 @@
 <header class="header">
-    <div class="sidebar-backdrop" onclick="closeMenu()"></div>
-    <div id="sidebar" class="sidebar">
-        <button class="sidebar-close" aria-label="Close Sidebar"
-            style="margin: 16px 0 24px 16px; background: none; border: none; font-size: 1.5rem; cursor: pointer;"
-            onclick="closeMenu()">
-            &times;
-        </button>
-        <nav class="sidebar-nav" style="display: flex; flex-direction: column; align-items: center; gap: 24px;">
-            <a href="profile.html" class="sidebar-nav-item">Profile</a>
-        </nav>
-    </div>
     <div class="header-content">
         <div class="logo">CSync</div>
         <nav class="desktop-nav">
@@ -27,24 +16,48 @@
                     fill="currentColor" />
             </svg>
         </button>
-        <div id="dropdown-placeholder"></div>
-        <div class="user-avatar">CS</div>
-        <button id="logoutButton" class="logout-button" aria-label="Logout">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            Logout
-        </button>
-        <!-- <button id="dropDownMenu" class="drop-down-menu-button" aria-label="Drop Down Menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 6H21M3 12H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
-        </button> -->
-    </div>
 
+        <!-- Profile Dropdown -->
+        <div class="profile-container">
+            <button id="profileButton" class="profile-button" aria-label="Profile menu">
+                <div class="user-avatar">CS</div>
+            </button>
+
+            <div id="profileDropdown" class="profile-dropdown">
+                <div class="profile-dropdown-header">
+                    <div class="profile-dropdown-avatar">CS</div>
+                    <div class="profile-dropdown-user-info">
+                        <h3>CS Student</h3>
+                        <p>csstudent@example.com</p>
+                    </div>
+                </div>
+
+                <div class="profile-dropdown-content active">
+                    <a href="profile.html" class="profile-dropdown-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span>Profile</span>
+                    </a>
+                </div>
+
+                <div class="profile-dropdown-footer">
+                    <button id="logoutButton" class="profile-dropdown-logout">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
 
 

@@ -1671,3 +1671,245 @@ svg {
   background-color: var(--gray-50);
   border-radius: 8px;
 }
+
+/* Profile Dropdown Styles */
+.profile-container {
+  position: relative;
+}
+
+.profile-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-button:focus {
+  outline: none;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 280px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+  z-index: 1000;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.profile-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.profile-dropdown-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.profile-dropdown-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.profile-dropdown-user-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: var(--dark);
+}
+
+.profile-dropdown-user-info p {
+  font-size: 14px;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.profile-dropdown-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.profile-dropdown-tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.profile-dropdown-tab:hover {
+  color: var(--primary);
+}
+
+.profile-dropdown-tab.active {
+  color: var(--primary);
+}
+
+.profile-dropdown-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.profile-dropdown-content {
+  padding: 10px;
+}
+
+.profile-dropdown-content.active {
+  display: block;
+}
+
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray-600);
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.profile-dropdown-item:hover {
+  background-color: var(--gray-100);
+  color: var(--primary);
+}
+
+.profile-dropdown-item svg {
+  stroke: var(--gray-500);
+  flex-shrink: 0;
+}
+
+.profile-dropdown-item:hover svg {
+  stroke: var(--primary);
+}
+
+.profile-dropdown-item span {
+  display: block;
+  white-space: nowrap;
+}
+
+.profile-dropdown-footer {
+  padding: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.profile-dropdown-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: rgba(239, 68, 68, 0.05);
+  color: #ef4444;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.profile-dropdown-logout:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.profile-dropdown-logout svg {
+  stroke: #ef4444;
+}
+
+/* Ripple effect for buttons */
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+  width: 70px;
+  height: 70px;
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Hide hamburger menu across all pages */
+.drop-down-menu-button {
+  display: none !important;
+}
+
+/* Responsive Design for Profile Dropdown */
+@media (max-width: 768px) {
+  .profile-dropdown {
+    width: 280px;
+  }
+  
+  .user-controls {
+    gap: 8px;
+  }
+}
+
+/* Force text visibility in dropdown items */
+.profile-dropdown-item span {
+  display: block !important;
+  visibility: visible !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix for Settings icon link */
+a[href="account-settings.html"] {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}

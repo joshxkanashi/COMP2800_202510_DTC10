@@ -39,54 +39,62 @@ const intializeNavbar = () => {
           }
         });
       }
+      
+      // Initialize profile dropdown
+      initializeProfileDropdown();
     });
 }
 
-
-const loadDropdownMenu = async () => {
-  try {
-    const response = await fetch('components/dropdown/dropdown.html');
-    const html = await response.text();
-
-    // Find the dropdown placeholder in the navbar
-    const placeholder = document.getElementById('dropdown-placeholder');
-    if (placeholder) {
-      placeholder.innerHTML = html;
-      const dropDownBtn = document.getElementById("dropDownMenu");
-      const menu = document.getElementById("sidebar")
-      var isOpen = false;
-
-      // Toggle menu on button click
-      dropDownBtn.addEventListener('click', () => {
-        isOpen ? closeMenu() : openMenu();
-      });
-
-      // Close menu when clicking outside
-      document.addEventListener('click', (event) => {
-        if (!dropDownBtn.contains(event.target) && !menu.contains(event.target)) {
-          closeMenu();
+// Initialize the profile dropdown menu
+const initializeProfileDropdown = () => {
+  const profileButton = document.getElementById('profileButton');
+  const profileDropdown = document.getElementById('profileDropdown');
+  
+  if (profileButton && profileDropdown) {
+    // Toggle dropdown on profile button click
+    profileButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileDropdown.classList.toggle('show');
+      
+      // Add ripple effect
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple-effect');
+      profileButton.appendChild(ripple);
+      
+      const rect = profileButton.getBoundingClientRect();
+      ripple.style.left = `${e.clientX - rect.left}px`;
+      ripple.style.top = `${e.clientY - rect.top}px`;
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+    
+    // Prevent redirecting when clicking on profile items container
+    profileDropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (profileDropdown.classList.contains('show') && !profileDropdown.contains(e.target)) {
+        profileDropdown.classList.remove('show');
+      }
+    });
+    
+    // Make sure the dropdown links are working properly
+    const profileLinks = profileDropdown.querySelectorAll('.profile-dropdown-item');
+    profileLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (href && href !== '#') {
+          e.stopPropagation();
+          window.location.href = href;
         }
       });
-
-      console.log('Dropdown menu loaded successfully');
-    } else {
-      console.error('Dropdown placeholder not found');
-    }
-  } catch (error) {
-    console.error('Error loading dropdown menu:', error);
+    });
   }
 }
 
-// drop down menu onclick functions
-const openMenu = () => {
-  document.getElementById('sidebar').classList.add('active');
-  document.querySelector('.sidebar-backdrop').classList.add('active');
-}
-
-const closeMenu = () => {
-  document.getElementById('sidebar').classList.remove('active');
-  document.querySelector('.sidebar-backdrop').classList.remove('active');
-}
-
+// Start the initialization process
 intializeNavbar();
-loadDropdownMenu();

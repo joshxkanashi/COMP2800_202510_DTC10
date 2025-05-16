@@ -298,9 +298,57 @@ document.addEventListener("DOMContentLoaded", function () {
             // If we have Supabase data, use it
             portfolioData = supabaseData;
           } else {
-            // No data, initialize with empty object
-            portfolioData = {};
-            console.log("No data found in Supabase, initializing empty portfolio");
+            // Initialize with default data for new users
+            portfolioData = {
+              name: "CS Student",
+              title: "Full Stack Developer & Computer Science Enthusiast",
+              location: "Vancouver, Canada",
+              email: "csstudent@example.com",
+              about1: "I'm a passionate Computer Science student with a strong interest in web development, artificial intelligence, and cybersecurity. My journey in tech began when I was 15, teaching myself how to code through online resources.",
+              about2: "When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, or mentoring junior developers. I believe in continuous learning and pushing the boundaries of what's possible with technology.",
+              education: [
+                {
+                  id: "edu1",
+                  date: "2021 - Present",
+                  degree: "BSc in Computer Science",
+                  school: "British Columbia Institute of Technology",
+                  description: "Focusing on Software Development, Data Structures, and Algorithms"
+                }
+              ],
+              skills: [
+                {
+                  id: "skill1",
+                  name: "JavaScript",
+                  level: "Advanced",
+                  progress: "90"
+                },
+                {
+                  id: "skill2",
+                  name: "Python",
+                  level: "Advanced",
+                  progress: "85"
+                }
+              ],
+              experience: [
+                {
+                  id: "exp1",
+                  date: "2022 - Present",
+                  title: "Junior Web Developer",
+                  company: "TechVision Labs, Vancouver",
+                  description: "Developing responsive web applications using React and Node.js. Collaborating with designers and back-end developers to create seamless user experiences."
+                }
+              ],
+              sections: [
+                { id: "about", type: "about", title: "About Me", visible: true },
+                { id: "education", type: "education", title: "Education", visible: true },
+                { id: "skills", type: "skills", title: "Technical Skills", visible: true },
+                { id: "experience", type: "experience", title: "Work Experience", visible: true },
+                { id: "projects", type: "projects", title: "Featured Projects", visible: true },
+                { id: "contact", type: "contact", title: "Get In Touch", visible: true }
+              ],
+              updated_at: new Date().toISOString()
+            };
+            console.log("Initialized with default portfolio data for new user");
           }
         } else {
           // Supabase not available - show error

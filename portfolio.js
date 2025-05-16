@@ -611,11 +611,9 @@ document.addEventListener("DOMContentLoaded", function () {
         data[`$${itemId}_description`] = edu.description;
         data.education.push(edu);
       });
-      // Update hero education summary to match most recent timeline entry
       if (data.education.length > 0) {
         const latest = data.education[0];
         data.education_summary = `${latest.degree} at ${latest.school}`;
-        // Also update the hero field in the DOM if present
         const heroEducation = document.querySelector('[data-field="education"]');
         if (heroEducation) {
           heroEducation.textContent = data.education_summary;
@@ -656,34 +654,6 @@ document.addEventListener("DOMContentLoaded", function () {
         data.skills.push({ id: itemId, name, level, progress });
       });
 
-      // --- Projects ---
-      // data.projects = [];
-      // const projectCards = document.querySelectorAll('.portfolio-project-card');
-      // projectCards.forEach(card => {
-      //   const itemId = card.dataset.itemId;
-      //   const badge = card.querySelector('[data-field$="_badge"]')?.textContent || '';
-      //   const title = card.querySelector('[data-field$="_title"]')?.textContent || '';
-      //   const description = card.querySelector('[data-field$="_description"]')?.textContent || '';
-      //   const link = card.querySelector('[data-field$="_link"]')?.textContent || '';
-      //   const github = card.querySelector('[data-field$="_github"]')?.textContent || '';
-      //   // Tech tags
-      //   const techTags = [];
-      //   const techContainer = card.querySelector('.portfolio-project-tech');
-      //   if (techContainer) {
-      //     techContainer.querySelectorAll('.tech-tag').forEach(tag => {
-      //       if (tag.dataset.tag) techTags.push(tag.dataset.tag);
-      //       else if (tag.textContent) techTags.push(tag.textContent.trim());
-      //     });
-      //   }
-      //   data[`$${itemId}_badge`] = badge;
-      //   data[`$${itemId}_title`] = title;
-      //   data[`$${itemId}_description`] = description;
-      //   data[`$${itemId}_link`] = link;
-      //   data[`$${itemId}_github`] = github;
-      //   data[`$${itemId}_tech`] = techTags;
-      //   data.projects.push({ id: itemId, badge, title, description, link, github, tech: techTags });
-      // });
-
       // --- Other editable fields (about, meta, etc.) ---
       const editableElements = document.querySelectorAll('.editable-content');
       editableElements.forEach((element) => {
@@ -711,6 +681,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         return { ...section };
       });
+
+      // --- Preserve featured_project_ids if present ---
+      if (portfolioData && portfolioData.featured_project_ids) {
+        data.featured_project_ids = [...portfolioData.featured_project_ids];
+      }
 
       // Timestamp
       data.updated_at = new Date().toISOString();
@@ -763,18 +738,7 @@ document.addEventListener("DOMContentLoaded", function () {
         element.addEventListener('focus', handleElementFocus);
         element.addEventListener('blur', handleElementBlur);
       });
-      // Make section titles editable
-      const sectionTitles = document.querySelectorAll('.section-title');
-      sectionTitles.forEach((title) => {
-        title.setAttribute('contenteditable', 'true');
-        title.setAttribute('spellcheck', 'true');
-        // Remove old listeners
-        title.removeEventListener('focus', handleElementFocus);
-        title.removeEventListener('blur', handleElementBlur);
-        // Add listeners
-        title.addEventListener('focus', handleElementFocus);
-        title.addEventListener('blur', handleElementBlur);
-      });
+      // Do NOT make section titles editable anymore
     }
 
     // In enableEditMode, call makeEditableElementsEditable()
@@ -922,15 +886,16 @@ document.addEventListener("DOMContentLoaded", function () {
           profileAvatar.removeEventListener("click", function() {});
         }
 
-        // Make elements non-editable
-        editableElements.forEach((element) => {
+        // Make all editable elements non-editable
+        document.querySelectorAll('.editable-content, .section-title').forEach((element) => {
           element.removeAttribute("contenteditable");
           element.removeAttribute("spellcheck");
           element.classList.remove("edit-placeholder");
-
-          // Remove event listeners
-          element.removeEventListener("focus", handleElementFocus);
-          element.removeEventListener("blur", handleElementBlur);
+          // Remove any inline styles that may have been added for edit mode
+          element.style.backgroundColor = '';
+          element.style.outline = '';
+          element.style.padding = '';
+          element.style.margin = '';
         });
 
         // Hide add buttons
@@ -1297,7 +1262,7 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       tagInputContainers.forEach((container) => container.remove());
     }
-    
+
     // Function to remove project action buttons
     function removeProjectActionButtons() {
       // Kept for compatibility with disableEditMode function
@@ -1658,7 +1623,7 @@ async function openProjectSelector() {
 
     modalBackdrop.innerHTML = modalHTML;
     document.body.appendChild(modalBackdrop);
-    
+
     // Add event listeners
     document.getElementById('projectSelectorClose').addEventListener('click', closeProjectSelector);
     document.getElementById('cancelFeaturedProjects').addEventListener('click', closeProjectSelector);
@@ -1669,7 +1634,7 @@ async function openProjectSelector() {
         closeProjectSelector();
       }
     });
-    
+
     // Add styles if needed
     if (!document.getElementById('projectSelectorStyles')) {
       const styleEl = document.createElement('style');
@@ -1815,7 +1780,7 @@ async function openProjectSelector() {
     const projectsGrid = document.getElementById('projectSelectorGrid');
     if (projectsGrid) {
       projectsGrid.innerHTML = '<p class="loading-text">Loading projects...</p>';
-    }
+        }
   }
   
   // Show the modal
@@ -2646,63 +2611,79 @@ async function saveFeaturedProjects() {
         // Move up button
         const moveUpBtn = section.querySelector(".move-up-btn");
         if (moveUpBtn) {
-          moveUpBtn.addEventListener("click", function() {
+          // Remove previous listener if present
+          if (moveUpBtn._moveUpHandler) {
+            moveUpBtn.removeEventListener("click", moveUpBtn._moveUpHandler);
+          }
+          // Create and store handler
+          moveUpBtn._moveUpHandler = function() {
             moveSection(section, "up");
-          });
+          };
+          moveUpBtn.addEventListener("click", moveUpBtn._moveUpHandler);
         }
         
         // Move down button
         const moveDownBtn = section.querySelector(".move-down-btn");
         if (moveDownBtn) {
-          moveDownBtn.addEventListener("click", function() {
+          if (moveDownBtn._moveDownHandler) {
+            moveDownBtn.removeEventListener("click", moveDownBtn._moveDownHandler);
+          }
+          moveDownBtn._moveDownHandler = function() {
             moveSection(section, "down");
-          });
+          };
+          moveDownBtn.addEventListener("click", moveDownBtn._moveDownHandler);
         }
         
         // Remove button
         const removeBtn = section.querySelector(".remove-section-btn");
         if (removeBtn) {
-          removeBtn.addEventListener("click", function() {
+          if (removeBtn._removeHandler) {
+            removeBtn.removeEventListener("click", removeBtn._removeHandler);
+          }
+          removeBtn._removeHandler = function() {
             if (confirm("Are you sure you want to remove this section?")) {
               removeSection(section);
             }
-          });
+          };
+          removeBtn.addEventListener("click", removeBtn._removeHandler);
         }
         
         // Section title click for settings
         const sectionTitle = section.querySelector(".section-title");
         if (sectionTitle && isEditMode) {
-          sectionTitle.addEventListener("click", function(event) {
+          if (sectionTitle._settingsHandler) {
+            sectionTitle.removeEventListener("click", sectionTitle._settingsHandler);
+          }
+          sectionTitle._settingsHandler = function(event) {
             // Only open settings if in edit mode and not editing other content
             if (isEditMode && !event.target.hasAttribute("contenteditable")) {
               openSectionSettings(section);
             }
-          });
+          };
+          sectionTitle.addEventListener("click", sectionTitle._settingsHandler);
         }
       });
     }
     
     // Move section up or down
     function moveSection(section, direction) {
-      const mainContainer = document.querySelector("main.container");
-      const sections = Array.from(mainContainer.querySelectorAll(".portfolio-section"));
-      const index = sections.indexOf(section);
-      
+      // Find the sectionOrder entry for this section
+      const sectionId = section.id;
+      const index = sectionOrder.findIndex(s => s.id === sectionId);
       if (direction === "up" && index > 0) {
-        // Move up
-        mainContainer.insertBefore(section, sections[index - 1]);
-      } else if (direction === "down" && index < sections.length - 1) {
-        // Move down - need to insert after the next element
-        if (index + 2 < sections.length) {
-          mainContainer.insertBefore(section, sections[index + 2]);
-        } else {
-          mainContainer.appendChild(section);
-        }
+        // Swap in the array
+        [sectionOrder[index - 1], sectionOrder[index]] = [sectionOrder[index], sectionOrder[index - 1]];
+      } else if (direction === "down" && index < sectionOrder.length - 1) {
+        [sectionOrder[index], sectionOrder[index + 1]] = [sectionOrder[index + 1], sectionOrder[index]];
       }
-      
+      // Reorder the DOM to match sectionOrder
+      const mainContainer = document.querySelector("main.container");
+      sectionOrder.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (el) mainContainer.appendChild(el);
+      });
       // Update order
       updateSectionOrder();
-      
       // Update navigation
       updatePortfolioNavigation();
     }
@@ -3276,14 +3257,18 @@ async function saveFeaturedProjects() {
     // Show save notification
     function showSaveNotification(message = "Changes saved successfully!") {
       const saveNotification = document.querySelector(".save-notification");
+      if (!saveNotification) {
+        console.warn("Save notification element not found in DOM.");
+        return;
+      }
       const messageElement = saveNotification.querySelector(".save-notification-text");
-      
-      messageElement.textContent = message;
-      saveNotification.classList.add("show");
-      
-      setTimeout(() => {
-        saveNotification.classList.remove("show");
-      }, 3000);
+      if (messageElement) {
+        messageElement.textContent = message;
+        saveNotification.classList.add("show");
+        setTimeout(() => {
+          saveNotification.classList.remove("show");
+        }, 3000);
+      }
     }
 
     // Update profile timestamp

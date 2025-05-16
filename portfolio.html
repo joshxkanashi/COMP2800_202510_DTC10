@@ -18,6 +18,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="portfolio.css">
+    <link rel="stylesheet" href="ai-advice-chat.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -587,6 +588,7 @@
     <script type="module" src="profile.js"></script>
     <script type="module" src="portfolio.js"></script>
     <script type="module" src="featured-projects.js"></script>
+    <script type="module" src="gemini-portfolio.js"></script>
 
         <button class="edit-fab" id="editProfileButton">Edit Profile</button>
 
@@ -754,6 +756,22 @@
 
         <!-- Modal Backdrop -->
         <div id="modalBackdrop" class="modal-backdrop"></div>
+    </div>
+
+    <!-- AI Advice Button and Chat Window -->
+    <div id="ai-advice-root">
+      <button id="aiAdviceBtn" class="ai-advice-btn">Get Advice!</button>
+      <div id="aiAdviceChat" class="ai-advice-chat hidden">
+        <div class="ai-advice-header">
+          <span>AI Portfolio Advisor</span>
+          <button id="aiAdviceClose" class="ai-advice-close">&times;</button>
+        </div>
+        <div id="aiAdviceMessages" class="ai-advice-messages"></div>
+        <div class="ai-advice-input-row">
+          <input id="aiAdviceInput" type="text" placeholder="Ask a follow-up question..." disabled />
+          <button id="aiAdviceAsk" class="ai-advice-ask">Ask for Advice</button>
+        </div>
+      </div>
     </div>
 </body>
 </html> 

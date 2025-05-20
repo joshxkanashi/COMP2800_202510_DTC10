@@ -4,7 +4,7 @@
   --primary-dark: #4f46e5;
 }
 
-.profile-container {
+.settings-container {
   max-width: 800px;
   margin: 4rem auto;
   padding: 0 1rem;
@@ -93,4 +93,22 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
+}
+
+.logout-btn {
+  background-color: #ef4444;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+}
+
+.logout-btn svg {
+  stroke: white;
 }

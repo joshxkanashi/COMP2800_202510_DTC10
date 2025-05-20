@@ -62,7 +62,7 @@ async function handleRegister(event) {
 
         if (profileError) throw profileError;
 
-        showMessage('Registration successful! Please check your email for verification.', 'success');
+        showMessage('Registration successful!', 'success');
         
         // Redirect to login page after 3 seconds
         setTimeout(() => {

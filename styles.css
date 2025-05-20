@@ -76,38 +76,38 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 16px;
+    padding: 12px 16px;
+    gap: 8px;
   }
 
   .desktop-nav {
     display: none;
-    /* ensure it's hidden on mobile */
   }
 
   .header-content {
     order: 1;
-    /* Switch order to be first */
     display: flex;
     justify-content: flex-start;
+    align-items: center;
+    flex: 1;
   }
 
   .logo {
     font-size: 20px;
-    margin-left: 5px;
+    margin-left: 0;
   }
 
   .user-controls {
     order: 2;
-    /* Switch order to be second (right side) */
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-right: 4px;
+    gap: 12px;
+    margin-right: 0;
   }
 
   .user-button {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     background-color: transparent;
     border: none;
     border-radius: 50%;
@@ -117,6 +117,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     color: var(--gray-600);
+    padding: 0;
   }
 
   .user-button:hover,
@@ -139,11 +140,22 @@ body {
     letter-spacing: -0.5px;
     transition: transform 0.2s ease;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    padding: 0;
   }
 
   .user-avatar:hover,
   .user-avatar:active {
     transform: scale(1.05);
+  }
+
+  /* Add spacing between buttons */
+  .user-controls > * {
+    margin-left: 8px;
+  }
+
+  /* Ensure buttons don't shrink */
+  .user-controls button {
+    flex-shrink: 0;
   }
 }
 
@@ -612,16 +624,18 @@ body {
 .bottom-nav {
   display: flex;
   justify-content: space-around;
+  align-items: center;
   background-color: var(--glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  padding: 14px 0;
+  padding: 10px 16px;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   border-top: 1px solid var(--glass-border);
   z-index: 100;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
 }
 
 @media (min-width: 1024px) {
@@ -634,44 +648,41 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 12px;
-  color: var(--gray-500);
-  transition: all 0.3s ease;
   text-decoration: none;
-  padding: 6px 12px;
+  color: var(--gray-500);
+  font-size: 12px;
+  padding: 8px;
+  flex: 1;
+  max-width: 100px;
+  transition: all 0.2s ease;
 }
 
 .nav-item.active {
   color: var(--primary);
-  position: relative;
-}
-
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  background-color: var(--primary);
-  border-radius: 50%;
 }
 
 .nav-icon {
-  font-size: 24px;
   margin-bottom: 4px;
-  position: relative;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
 }
 
-.nav-item:hover {
-  color: var(--primary);
-  transform: translateY(-2px);
+.nav-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+}
+
+/* Add safe area inset padding for iOS devices */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
 }
 
 /* Loading animation */
@@ -1563,55 +1574,84 @@ svg {
 
 /* Floating Edit Profile Button */
 .edit-fab {
+  display: none;
+}
+
+/* Action buttons in header */
+.header-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
   position: fixed;
-  bottom: 32px;
-  right: 32px;
+  bottom: 100px; /* Position above bottom navbar */
   z-index: 1200;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.18);
+}
+
+.header-action-btn span {
+  display: none; /* Hide text in mobile view */
+}
+
+.header-action-btn.primary {
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
   color: white;
-  border: none;
-  border-radius: 50px;
-  padding: 16px 28px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.18);
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  left: 20px;
 }
 
-.edit-fab:hover {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
-  transform: translateY(-2px) scale(1.04);
+.header-action-btn.secondary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  right: 20px;
 }
 
-@media (max-width: 600px) {
-  .edit-fab {
-    bottom: 16px;
-    right: 16px;
-    padding: 12px 20px;
-    font-size: 1rem;
+/* Restore desktop styles */
+@media (min-width: 1024px) {
+  .header-action-btn {
+    width: auto;
+    height: auto;
+    border-radius: 24px;
+    font-size: 16px;
+    padding: 12px 24px;
+    bottom: 32px;
+  }
+
+  .header-action-btn span {
+    display: inline;
+    margin-left: 8px;
+  }
+
+  .header-action-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .header-action-btn.primary {
+    left: 32px;
+  }
+
+  .header-action-btn.secondary {
+    right: 32px;
+    padding: 14px 28px;
+    font-size: 17px;
+  }
+
+  .header-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.28);
   }
 }
 
-.drop-down-menu-button {
-  background-color: transparent;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  cursor: pointer;
-  color: var(--gray-600);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.drop-down-menu-button:hover {
-  color: var(--primary);
-  background-color: var(--gray-100);
+/* Remove the old edit-fab styles since we're using header-action-btn now */
+.edit-fab {
+  display: none;
 }
 
 /* Add these styles to your styles.css file */

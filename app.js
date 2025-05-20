@@ -90,28 +90,6 @@ function setupEventListeners() {
       tag.classList.add('active');
     });
   });
-  
-  // Add event listeners for bottom nav
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      navItems.forEach(navItem => navItem.classList.remove('active'));
-      item.classList.add('active');
-      
-      // Handle navigation - would be implemented in a real app
-      const navAction = item.getAttribute('aria-label').toLowerCase();
-      console.log(`Navigating to: ${navAction}`);
-      
-      // Handle connect navigation
-      if (navAction === 'connect') {
-        const contactSection = document.getElementById('contact');
-        if (contactSection) {
-          scrollToElement(contactSection);
-        }
-      }
-    });
-  });
 
   // Project card interactions
   const projectCards = document.querySelectorAll('.project-card');

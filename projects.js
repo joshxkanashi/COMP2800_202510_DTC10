@@ -1,5 +1,9 @@
 import { supabase } from './supabaseAPI.js';
 
+// Global variables for modal
+let currentProject = null;
+let currentImageIndex = 0;
+
 // Function to load user's projects
 async function loadProjects() {
     try {
@@ -227,6 +231,15 @@ function createProjectCard(project) {
     actions.style.gap = '0.5rem';
     actions.style.marginTop = '1rem';
 
+    // View button
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'edit-btn';
+    viewBtn.textContent = 'View';
+    viewBtn.onclick = (e) => {
+        e.stopPropagation();
+        openProjectModal(project);
+    };
+
     // Edit button
     const editBtn = document.createElement('button');
     editBtn.className = 'edit-btn';
@@ -256,6 +269,7 @@ function createProjectCard(project) {
         }
     };
 
+    actions.appendChild(viewBtn);
     actions.appendChild(editBtn);
     actions.appendChild(deleteBtn);
 
@@ -266,8 +280,7 @@ function createProjectCard(project) {
 
     // Add click event to view project details
     card.addEventListener('click', () => {
-        // TODO: Implement project details view
-        console.log('View project:', project);
+        openProjectModal(project);
     });
 
     // Assemble the card
@@ -275,6 +288,171 @@ function createProjectCard(project) {
     card.appendChild(contentSection);
 
     return card;
+}
+
+// Expose modal functions to global scope
+window.openProjectModal = openProjectModal;
+window.closeProjectModal = closeProjectModal;
+window.navigateProjectImages = navigateProjectImages;
+window.setCurrentImage = setCurrentImage;
+
+// Modal functions
+function openProjectModal(project) {
+    currentProject = project;
+    currentImageIndex = 0;
+    
+    const modal = document.getElementById('projectModal');
+    const title = document.getElementById('modalProjectTitle');
+    const mainImage = document.getElementById('modalMainImage');
+    const techStack = document.getElementById('modalTechStack');
+    const description = document.getElementById('modalDescription');
+    const liveLink = document.getElementById('modalLiveLink');
+    const githubLink = document.getElementById('modalGithubLink');
+    const thumbnails = document.getElementById('imageThumbnails');
+    const prevBtn = document.querySelector('.nav-button.prev');
+    const nextBtn = document.querySelector('.nav-button.next');
+    const closeBtn = document.querySelector('.close-modal');
+
+    // Set up event listeners
+    closeBtn.addEventListener('click', closeProjectModal);
+    prevBtn.addEventListener('click', () => navigateProjectImages(-1));
+    nextBtn.addEventListener('click', () => navigateProjectImages(1));
+
+    // Set project details
+    title.textContent = project.title;
+    description.textContent = project.description;
+
+    // Clear and set tech stack
+    techStack.innerHTML = '';
+    if (project.languages && project.languages.length > 0) {
+        project.languages.forEach(tech => {
+            const tag = document.createElement('span');
+            tag.className = 'tech-tag';
+            tag.textContent = tech;
+            techStack.appendChild(tag);
+        });
+    }
+
+    // Set up images
+    mainImage.innerHTML = '';
+    thumbnails.innerHTML = '';
+    
+    const photoUrls = project.photo_urls || (project.photo_url ? [project.photo_url] : []);
+    
+    if (photoUrls.length > 0) {
+        const img = document.createElement('img');
+        img.src = photoUrls[0];
+        img.alt = project.title;
+        mainImage.appendChild(img);
+
+        // Add thumbnails if there are multiple images
+        if (photoUrls.length > 1) {
+            photoUrls.forEach((url, index) => {
+                const thumb = document.createElement('div');
+                thumb.className = `thumbnail ${index === 0 ? 'active' : ''}`;
+                thumb.onclick = () => setCurrentImage(index);
+                
+                const thumbImg = document.createElement('img');
+                thumbImg.src = url;
+                thumbImg.alt = `${project.title} - Thumbnail ${index + 1}`;
+                thumb.appendChild(thumbImg);
+                thumbnails.appendChild(thumb);
+            });
+
+            // Show navigation buttons
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
+            thumbnails.style.display = 'flex';
+        } else {
+            // Hide navigation for single image
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            thumbnails.style.display = 'none';
+        }
+    }
+
+    // Set up links
+    if (project.project_url) {
+        liveLink.href = project.project_url;
+        liveLink.style.display = 'inline-block';
+    } else {
+        liveLink.style.display = 'none';
+    }
+
+    if (project.github_url) {
+        githubLink.href = project.github_url;
+        githubLink.style.display = 'inline-block';
+    } else {
+        githubLink.style.display = 'none';
+    }
+
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    // Add event listeners for keyboard navigation
+    document.addEventListener('keydown', handleModalKeyPress);
+
+    // Add click outside to close
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeProjectModal();
+        }
+    });
+}
+
+function closeProjectModal() {
+    const modal = document.getElementById('projectModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    currentProject = null;
+    currentImageIndex = 0;
+    
+    // Remove keyboard event listener
+    document.removeEventListener('keydown', handleModalKeyPress);
+
+    // Remove click event listeners
+    const closeBtn = document.querySelector('.close-modal');
+    const prevBtn = document.querySelector('.nav-button.prev');
+    const nextBtn = document.querySelector('.nav-button.next');
+    
+    closeBtn.removeEventListener('click', closeProjectModal);
+    prevBtn.removeEventListener('click', () => navigateProjectImages(-1));
+    nextBtn.removeEventListener('click', () => navigateProjectImages(1));
+}
+
+function handleModalKeyPress(e) {
+    if (e.key === 'Escape') {
+        closeProjectModal();
+    } else if (e.key === 'ArrowLeft') {
+        navigateProjectImages(-1);
+    } else if (e.key === 'ArrowRight') {
+        navigateProjectImages(1);
+    }
+}
+
+function navigateProjectImages(direction) {
+    const photoUrls = currentProject?.photo_urls || (currentProject?.photo_url ? [currentProject.photo_url] : []);
+    if (!photoUrls.length || photoUrls.length <= 1) return;
+    
+    currentImageIndex = (currentImageIndex + direction + photoUrls.length) % photoUrls.length;
+    setCurrentImage(currentImageIndex);
+}
+
+function setCurrentImage(index) {
+    const photoUrls = currentProject?.photo_urls || (currentProject?.photo_url ? [currentProject.photo_url] : []);
+    if (!photoUrls.length) return;
+    
+    currentImageIndex = index;
+    const mainImage = document.getElementById('modalMainImage');
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    
+    // Update main image
+    mainImage.innerHTML = `<img src="${photoUrls[index]}" alt="${currentProject.title}">`;
+    
+    // Update thumbnails
+    thumbnails.forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+    });
 }
 
 // Load projects when the page loads

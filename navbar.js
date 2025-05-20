@@ -21,28 +21,10 @@ const initializeProfileDropdown = () => {
   }
 }
 
-// Set up logout functionality
-const setupLogout = () => {
-  const logoutBtn = document.getElementById('logoutButton');
-  
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        window.location.href = 'login.html';
-      } catch (error) {
-        console.error('Error during logout:', error);
-      }
-    });
-  }
-}
-
 // Initialize all components after navbar is loaded
 const initializeComponents = () => {
   setTimeout(() => {
     initializeProfileDropdown();
-    setupLogout();
   }, 100);
 }
 
@@ -101,7 +83,7 @@ const intializeNavbar = async () => {
 
       // Initialize components after HTML is loaded
       initializeComponents();
-    }
+        }
   } catch (error) {
     console.error('Error initializing navbar:', error);
   }
@@ -109,5 +91,5 @@ const intializeNavbar = async () => {
 
 // Start the initialization process
 document.addEventListener('DOMContentLoaded', () => {
-  intializeNavbar();
+intializeNavbar();
 });

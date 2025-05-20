@@ -45,7 +45,24 @@ export async function updateUserAvatar() {
     }
 }
 
-// Call updateUserAvatar when the page loads
+// Set up logout functionality
+function setupLogout() {
+    const logoutBtn = document.getElementById('logoutButton');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Error during logout:', error);
+            }
+        });
+    }
+}
+
+// Call updateUserAvatar and setup logout when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     updateUserAvatar();
+    setupLogout();
 }); 

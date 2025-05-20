@@ -11,18 +11,26 @@ async function checkAuth() {
         // Get user's profile data
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('full_name')
+            .select('full_name, avatar_url')
             .eq('id', user.id)
             .single();
 
         // Update UI with user info
-        const userAvatar = document.querySelector('.user-avatar');
+        const welcomeProfilePicture = document.getElementById('welcomeProfilePicture');
         const welcomeTitle = document.querySelector('.welcome-title');
         
-        if (userAvatar) {
-            // Use first letter of full name if available, otherwise use email
-            const displayName = profile?.full_name || user.email;
-            userAvatar.textContent = displayName.charAt(0).toUpperCase();
+        if (welcomeProfilePicture) {
+            const defaultAvatar = `data:image/svg+xml,${encodeURIComponent(`
+                <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="128" height="128" fill="#818cf8"/>
+                    <path d="M64 69.5833C75.2842 69.5833 84.4167 60.4508 84.4167 49.1667C84.4167 37.8825 75.2842 28.75 64 28.75C52.7158 28.75 43.5833 37.8825 43.5833 49.1667C43.5833 60.4508 52.7158 69.5833 64 69.5833Z" fill="white"/>
+                    <path d="M64 79.75C47.6558 79.75 34.3333 93.0725 34.3333 109.417H93.6667C93.6667 93.0725 80.3442 79.75 64 79.75Z" fill="white"/>
+                </svg>
+            `)}`;
+            welcomeProfilePicture.src = profile?.avatar_url || defaultAvatar;
+            welcomeProfilePicture.onerror = () => {
+                welcomeProfilePicture.src = defaultAvatar;
+            };
         }
         
         if (welcomeTitle) {

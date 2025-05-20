@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Settings</title>
+    <title>Profile Settings</title>
     <link rel="stylesheet" href="profile.css" />
     <link rel="stylesheet" href="styles.css" />
     <script type="module" src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -15,47 +15,57 @@
     <div id="navbar-placeholder"></div>
     <script type="module" src="navbar.js"></script>
     <main class="settings-container">
-        <h1 class="profile-title">Profile</h1>
+        <h1 class="profile-title">Profile Settings</h1>
 
         <section class="profile-card">
-            <h2 class="profile-section-title">Account</h2>
-            <form class="profile-form">
+            <h2 class="profile-section-title">Account Information</h2>
+            <form id="profileForm" class="profile-form">
+                <div class="profile-picture-section">
+                    <div class="profile-picture-container">
+                        <img id="profilePicture" alt="Profile Picture" class="profile-picture" />
+                        <div class="profile-picture-overlay">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 16L12 8M8 12L16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span>Upload Photo</span>
+                        </div>
+                    </div>
+                    <input type="file" id="pictureInput" accept="image/*" class="hidden" />
+                    <div class="profile-picture-help">
+                        <small class="form-help">Click to upload a new photo</small>
+                        <small class="form-help">Maximum size: 2MB</small>
+                    </div>
+                </div>
+
                 <label>
                     Full Name
-                    <input type="text" placeholder="Senuk Jayalath" />
+                    <input type="text" id="fullName" placeholder="Enter your full name" required />
                 </label>
                 <label>
                     Email Address
-                    <input type="email" placeholder="senukj@stanislavhikes.com" />
+                    <input type="email" id="email" disabled />
+                    <small class="form-help">Email cannot be changed</small>
                 </label>
                 <label>
-                    Password
-                    <input type="password" placeholder="••••••••" />
+                    Date of Birth
+                    <input type="date" id="dateOfBirth" />
                 </label>
                 <button type="submit" class="profile-btn">Save Changes</button>
             </form>
         </section>
 
         <section class="profile-card">
-            <h2 class="profile-section-title">Preferences</h2>
-            <form class="profile-form">
+            <h2 class="profile-section-title">Change Password</h2>
+            <form id="passwordForm" class="profile-form">
                 <label>
-                    Language
-                    <select>
-                        <option>English</option>
-                        <option>French</option>
-                        <option>Chinese</option>
-                    </select>
+                    New Password
+                    <input type="password" id="newPassword" placeholder="Enter new password" required minlength="6" />
                 </label>
                 <label>
-                    Timezone
-                    <select>
-                        <option>PST (UTC−08:00)</option>
-                        <option>EST (UTC−05:00)</option>
-                        <option>GMT (UTC+00:00)</option>
-                    </select>
+                    Confirm Password
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password" required minlength="6" />
                 </label>
-                <button type="submit" class="profile-btn">Save Preferences</button>
+                <button type="submit" class="profile-btn">Update Password</button>
             </form>
         </section>
 

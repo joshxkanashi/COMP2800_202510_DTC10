@@ -2146,18 +2146,40 @@ a[href="account-settings.html"] {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
-    background: var(--primary);
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
+    padding: 10px 20px;
     font-size: 14px;
     font-weight: 500;
-    transition: background-color 0.2s;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
 }
 
-.project-modal-link:hover {
+.project-modal-link:first-child {
+    background: var(--primary);
+    color: white;
+}
+
+.project-modal-link:first-child:hover {
     background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.project-modal-link:not(:first-child) {
+    background: var(--gray-100);
+    color: var(--gray-900);
+}
+
+.project-modal-link:not(:first-child):hover {
+    background: var(--gray-200);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.project-modal-link svg {
+    width: 18px;
+    height: 18px;
 }
 
 body.modal-open {

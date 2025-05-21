@@ -7,6 +7,12 @@ let currentChatUserId = null;
 let currentConversationId = null;
 let messageSubscription = null;
 let conversationSubscription = null;
+let presenceChannel = null;
+let isTyping = false;
+let typingTimeout = null;
+const MESSAGES_PER_PAGE = 20;
+let currentPage = 1;
+let allMessagesLoaded = false;
 
 // Make openChat function available globally right away
 window.openChat = openChat;
@@ -53,8 +59,9 @@ function setupChatUI() {
     const chatClose = document.getElementById('chatClose');
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
+    const chatMessages = document.getElementById('chatMessages');
     
-    if (!chatModal || !chatClose || !chatInput || !chatSend) {
+    if (!chatModal || !chatClose || !chatInput || !chatSend || !chatMessages) {
         console.error('Required chat UI elements not found');
         return;
     }
@@ -84,12 +91,170 @@ function setupChatUI() {
         }
     });
     
-    // Enable/disable send button based on input
+    // Handle typing indicator
     chatInput.addEventListener('input', () => {
         chatSend.disabled = !chatInput.value.trim();
+        handleTypingIndicator();
     });
+
+    // Implement infinite scroll for message history
+    chatMessages.addEventListener('scroll', () => {
+        if (chatMessages.scrollTop === 0 && !allMessagesLoaded) {
+            loadMoreMessages();
+        }
+    });
+}
+
+// Handle typing indicator
+function handleTypingIndicator() {
+    if (!isTyping) {
+        isTyping = true;
+        broadcastTypingStatus(true);
+    }
     
-    console.log('Chat UI setup complete');
+    // Clear existing timeout
+    if (typingTimeout) {
+        clearTimeout(typingTimeout);
+    }
+    
+    // Set new timeout
+    typingTimeout = setTimeout(() => {
+        isTyping = false;
+        broadcastTypingStatus(false);
+    }, 2000);
+}
+
+// Broadcast typing status
+function broadcastTypingStatus(isTyping) {
+    if (presenceChannel && currentConversationId) {
+        presenceChannel.send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: { isTyping, userId: currentUser.id }
+        });
+    }
+}
+
+// Load more messages (pagination)
+async function loadMoreMessages() {
+    if (!currentConversationId) return;
+    
+    try {
+        currentPage++;
+        const { data: messages, error } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', currentConversationId)
+            .order('created_at', { ascending: false })
+            .range((currentPage - 1) * MESSAGES_PER_PAGE, currentPage * MESSAGES_PER_PAGE - 1);
+            
+        if (error) throw error;
+        
+        if (messages.length < MESSAGES_PER_PAGE) {
+            allMessagesLoaded = true;
+        }
+        
+        // Preserve scroll position
+        const chatMessages = document.getElementById('chatMessages');
+        const oldHeight = chatMessages.scrollHeight;
+        
+        // Add messages to top of container
+        messages.reverse().forEach(message => {
+            const isMine = message.sender_id === currentUser.id;
+            prependMessageToUI(message, isMine);
+        });
+        
+        // Maintain scroll position
+        chatMessages.scrollTop = chatMessages.scrollHeight - oldHeight;
+    } catch (error) {
+        console.error('Error loading more messages:', error);
+    }
+}
+
+// Prepend a message to the UI (for loading history)
+function prependMessageToUI(message, isMine) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+    
+    const messageEl = createMessageElement(message, isMine);
+    chatMessages.insertBefore(messageEl, chatMessages.firstChild);
+}
+
+// Create message element
+function createMessageElement(message, isMine) {
+    const messageEl = document.createElement('div');
+    messageEl.className = isMine ? 'chat-message sent' : 'chat-message received';
+    messageEl.setAttribute('data-id', message.id);
+    
+    const date = new Date(message.created_at);
+    const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    messageEl.innerHTML = `
+        ${escapeHtml(message.content)}
+        <div class="chat-message-time">${timeString}</div>
+    `;
+    
+    return messageEl;
+}
+
+// Subscribe to presence channel
+function subscribeToPresence(conversationId) {
+    if (presenceChannel) {
+        presenceChannel.unsubscribe();
+    }
+    
+    presenceChannel = supabase.channel(`presence-${conversationId}`);
+    
+    presenceChannel
+        .on('presence', { event: 'sync' }, () => {
+            const state = presenceChannel.presenceState();
+            updateOnlineStatus(state);
+        })
+        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            console.log('User joined:', newPresences[0]);
+            updateOnlineStatus(presenceChannel.presenceState());
+        })
+        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            console.log('User left:', leftPresences[0]);
+            updateOnlineStatus(presenceChannel.presenceState());
+        })
+        .on('broadcast', { event: 'typing' }, payload => {
+            handleTypingEvent(payload);
+        })
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                await presenceChannel.track({ 
+                    user_id: currentUser.id,
+                    online_at: new Date().toISOString()
+                });
+            }
+        });
+}
+
+// Update online status in UI
+function updateOnlineStatus(state) {
+    const statusEl = document.querySelector('.chat-header-status');
+    if (!statusEl || !currentChatUserId) return;
+    
+    const otherUserPresence = Object.values(state).flat()
+        .find(presence => presence.user_id === currentChatUserId);
+    
+    statusEl.textContent = otherUserPresence ? 'Online' : 'Offline';
+}
+
+// Handle typing event
+function handleTypingEvent(payload) {
+    if (payload.payload.userId === currentChatUserId) {
+        const statusEl = document.querySelector('.chat-header-status');
+        if (statusEl) {
+            if (payload.payload.isTyping) {
+                statusEl.textContent = 'Typing...';
+            } else {
+                // Revert to online status
+                updateOnlineStatus(presenceChannel.presenceState());
+            }
+        }
+    }
 }
 
 // Open chat with selected user
@@ -136,6 +301,8 @@ async function openChat(userId, userName, userAvatar) {
         }
         
         currentConversationId = conversationId;
+        currentPage = 1;
+        allMessagesLoaded = false;
         
         // Set chat header information
         const chatHeaderName = document.getElementById('chatHeaderName');
@@ -162,10 +329,13 @@ async function openChat(userId, userName, userAvatar) {
             chatMessages.innerHTML = '<div class="chat-loading">Loading messages...</div>';
         }
         
+        // Subscribe to presence channel
+        subscribeToPresence(conversationId);
+        
         // Subscribe to new messages
         subscribeToMessages(conversationId);
         
-        // Load existing messages
+        // Load initial messages
         await loadMessages(conversationId);
         
         // Open chat modal
@@ -198,20 +368,26 @@ function closeChat() {
         chatInput.value = '';
     }
     
-    // Unsubscribe from message updates
+    // Clean up subscriptions
     if (messageSubscription) {
-        try {
-            messageSubscription.unsubscribe();
-            console.log('Unsubscribed from message updates');
-        } catch (error) {
-            console.error('Error unsubscribing from messages:', error);
-        }
+        messageSubscription.unsubscribe();
         messageSubscription = null;
     }
     
-    // Reset current conversation state
+    if (presenceChannel) {
+        presenceChannel.unsubscribe();
+        presenceChannel = null;
+    }
+    
+    // Reset state
     currentChatUserId = null;
     currentConversationId = null;
+    currentPage = 1;
+    allMessagesLoaded = false;
+    isTyping = false;
+    if (typingTimeout) {
+        clearTimeout(typingTimeout);
+    }
 }
 
 // Get or create a conversation with the specified user
@@ -354,11 +530,10 @@ async function loadMessages(conversationId) {
             .from('messages')
             .select('*')
             .eq('conversation_id', conversationId)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: false })
+            .limit(MESSAGES_PER_PAGE);
             
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
         
         // Clear chat container
         const chatMessages = document.getElementById('chatMessages');
@@ -372,9 +547,13 @@ async function loadMessages(conversationId) {
         // Show or hide empty state
         toggleEmptyState(messages.length === 0);
         
-        // Add messages to UI
+        if (messages.length < MESSAGES_PER_PAGE) {
+            allMessagesLoaded = true;
+        }
+        
+        // Add messages to UI in reverse order (newest last)
         if (messages.length > 0) {
-            messages.forEach(message => {
+            messages.reverse().forEach(message => {
                 const isMine = message.sender_id === currentUser.id;
                 addMessageToUI(message, isMine);
                 
@@ -459,55 +638,67 @@ async function sendMessage() {
         return;
     }
     
-    // Get message content
     const content = chatInput.value.trim();
     if (!content) return;
     
-    // Disable input and button while sending
-    chatInput.disabled = true;
+    // Create temporary message object
+    const tempMessage = {
+        id: 'temp-' + Date.now(),
+        conversation_id: currentConversationId,
+        sender_id: currentUser.id,
+        content: content,
+        created_at: new Date().toISOString(),
+        read: false
+    };
+    
+    // Optimistically add message to UI
+    addMessageToUI(tempMessage, true);
+    
+    // Clear input and scroll
+    chatInput.value = '';
     chatSend.disabled = true;
+    scrollToBottom();
     
     try {
-        console.log('Sending message to conversation:', currentConversationId);
-        
-        // Insert message into database
+        // Send message to server
         const { data: message, error } = await supabase
             .from('messages')
-            .insert([
-                {
-                    conversation_id: currentConversationId,
-                    sender_id: currentUser.id,
-                    content: content,
-                    read: false
-                }
-            ])
+            .insert([{
+                conversation_id: currentConversationId,
+                sender_id: currentUser.id,
+                content: content,
+                read: false
+            }])
             .select()
             .single();
             
         if (error) throw error;
         
-        // Add message to UI
-        addMessageToUI(message, true);
-        
-        // Hide empty state if visible
-        toggleEmptyState(false);
-        
-        // Clear input
-        chatInput.value = '';
-        
-        // Scroll to bottom
-        scrollToBottom();
+        // Replace temporary message with real one
+        const tempEl = document.querySelector(`[data-id="${tempMessage.id}"]`);
+        if (tempEl) {
+            tempEl.setAttribute('data-id', message.id);
+        }
         
         console.log('Message sent successfully:', message.id);
     } catch (error) {
         console.error('Error sending message:', error);
+        
+        // Remove temporary message on error
+        const tempEl = document.querySelector(`[data-id="${tempMessage.id}"]`);
+        if (tempEl) {
+            tempEl.remove();
+        }
+        
+        // Show error to user
         alert('Error sending message. Please try again.');
-    } finally {
-        // Re-enable input and button
-        chatInput.disabled = false;
-        chatSend.disabled = true; // Will be enabled once text is entered
-        chatInput.focus();
+        
+        // Restore message to input
+        chatInput.value = content;
+        chatSend.disabled = false;
     }
+    
+    chatInput.focus();
 }
 
 // Mark a message as read

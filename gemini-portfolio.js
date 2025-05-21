@@ -163,5 +163,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Export or expose functions as needed
-window.initializeGeminiPortfolio = initializeGeminiPortfolio;
 window.createTextElement = createTextElement; 

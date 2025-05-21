@@ -4238,34 +4238,23 @@ async function saveFeaturedProjects() {
           }
         }
         
-        // Fallback: if no featured projects defined, show most recent projects
-        console.log("No featured projects found, showing recent projects instead");
-        const { data: projects, error } = await supabase
-            .from('projects')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(3);
-
-        if (error) throw error;
-
+        // If no featured projects are selected, show the empty state
         const projectsContainer = document.getElementById('projectsContainer');
-        projectsContainer.innerHTML = '';
-
-        if (!projects || projects.length === 0) {
-            // Show empty state if no projects
-            const empty = document.createElement('div');
-            empty.className = 'empty-state';
-            empty.innerHTML = `<h2>No Featured Projects</h2><p>Add a project to feature it here!</p>`;
-            projectsContainer.appendChild(empty);
-            return;
-        }
-
-        // Only show up to 3 projects
-        (projects.slice(0, 3)).forEach(project => {
-            const card = createFeaturedProjectCard(project);
-            projectsContainer.appendChild(card);
-        });
+        projectsContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="project-image">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="empty-state-content">
+                    <h3>No Featured Projects</h3>
+                    <p>Select projects to feature in your portfolio</p>
+                </div>
+            </div>
+        `;
     } catch (error) {
         console.error('Error loading featured projects:', error);
     }

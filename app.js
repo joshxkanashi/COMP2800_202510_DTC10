@@ -1045,8 +1045,30 @@ async function loadRecommendedProjects() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch recent projects from other users with their creator's profile info
-        const { data: projects, error } = await supabase
+        // First get user's profile and skills
+        const { data: userProfile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (profileError) throw profileError;
+
+        // Get user's portfolio to find their skills and interests
+        const { data: portfolioData, error: portfolioError } = await supabase
+            .from('portfolios')
+            .select('data')
+            .eq('user_id', user.id)
+            .single();
+
+        // Extract user's skills from portfolio data
+        let userSkills = [];
+        if (portfolioData?.data?.skills) {
+            userSkills = portfolioData.data.skills.map(skill => skill.name.toLowerCase());
+        }
+
+        // Fetch all projects from other users with their creator's profile info
+        const { data: allProjects, error: projectsError } = await supabase
             .from('projects')
             .select(`
                 *,
@@ -1055,22 +1077,51 @@ async function loadRecommendedProjects() {
                     avatar_url
                 )
             `)
-            .neq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(8);
+            .neq('user_id', user.id);
 
-        if (error) throw error;
+        if (projectsError) throw projectsError;
 
+        if (!allProjects || allProjects.length === 0) {
+            const container = document.getElementById('recommendedProjectsContainer');
+            if (container) {
+                container.innerHTML = `<div class="empty-state"><p>No recommendations yet. Check back later!</p></div>`;
+            }
+            return;
+        }
+
+        // Score and sort projects based on relevance
+        const scoredProjects = allProjects.map(project => {
+            let score = 0;
+
+            // 1. Match with user's skills
+            if (project.languages) {
+                const projectLangs = project.languages.map(lang => lang.toLowerCase());
+                const skillMatches = projectLangs.filter(lang => userSkills.includes(lang)).length;
+                score += skillMatches * 2; // Give more weight to skill matches
+            }
+
+            // 2. Project popularity (view count)
+            score += (project.view_count || 0) * 0.1;
+
+            // 3. Recent projects get a small boost
+            const projectAge = new Date() - new Date(project.created_at);
+            const daysOld = projectAge / (1000 * 60 * 60 * 24);
+            score += Math.max(0, 10 - daysOld * 0.1); // Small boost for newer projects
+
+            return { ...project, relevanceScore: score };
+        });
+
+        // Sort by score and take top 8
+        const recommendedProjects = scoredProjects
+            .sort((a, b) => b.relevanceScore - a.relevanceScore)
+            .slice(0, 8);
+
+        // Update UI
         const container = document.getElementById('recommendedProjectsContainer');
         if (!container) return;
         container.innerHTML = '';
 
-        if (!projects || projects.length === 0) {
-            container.innerHTML = `<div class="empty-state"><p>No recommendations yet. Check back later!</p></div>`;
-            return;
-        }
-
-        projects.forEach(project => {
+        recommendedProjects.forEach(project => {
             const card = createProjectCard(project);
             container.appendChild(card);
         });

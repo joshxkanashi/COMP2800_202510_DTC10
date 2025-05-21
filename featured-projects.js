@@ -162,20 +162,22 @@ window.openProjectModal = function(project) {
         modalLinks.appendChild(githubLink);
     }
 
-    // Set up View Portfolio button
-    let viewPortfolioBtn = document.getElementById('projectModalViewPortfolio');
-    if (!viewPortfolioBtn) {
-        viewPortfolioBtn = document.createElement('button');
-        viewPortfolioBtn.id = 'projectModalViewPortfolio';
-        viewPortfolioBtn.className = 'btn-primary';
-        viewPortfolioBtn.style.marginTop = '18px';
-        modalLinks.parentNode.appendChild(viewPortfolioBtn);
+    // Only add View Portfolio button if we're not already on the portfolio page
+    if (!window.location.pathname.includes('eachConnectLanding.html')) {
+        let viewPortfolioBtn = document.getElementById('projectModalViewPortfolio');
+        if (!viewPortfolioBtn) {
+            viewPortfolioBtn = document.createElement('button');
+            viewPortfolioBtn.id = 'projectModalViewPortfolio';
+            viewPortfolioBtn.className = 'btn-primary';
+            viewPortfolioBtn.style.marginTop = '18px';
+            modalLinks.parentNode.appendChild(viewPortfolioBtn);
+        }
+        viewPortfolioBtn.textContent = 'View Portfolio';
+        viewPortfolioBtn.onclick = () => {
+            localStorage.setItem('selectedProfileId', project.user_id);
+            window.location.href = 'eachConnectLanding.html';
+        };
     }
-    viewPortfolioBtn.textContent = 'View Portfolio';
-    viewPortfolioBtn.onclick = () => {
-        localStorage.setItem('selectedProfileId', project.user_id);
-        window.location.href = 'eachConnectLanding.html';
-    };
 
     // Set up close functionality
     if (closeBtn) {

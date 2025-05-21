@@ -473,16 +473,6 @@ body.edit-mode .avatar.large:active {
   border-radius: 100px;
 }
 
-.skill-tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  background-color: var(--light);
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: var(--card-shadow);
-}
-
 .view-all-link {
   display: flex;
   justify-content: center;

@@ -2876,12 +2876,6 @@ async function saveFeaturedProjects() {
               Add Skill
             </button>
           </div>
-
-          <div class="skill-tags-container">
-            <div class="skill-tag">Tag 1</div>
-            <div class="skill-tag">Tag 2</div>
-            <div class="skill-tag">Tag 3</div>
-          </div>
         </div>
       `,
       experience: `

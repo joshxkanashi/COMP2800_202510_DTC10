@@ -1,18 +1,18 @@
 import { supabase } from './supabaseAPI.js';
 
-const button = document.querySelectorAll("#openCard")
-
-button.forEach((card) => {
-	card.addEventListener("click", () => {
-		window.location.href = 'eachConnectLanding.html';
-	})
-})
 
 const getUsers = async () => {
 	try {
+		// Get current user
+		const { data: { user }, error: userError } = await supabase.auth.getUser();
+		if (userError) throw userError;
+		if (!user) return;
+
+		// Get all profiles except current user
 		const { data: profiles, error } = await supabase
 			.from('profiles')
 			.select('*')
+			.neq('id', user.id)  // Exclude current user
 			.order('created_at', { ascending: false });
 
 		if (error) throw error;
@@ -40,7 +40,6 @@ const getUsers = async () => {
 				</div>
 				<button id="openCard" class="connect-open-btn">Open</button>
 			`;
-
 
 			// Add click event listener
 			card.addEventListener('click', () => {
@@ -70,6 +69,8 @@ const getUsers = async () => {
 				openBtn.style.display = window.innerWidth <= 1024 ? 'none' : 'block';
 			}
 
+			openButton();
+
 			container.appendChild(card);
 		});
 	} catch (error) {
@@ -77,5 +78,18 @@ const getUsers = async () => {
 	}
 };
 
+const openButton = () => {
+	const button = document.querySelectorAll("#openCard")
+
+	button.forEach((card) => {
+		card.addEventListener("click", () => {
+			console.log("hi");
+			window.location.href = 'eachConnectLanding.html';
+		})
+	})
+}
+
 // Call getUsers when the page loads
-document.addEventListener('DOMContentLoaded', getUsers);
+document.addEventListener('DOMContentLoaded', () => {
+	getUsers();
+});

@@ -1966,3 +1966,61 @@ a[href="account-settings.html"] {
   align-items: center !important;
   gap: 8px !important;
 }
+
+/* Add loading animation for avatars */
+.avatar.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    var(--primary-light) 25%, 
+    var(--primary) 50%, 
+    var(--primary-light) 75%);
+  background-size: 200% 100%;
+  animation: avatarLoading 1.5s infinite;
+  z-index: 1;
+}
+
+@keyframes avatarLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Add a loading animation for stat cards */
+.stat-loading {
+  position: relative;
+  color: transparent !important;
+  overflow: hidden;
+}
+
+.stat-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    rgba(129, 140, 248, 0.2) 25%,
+    rgba(99, 102, 241, 0.3) 50%,
+    rgba(129, 140, 248, 0.2) 75%);
+  background-size: 200% 100%;
+  animation: statLoading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes statLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

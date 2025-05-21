@@ -10,6 +10,92 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #10B981;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+        }
+        
+        /* Styling avatar images */
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            border: 2px solid var(--gray-100);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .avatar.large {
+            width: 100px;
+            height: 100px;
+            font-size: 36px;
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        /* Loading animation for avatars */
+        .avatar.loading {
+            position: relative;
+        }
+        
+        .avatar.loading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                var(--primary-light) 25%, 
+                var(--primary) 50%, 
+                var(--primary-light) 75%);
+            background-size: 200% 100%;
+            border-radius: 50%;
+            animation: avatarLoading 1.5s infinite;
+        }
+        
+        @keyframes avatarLoading {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -96,11 +182,11 @@
     <script type="module">
         import { supabase } from './supabaseAPI.js';
 
-        // Get selected profile ID from localStorage
-        const selectedProfileId = localStorage.getItem('selectedProfileId');
-        
         // Load profile data from Supabase
         async function loadUserProfile() {
+            // Get the profile ID from localStorage
+            const selectedProfileId = localStorage.getItem('selectedProfileId');
+            
             if (!selectedProfileId) {
                 showError('No profile selected. Please select a user from the Connect page.');
                 return;
@@ -122,119 +208,101 @@
                     </div>
                 `;
                 
-                // Add a cache-busting timestamp to prevent cached results
+                // Set up cache buster to prevent cached responses
                 const cacheBuster = Date.now();
                 
-                // Fetch user profile data
+                // First get the basic profile information
                 const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', selectedProfileId)
                     .single();
-                    
-                if (profileError) throw profileError;
-                if (!profile) throw new Error('Profile not found');
                 
-                console.log("Profile data loaded:", profile);
+                console.log('Profile data loaded:', profile);
                 
-                // Fetch user's portfolio data with forceful no-cache approach
+                if (profileError) {
+                    console.error('Error fetching profile:', profileError);
+                    showError('Could not load profile information. Database error occurred.');
+                    return;
+                }
+                
+                if (!profile) {
+                    console.error('No profile found with ID:', selectedProfileId);
+                    showError('Profile not found. The user may have been removed.');
+                    return;
+                }
+                
+                // Render the profile header with the basic profile info
+                renderProfileHeader(profile);
+                
+                // Try multiple approaches to get portfolio data
                 let portfolioData = null;
+                
+                // Method 1: Direct query to portfolios table
                 try {
-                    // First approach - using standard query
                     const { data, error } = await supabase
                         .from('portfolios')
                         .select('*')
                         .eq('user_id', selectedProfileId)
                         .maybeSingle();
-                        
+                    
                     if (!error && data) {
                         portfolioData = data;
-                        console.log("Portfolio data loaded via standard query:", data);
-                    } else if (error) {
-                        console.warn("Error with standard query:", error);
+                        console.log('Portfolio data found via direct query:', data);
                     }
                 } catch (e) {
-                    console.error("Error fetching portfolio via standard query:", e);
+                    console.warn('Error with direct portfolio query:', e);
                 }
                 
-                // If first approach failed, try using RPC for more direct access
+                // Method 2: If the first method fails, try using RPC or a different approach
                 if (!portfolioData) {
                     try {
-                        const { data, error } = await supabase.rpc('get_user_portfolio', {
+                        const { data, error } = await supabase
+                            .from('user_portfolios') // Try an alternative view or table if it exists
+                            .select('*')
+                            .eq('user_id', selectedProfileId)
+                            .maybeSingle();
+                        
+                        if (!error && data) {
+                            portfolioData = data;
+                            console.log('Portfolio data found via alternative table:', data);
+                        }
+                    } catch (e) {
+                        console.warn('Error with alternative portfolio query:', e);
+                    }
+                }
+                
+                // Method 3: Try a raw SQL query using RPC if set up
+                if (!portfolioData) {
+                    try {
+                        const { data, error } = await supabase.rpc('get_portfolio_by_user_id', {
                             user_id_param: selectedProfileId
                         });
                         
                         if (!error && data) {
                             portfolioData = data;
-                            console.log("Portfolio data loaded via RPC:", data);
-                        } else {
-                            console.warn("RPC approach failed:", error);
+                            console.log('Portfolio data found via RPC:', data);
                         }
                     } catch (e) {
-                        console.error("Error with RPC approach:", e);
+                        console.warn('Error with RPC call:', e);
                     }
                 }
                 
-                // Clear any cached data
-                localStorage.removeItem('cachedPortfolioData');
-                localStorage.removeItem('cachedProfileData');
-                
-                // Set a timestamp to indicate when data was last loaded
-                localStorage.setItem('profileLoadTimestamp', cacheBuster);
-                
-                // Render profile header
-                renderProfileHeader(profile);
-                
-                // Clear any cached portfolio data from window object
-                window.portfolioCache = null;
-                
-                // Render portfolio sections
-                if (portfolioData) {
-                    // Log detailed information about the portfolio data to help debug
-                    console.log('Loaded fresh portfolio data:', portfolioData);
-                    
-                    // Extract experience data for debugging
-                    if (portfolioData.data) {
-                        // Check for experience data in the data field
-                        if (typeof portfolioData.data === 'string') {
-                            try {
-                                const parsedData = JSON.parse(portfolioData.data);
-                                console.log("Experience data in parsed portfolioData:", {
-                                    exp1_title: parsedData.exp1_title,
-                                    exp1_company: parsedData.exp1_company,
-                                    exp1_date: parsedData.exp1_date,
-                                    experience: parsedData.experience
-                                });
-                            } catch (e) {
-                                console.error("Error parsing portfolio data:", e);
-                            }
-                        } else if (typeof portfolioData.data === 'object') {
-                            console.log("Experience data in portfolioData object:", {
-                                exp1_title: portfolioData.data.exp1_title,
-                                exp1_company: portfolioData.data.exp1_company,
-                                exp1_date: portfolioData.data.exp1_date,
-                                experience: portfolioData.data.experience
-                            });
-                        }
-                    } else {
-                        // Check if experience data is directly in portfolioData
-                        console.log("Direct experience data check:", {
-                            exp1_title: portfolioData.exp1_title,
-                            exp1_company: portfolioData.exp1_company,
-                            exp1_date: portfolioData.exp1_date,
-                            experience: portfolioData.experience
-                        });
-                    }
-                    
-                    renderPortfolioContent(portfolioData);
-                } else {
-                    // If no portfolio data, show placeholder content
-                    console.log('No portfolio data found for user');
+                // Final check - if we have profile data but no portfolio data,
+                // just render with empty portfolio
+                if (!portfolioData) {
+                    console.log('No portfolio data found for user. Rendering placeholder content.');
                     renderPlaceholderContent(profile);
+                    return;
                 }
+                
+                // We have some portfolio data, render it
+                console.log('Final portfolio data being rendered:', portfolioData);
+                renderPortfolioContent(portfolioData);
+                
             } catch (error) {
-                console.error('Error loading profile:', error);
-                showError('Error loading profile. Please try again later.');
+                console.error('Unexpected error during profile loading:', error);
+                showError('An unexpected error occurred. Please try again later.');
             }
         }
         
@@ -245,9 +313,22 @@
             
             const firstLetter = profile.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U';
             
+            // Create avatar with image or fallback to first letter
+            let avatarContent = '';
+            let avatarClass = 'avatar large';
+            
+            if (profile.avatar_url) {
+                avatarClass += ' loading';
+                avatarContent = `<img src="${profile.avatar_url}" alt="${profile.full_name || 'User'}" 
+                    onload="this.parentNode.classList.remove('loading')" 
+                    onerror="this.style.display='none'; this.parentNode.textContent='${firstLetter}'; this.parentNode.classList.remove('loading')">`;
+            } else {
+                avatarContent = firstLetter;
+            }
+            
             heroSection.innerHTML = `
                 <div class="portfolio-hero-content">
-                    <div class="avatar large">${firstLetter}</div>
+                    <div class="${avatarClass}">${avatarContent}</div>
                     <div class="portfolio-info">
                         <h1 class="portfolio-title">${profile.full_name || 'Anonymous User'}</h1>
                         <p class="portfolio-subtitle">${profile.job_title || 'Developer'}</p>
@@ -752,11 +833,18 @@
             
             if (heroSection) {
                 heroSection.innerHTML = `
-                    <div style="padding: 40px; text-align: center; color: white;">
+                    <div style="padding: 40px; text-align: center; color: white; background: linear-gradient(135deg, #f43f5e, #ef4444); border-radius: 8px; margin: 20px;">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 16px; opacity: 0.8;">
                             <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <h2 style="margin-bottom: 8px;">${message}</h2>
+                        <h2 style="margin-bottom: 8px; font-size: 24px;">${message}</h2>
+                        <p style="margin-bottom: 24px; opacity: 0.8;">There was a problem loading the profile data.</p>
+                        <a href="connect.html" class="btn-primary" style="background: white; color: #ef4444; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Back to Connect
+                        </a>
                     </div>
                 `;
             }
@@ -764,6 +852,9 @@
             if (contentContainer) {
                 contentContainer.innerHTML = '';
             }
+            
+            // Also log to console for debugging
+            console.error('Error shown to user:', message);
         }
         
         // Initialize portfolio navigation

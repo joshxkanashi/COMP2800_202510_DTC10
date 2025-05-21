@@ -154,27 +154,50 @@
   width: 120px;
   height: 120px;
   font-size: 42px;
-  position: relative;
-  overflow: hidden;
-  border-radius: 50%;
-  background-color: var(--primary-light);
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary-light), var(--primary));
+  color: white;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
-/* Profile image within avatar */
 .avatar.large img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+}
+
+/* Improved loading animation for avatar */
+.avatar.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    var(--primary-light) 25%, 
+    var(--primary) 50%, 
+    var(--primary-light) 75%);
+  background-size: 200% 100%;
+  animation: avatarLoading 1.5s infinite;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Hide content during loading */
+.avatar.loading > *:not(img) {
+  opacity: 0;
 }
 
 /* Edit mode avatar styles */

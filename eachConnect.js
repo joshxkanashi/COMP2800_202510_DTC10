@@ -10,7 +10,7 @@ const createProfileCard = (profile) => {
 	const card = document.createElement('div');
 	card.className = 'connect-card';
 
-	// Get first letter of name for avatar
+	// Get first letter of name for avatar fallback
 	const firstLetter = profile.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U';
 	
 	// Create a random array of skills for demo purposes
@@ -22,9 +22,22 @@ const createProfileCard = (profile) => {
 		randomSkills.push(skillsList[randomIndex]);
 	}
 	
+	// Create avatar element with profile picture or fallback to first letter
+	let avatarContent = '';
+	let avatarClass = 'connect-avatar';
+	
+	if (profile.avatar_url) {
+		avatarClass += ' loading'; // Add loading class until image loads
+		avatarContent = `<img src="${profile.avatar_url}" alt="${profile.full_name || 'User'}" 
+			onload="this.parentNode.classList.remove('loading')" 
+			onerror="this.style.display='none'; this.parentNode.textContent='${firstLetter}'; this.parentNode.classList.remove('loading');">`;
+	} else {
+		avatarContent = firstLetter;
+	}
+	
 	// Create card content
 	card.innerHTML = `
-		<div class="connect-avatar">${firstLetter}</div>
+		<div class="${avatarClass}">${avatarContent}</div>
 		<div class="connect-info">
 			<h3 class="connect-name">${profile.full_name || 'Anonymous User'}</h3>
 			<p class="connect-role">${profile.email || ''}</p>
@@ -45,16 +58,21 @@ const createProfileCard = (profile) => {
 
 	// Add click event listener
 	card.addEventListener('click', () => {
-		// Remove any existing selected profile data to avoid caching issues
-		localStorage.removeItem('selectedProfileId');
+		// Clear any cached data to ensure fresh load
+		localStorage.removeItem('profileData');
+		localStorage.removeItem('cachedPortfolioData');
+		localStorage.removeItem('cachedProfileData');
 		
 		// Store the profile ID in localStorage for the next page
 		localStorage.setItem('selectedProfileId', profile.id);
 		
-		// Add a timestamp to force a fresh load and prevent caching
+		// Also store the timestamp to force a fresh load 
 		localStorage.setItem('profileLoadTimestamp', Date.now());
 		
-		// Navigate to the profile page
+		// Log the action for debugging
+		console.log('Selected profile:', profile.id, 'Navigating to profile page...');
+		
+		// Navigate to the profile page with cache-busting parameter
 		window.location.href = 'eachConnectLanding.html?nocache=' + Date.now();
 	});
 
@@ -143,12 +161,15 @@ const getUsers = async () => {
 		const timestamp = new Date().getTime();
 		
 		// Fetch user profiles with a timestamp to prevent caching
+		// Make sure to specifically select avatar_url field
 		const { data: profiles, error } = await supabase
 			.from('profiles')
-			.select('*')
+			.select('id, full_name, email, city, avatar_url, created_at')
 			.order('created_at', { ascending: false });
 			
 		if (error) throw error;
+		
+		console.log('Loaded profiles:', profiles); // For debugging
 		
 		// Store profiles globally for filtering
 		allProfiles = profiles || [];

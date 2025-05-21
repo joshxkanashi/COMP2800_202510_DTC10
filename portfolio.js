@@ -4130,20 +4130,46 @@ async function saveFeaturedProjects() {
       // Set avatar circle to first letter of full name or load profile image
       const profileAvatar = document.getElementById("profileAvatar");
       if (profileAvatar) {
+        // Always start with loading state and empty content
+        profileAvatar.innerHTML = '';
+        profileAvatar.classList.add('loading');
+        
         // If we have an avatar URL from the profile and the column exists, use it
         if (hasAvatarColumn && profile?.avatar_url) {
-          let avatarImg = profileAvatar.querySelector("img");
+          // Pre-load image before inserting into DOM
+          const tempImg = new Image();
+          tempImg.src = profile.avatar_url;
           
-          if (!avatarImg) {
-            avatarImg = document.createElement("img");
+          // Handle successful load
+          tempImg.onload = () => {
+            const avatarImg = document.createElement("img");
+            avatarImg.src = profile.avatar_url;
+            avatarImg.alt = profile?.full_name || "Profile Picture";
             profileAvatar.appendChild(avatarImg);
-          }
+            
+            // Remove loading class with slight delay to ensure smooth transition
+            setTimeout(() => {
+              profileAvatar.classList.remove('loading');
+            }, 100);
+          };
           
-          avatarImg.src = profile.avatar_url;
+          // Handle load error
+          tempImg.onerror = () => {
+            // If image fails to load, show first letter of name
+            const initials = (profile?.full_name || user.email || 'U')[0].toUpperCase();
+            // Insert initials after loading animation completes
+            setTimeout(() => {
+              profileAvatar.textContent = initials;
+              profileAvatar.classList.remove('loading');
+            }, 200);
+          };
         } else {
-          // Otherwise, use the initials
-    const initials = (profile?.full_name || user.email || 'U')[0].toUpperCase();
-          profileAvatar.textContent = initials;
+          // Otherwise, use the initials but wait for animation to complete
+          setTimeout(() => {
+            const initials = (profile?.full_name || user.email || 'U')[0].toUpperCase();
+            profileAvatar.textContent = initials;
+            profileAvatar.classList.remove('loading');
+          }, 200);
         }
       }
 

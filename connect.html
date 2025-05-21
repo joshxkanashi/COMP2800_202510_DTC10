@@ -14,6 +14,37 @@
     <script type="module" src="connectChat.js"></script>
     <style>
         /* Connect page specific styles */
+        .search-icon2 {
+            position: absolute;
+            left: 20px;
+            top: 52%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            transition: color 0.3s ease;
+            z-index: 2;
+            pointer-events: none;
+            }
+
+        .search-button2 {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+            z-index: 3;
+            }
+        
         .connect-hero {
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border-radius: 24px;
@@ -553,10 +584,22 @@
 
             <div class="connect-search-container">
                 <div class="search-container">
+<<<<<<< HEAD
                     <input type="text" id="connectSearchInput" placeholder="Search by name, skills, or location">
                     <button id="connectSearchButton">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M15 15L21 21M10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10C17 13.866 13.866 17 10 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+=======
+                    <span class="search-icon2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="connectSearchInput" class="search-input" placeholder="Search developers by name, skills or location" aria-label="Search for developers">
+                    <button class="search-button2" id="connectSearchButton" aria-label="Search">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+>>>>>>> 44e60fad40d6580337322137e53c72a2761749c1
                         </svg>
                     </button>
                 </div>

@@ -753,6 +753,78 @@
     <script type="module">
         import { supabase } from './supabaseAPI.js';
 
+        // Function to increment portfolio view count
+        async function incrementPortfolioViewCount(userId) {
+            // Check if this portfolio has been viewed in the current session
+            const viewedPortfolios = JSON.parse(sessionStorage.getItem('viewedPortfolios') || '[]');
+            
+            if (!viewedPortfolios.includes(userId)) {
+                try {
+                    // First check if portfolio exists
+                    const { data: portfolio, error: getError } = await supabase
+                        .from('portfolios')
+                        .select('view_count')
+                        .eq('user_id', userId)
+                        .single();
+
+                    if (getError && getError.code === 'PGRST116') {
+                        // Portfolio doesn't exist, create it
+                        const { error: createError } = await supabase
+                            .from('portfolios')
+                            .insert([
+                                { 
+                                    user_id: userId,
+                                    view_count: 1,
+                                    data: {} // Initialize with empty data object
+                                }
+                            ]);
+                        
+                        if (createError) throw createError;
+                        
+                        // Add to viewed portfolios for this session
+                        viewedPortfolios.push(userId);
+                        sessionStorage.setItem('viewedPortfolios', JSON.stringify(viewedPortfolios));
+                        
+                        console.log(`Created new portfolio for ${userId} with initial view count of 1`);
+                        
+                        // Update the view count display if it exists
+                        const viewCountElement = document.querySelector('.portfolio-view-count');
+                        if (viewCountElement) {
+                            viewCountElement.textContent = 1;
+                        }
+                        return;
+                    } else if (getError) {
+                        throw getError;
+                    }
+                    
+                    // Portfolio exists, increment view count
+                    const currentCount = portfolio?.view_count || 0;
+                    const newCount = currentCount + 1;
+                    
+                    const { error: updateError } = await supabase
+                        .from('portfolios')
+                        .update({ view_count: newCount })
+                        .eq('user_id', userId);
+                        
+                    if (updateError) throw updateError;
+                    
+                    // Add to viewed portfolios for this session
+                    viewedPortfolios.push(userId);
+                    sessionStorage.setItem('viewedPortfolios', JSON.stringify(viewedPortfolios));
+                    
+                    console.log(`Incremented view count for portfolio ${userId} to ${newCount}`);
+                    
+                    // Update the view count display if it exists
+                    const viewCountElement = document.querySelector('.portfolio-view-count');
+                    if (viewCountElement) {
+                        viewCountElement.textContent = newCount;
+                    }
+                } catch (error) {
+                    console.error('Error incrementing view count:', error);
+                }
+            }
+        }
+
         // Load profile data from Supabase
         async function loadUserProfile() {
             // Get the profile ID from localStorage
@@ -869,6 +941,7 @@
                 
                 // We have some portfolio data, render it
                 console.log('Final portfolio data being rendered:', portfolioData);
+                await incrementPortfolioViewCount(selectedProfileId);
                 renderProfileHeader(profile, portfolioData);
                 await renderPortfolioContent(portfolioData);
                 

@@ -125,11 +125,11 @@ async function loadStats(userId) {
             .select('id')
             .eq('user_id', userId);
 
-        // Get profile views
-        const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
+        // Get portfolio views
+        const { data: portfolioData, error: portfolioError } = await supabase
+            .from('portfolios')
             .select('view_count')
-            .eq('id', userId)
+            .eq('user_id', userId)
             .single();
 
         // Update project stats
@@ -147,8 +147,8 @@ async function loadStats(userId) {
             projectStatChange.textContent = `+${Math.floor(projectCount * 0.2)} compared to last month`;
         }
 
-        // Update profile view stats
-        const viewCount = profileData?.view_count || 0;
+        // Update portfolio view stats
+        const viewCount = portfolioData?.view_count || 0;
         const viewStatValue = document.querySelector('.stat-card:nth-of-type(2) .stat-value');
         const viewStatChange = document.querySelector('.stat-card:nth-of-type(2) .stat-change');
         
@@ -158,8 +158,7 @@ async function loadStats(userId) {
         }
         
         if (viewStatChange) {
-            // Demo value - in a real app, you would calculate this from historical data
-            viewStatChange.textContent = `+50% compared to last month`;
+            viewStatChange.textContent = `Portfolio Views`;
         }
     } catch (error) {
         console.error('Error loading stats:', error);

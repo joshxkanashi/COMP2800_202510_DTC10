@@ -474,22 +474,42 @@ function subscribeToMessages(conversationId) {
             messageSubscription.unsubscribe();
         }
         
-        // Create new subscription
+        // Create new subscription with explicit channel name and table
         messageSubscription = supabase
             .channel(`messages:${conversationId}`)
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'messages',
-                filter: `conversation_id=eq.${conversationId}`
-            }, handleNewMessage)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `conversation_id=eq.${conversationId}`
+                },
+                (payload) => {
+                    console.log('Real-time message received:', payload);
+                    handleNewMessage(payload);
+                }
+            )
             .subscribe((status) => {
                 console.log('Message subscription status:', status);
+                if (status === 'SUBSCRIBED') {
+                    console.log('Successfully subscribed to message updates');
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error('Error subscribing to message updates');
+                    // Try to resubscribe after a delay
+                    setTimeout(() => {
+                        subscribeToMessages(conversationId);
+                    }, 5000);
+                }
             });
             
         console.log('Subscribed to message updates');
     } catch (error) {
         console.error('Error subscribing to messages:', error);
+        // Try to resubscribe after a delay
+        setTimeout(() => {
+            subscribeToMessages(conversationId);
+        }, 5000);
     }
 }
 

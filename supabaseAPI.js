@@ -23,27 +23,34 @@ console.error = (...args) => {
 let supabase;
 
 try {
+    const supabaseOptions = {
+        realtime: {
+            params: {
+                eventsPerSecond: 10
+            },
+            heartbeat: {
+                interval: 5000,
+                maxRetries: 10
+            }
+        },
+        db: {
+            schema: 'public'
+        },
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true
+        }
+    };
+
     // For browsers using the global Supabase client (script tag)
     if (typeof window !== 'undefined' && window.supabase) {
         console.log('Creating Supabase client using global createClient');
-        supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
-            realtime: {
-                params: {
-                    eventsPerSecond: 10
-                }
-            }
-        });
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey, supabaseOptions);
     } 
     // For module environments
     else if (typeof createClient !== 'undefined') {
         console.log('Creating Supabase client using direct createClient');
-        supabase = createClient(supabaseUrl, supabaseKey, {
-            realtime: {
-                params: {
-                    eventsPerSecond: 10
-                }
-            }
-        });
+        supabase = createClient(supabaseUrl, supabaseKey, supabaseOptions);
     }
     // Try importing as a module (for Node.js or bundlers)
     else {
@@ -54,13 +61,7 @@ try {
         import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm')
             .then(module => {
                 const { createClient } = module;
-                supabase = createClient(supabaseUrl, supabaseKey, {
-                    realtime: {
-                        params: {
-                            eventsPerSecond: 10
-                        }
-                    }
-                });
+                supabase = createClient(supabaseUrl, supabaseKey, supabaseOptions);
                 console.log('Supabase client initialized via dynamic import');
             })
             .catch(error => {

@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Load chat module first to ensure it's available -->
+    <script type="module" src="connectChat.js"></script>
     <style>
         /* Connect page specific styles */
         .connect-hero {
@@ -240,6 +242,301 @@
                 background-position: -200% 0;
             }
         }
+
+        /* Chat styles */
+        .chat-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .chat-container {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            height: 80vh;
+            max-height: 700px;
+            border-radius: 16px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .chat-modal.open .chat-container {
+            transform: translateY(0);
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+        
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chat-header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .chat-header-info {
+            flex: 1;
+        }
+        
+        .chat-header-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .chat-header-status {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .chat-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background-color: var(--gray-50);
+        }
+        
+        .chat-message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            position: relative;
+            color: var(--dark);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .chat-message.sent {
+            align-self: flex-end;
+            background-color: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .chat-message.received {
+            align-self: flex-start;
+            background-color: white;
+            border: 1px solid var(--gray-200);
+            border-bottom-left-radius: 4px;
+        }
+        
+        .chat-message-time {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .chat-input-container {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-top: 1px solid var(--gray-200);
+            background-color: white;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--gray-200);
+            border-radius: 24px;
+            outline: none;
+            font-family: inherit;
+            resize: none;
+            font-size: 14px;
+            background-color: var(--gray-50);
+            transition: all 0.2s ease;
+        }
+        
+        .chat-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .chat-send {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .chat-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.2);
+        }
+        
+        .chat-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .chat-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--gray-500);
+            text-align: center;
+            padding: 0 24px;
+        }
+        
+        .chat-empty svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            color: var(--gray-300);
+        }
+        
+        .chat-empty h3 {
+            margin-bottom: 8px;
+            color: var(--gray-700);
+        }
+        
+        .connect-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .connect-message-btn {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .connect-message-btn:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            margin-top: -8px;
+            margin-bottom: 8px;
+            opacity: 0.7;
+            font-size: 12px;
+        }
+        
+        .typing-dots {
+            display: flex;
+            margin-left: 8px;
+        }
+        
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background-color: currentColor;
+            border-radius: 50%;
+            margin-right: 3px;
+            animation: typingDot 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typingDot {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-4px);
+            }
+        }
     </style>
 </head>
 
@@ -249,155 +546,110 @@
         <script type="module" src="navbar.js"></script>
 
         <main class="container">
-            <!-- Hero section -->
-            <div class="connect-hero">
-                <h1>Connect with Fellow Developers</h1>
-                <p>Discover and connect with developers who share your interests and skills</p>
-            </div>
-            
-            <!-- Search section -->
+            <section class="connect-hero">
+                <h1>Find and Connect with Developers</h1>
+                <p>Discover talented developers, view their portfolios, and connect with them for your next project or collaboration</p>
+            </section>
+
             <div class="connect-search-container">
                 <div class="search-container">
-                    <span class="search-icon">
+                    <input type="text" id="connectSearchInput" placeholder="Search by name, skills, or location">
+                    <button id="connectSearchButton">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="connectSearchInput" class="search-input" placeholder="Search developers by name, skills or location" aria-label="Search for developers">
-                    <button class="search-button" id="connectSearchButton" aria-label="Search">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15 15L21 21M10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10C17 13.866 13.866 17 10 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
                 </div>
-                
-                <!-- Filters -->
+
                 <div class="connect-filters">
-                    <div class="connect-filter active" data-filter="all">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 4.5H21M3 12H21M3 19.5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <button class="connect-filter active" data-filter="all">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6H21M3 12H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         All Developers
-                    </div>
-                    <div class="connect-filter" data-filter="frontend">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </button>
+                    <button class="connect-filter" data-filter="frontend">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8.5 12H15.5M6.5 15.5H17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         Frontend
-                    </div>
-                    <div class="connect-filter" data-filter="backend">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 12V8H8V12M20 12V16H8V12M20 12H8M4 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </button>
+                    <button class="connect-filter" data-filter="backend">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19.3 7.91998V13.07C19.3 16.15 17.54 17.47 14.9 17.47H6.11C5.4 17.47 4.75 17.38 4.18 17.19C3.88 17.1 3.6 16.99 3.35 16.85C2.21 16.2 1.6 14.99 1.6 13.07V7.91998C1.6 4.83998 3.36 3.52002 6 3.52002H14.9C17.54 3.52002 19.3 4.83998 19.3 7.91998Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22.4001 10.9V16.05C22.4001 19.13 20.6401 20.4501 18.0001 20.4501H9.2101C7.9301 20.4501 6.88006 20.2101 6.12006 19.6701C5.37006 19.1301 4.90009 18.2701 4.80009 17.1901C5.37009 17.3801 6.02007 17.4701 6.73007 17.4701H15.5201C18.1601 17.4701 19.9201 16.1501 19.9201 13.0701V7.9201C19.9201 5.9301 19.0701 4.58009 17.5901 3.89009C17.8501 3.79009 18.1401 3.73006 18.4601 3.73006H18.0001C20.6401 3.73006 22.4001 5.05004 22.4001 8.13004V10.9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10.4945 9.01001L7.55444 11.95L10.4945 14.89" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M13.8801 9.01001L16.8201 11.95L13.8801 14.89" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         Backend
-                    </div>
-                    <div class="connect-filter" data-filter="fullstack">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </button>
+                    <button class="connect-filter" data-filter="fullstack">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 7C22 4 20 2 17 2H7C4 2 2 4 2 7V13C2 16 4 18 7 18H17C20 18 22 16 22 13V7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 22V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 13V17C2 19.8 4.2 22 7 22H17C19.8 22 22 19.8 22 17V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7.5 11L10.65 8.37C10.9 8.16 11.23 8.22 11.4 8.5L12.6 10.5C12.77 10.78 13.1 10.83 13.35 10.63L16.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         Full Stack
-                    </div>
-                    <div class="connect-filter" data-filter="mobile">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 18V18.01M7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </button>
+                    <button class="connect-filter" data-filter="mobile">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 2V22M15 18H2.5V14L6.5 12L2.5 10V6H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M18.5 14H21.5M18.5 18H21.5M18.5 6H21.5M18.5 10H21.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         Mobile
-                    </div>
+                    </button>
                 </div>
             </div>
 
-            <!-- Cards Container -->
             <div id="cardsContainer" class="connect-grid">
-                <!-- Loading indicator (will be replaced by actual cards) -->
-                <div class="loading-container" style="grid-column: 1/-1; text-align: center; padding: 40px;">
-                    <div class="loading"></div>
-                    <p style="margin-top: 16px; color: var(--gray-500);">Loading developers...</p>
+                <!-- Cards will be loaded here dynamically -->
+            </div>
+        </main>
+
+        <!-- Chat Modal -->
+        <div id="chatModal" class="chat-modal">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-header-avatar" id="chatHeaderAvatar">U</div>
+                    <div class="chat-header-info">
+                        <div class="chat-header-name" id="chatHeaderName">User</div>
+                        <div class="chat-header-status">Developer</div>
+                    </div>
+                    <button class="chat-close" id="chatClose">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <div class="chat-empty" id="chatEmpty">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 12H8.01M12 12H12.01M16 12H16.01M22 12C22 16.4183 17.5228 20 12 20C10.4178 20 8.91172 19.6919 7.57487 19.1449C5.20832 19.8072 2.5 19.9389 2.5 19.9389C2.5 19.9389 3.95023 18.0571 4.54963 16.5C3.02501 15.0143 2 13.1218 2 11C2 6.58172 6.47715 3 12 3C17.5228 3 22 6.58172 22 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3>No messages yet</h3>
+                    <p>Start the conversation by saying hello!</p>
+                </div>
+                <div class="chat-input-container">
+                    <textarea id="chatInput" class="chat-input" placeholder="Type a message..."></textarea>
+                    <button id="chatSend" class="chat-send" disabled>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
-
-            <!-- Bottom Navigation -->
-            <nav class="bottom-nav">
-                <a href="index.html" class="nav-item" aria-label="Home">
-                    <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <span>Home</span>
-                </a>
-                <a href="portfolio.html" class="nav-item" aria-label="Portfolio">
-                    <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <span>Portfolio</span>
-                </a>
-                <a href="projects.html" class="nav-item" aria-label="Projects">
-                    <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 14L18 11L15 14M18 11V17M10 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3H14C15.1046 3 16 3.89543 16 5V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <span>Projects</span>
-                </a>
-                <a href="connect.html" class="nav-item active" aria-label="Connect">
-                    <div class="nav-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <span>Connect</span>
-                </a>
-            </nav>
-        </main>
+        </div>
     </div>
+
+    <!-- First load the supabaseAPI.js as a module -->
+    <script type="module" src="supabaseAPI.js"></script>
     
+    <!-- Then load the eachConnect.js file -->
     <script type="module" src="eachConnect.js"></script>
-    <script type="module">
-        // Connect page specific script
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle filter clicks
-            const filters = document.querySelectorAll('.connect-filter');
-            filters.forEach(filter => {
-                filter.addEventListener('click', function() {
-                    // Toggle active class
-                    filters.forEach(f => f.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Get filter value
-                    const filterValue = this.getAttribute('data-filter');
-                    console.log('Filter selected:', filterValue);
-                    // In a real app, you would filter the cards based on this value
-                });
-            });
-            
-            // Handle search
-            const searchInput = document.getElementById('connectSearchInput');
-            const searchButton = document.getElementById('connectSearchButton');
-            
-            const performSearch = () => {
-                const searchTerm = searchInput.value.trim().toLowerCase();
-                console.log('Searching for:', searchTerm);
-                // In a real app, you would filter the cards based on this search term
-            };
-            
-            if (searchButton) {
-                searchButton.addEventListener('click', performSearch);
-            }
-            
-            if (searchInput) {
-                searchInput.addEventListener('keyup', (e) => {
-                    if (e.key === 'Enter') {
-                        performSearch();
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 
 </html>

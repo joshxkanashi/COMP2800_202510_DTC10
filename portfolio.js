@@ -862,6 +862,197 @@ document.addEventListener("DOMContentLoaded", function () {
           
           editControls.insertBefore(reorderButton, cancelEditButton);
         }
+        
+        // Show all add item buttons in dynamic sections
+        document.querySelectorAll('.portfolio-section .add-item-button').forEach(button => {
+          button.style.display = "flex";
+          
+          // Ensure add buttons in all dynamic sections work after refresh
+          if (button.closest('.portfolio-section[data-section-type="education"]') || 
+              button.closest('.portfolio-section[data-section-type="experience"]') || 
+              button.closest('.portfolio-section[data-section-type="skills"]')) {
+            
+            // Reset the button by cloning it to remove any stale event handlers
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            // Set the appropriate handler based on section type
+            const section = newButton.closest('.portfolio-section');
+            if (section.dataset.sectionType === "education") {
+              newButton.addEventListener("click", function() {
+                const timelineContainer = section.querySelector(".timeline");
+                if (!timelineContainer) return;
+                
+                const items = timelineContainer.querySelectorAll(".timeline-item");
+                const newItemId = `edu_${section.id}_${items.length + 1}`;
+                
+                const newItem = document.createElement("div");
+                newItem.className = "timeline-item new-item";
+                newItem.dataset.itemId = newItemId;
+                
+                newItem.innerHTML = `
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-date editable-content" data-field="${newItemId}_date">Enter date...</div>
+                  <div class="timeline-content">
+                    <h3 class="timeline-title editable-content" data-field="${newItemId}_degree">Enter degree/certification...</h3>
+                    <p class="timeline-subtitle editable-content" data-field="${newItemId}_school">Enter school/institution...</p>
+                    <p class="timeline-description editable-content" data-field="${newItemId}_description">Enter description...</p>
+                  </div>
+                `;
+                
+                timelineContainer.appendChild(newItem);
+                
+                // Add delete button
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "delete-item-button";
+                deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                deleteButton.setAttribute("type", "button");
+                deleteButton.setAttribute("aria-label", "Delete item");
+                
+                deleteButton.addEventListener("click", function () {
+                  if (confirm("Are you sure you want to delete this item?")) {
+                    newItem.remove();
+                  }
+                });
+                
+                newItem.prepend(deleteButton);
+                
+                // Make new elements editable
+                const editableElements = newItem.querySelectorAll(".editable-content");
+                editableElements.forEach((element) => {
+                  element.setAttribute("contenteditable", "true");
+                  element.setAttribute("spellcheck", "true");
+                  element.classList.add("edit-placeholder");
+                  element.addEventListener("focus", handleElementFocus);
+                  element.addEventListener("blur", handleElementBlur);
+                });
+                
+                editableElements[0].focus();
+              });
+            } else if (section.dataset.sectionType === "experience") {
+              newButton.addEventListener("click", function() {
+                const timelineContainer = section.querySelector(".timeline");
+                if (!timelineContainer) return;
+                
+                const items = timelineContainer.querySelectorAll(".timeline-item");
+                const newItemId = `exp_${section.id}_${items.length + 1}`;
+                
+                const newItem = document.createElement("div");
+                newItem.className = "timeline-item new-item";
+                newItem.dataset.itemId = newItemId;
+                
+                newItem.innerHTML = `
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-date editable-content" data-field="${newItemId}_date">Enter date...</div>
+                  <div class="timeline-content">
+                    <h3 class="timeline-title editable-content" data-field="${newItemId}_title">Enter job title...</h3>
+                    <p class="timeline-subtitle editable-content" data-field="${newItemId}_company">Enter company...</p>
+                    <p class="timeline-description editable-content" data-field="${newItemId}_description">Enter job description...</p>
+                  </div>
+                `;
+                
+                timelineContainer.appendChild(newItem);
+                
+                // Add delete button
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "delete-item-button";
+                deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                deleteButton.setAttribute("type", "button");
+                deleteButton.setAttribute("aria-label", "Delete item");
+                
+                deleteButton.addEventListener("click", function () {
+                  if (confirm("Are you sure you want to delete this item?")) {
+                    newItem.remove();
+                  }
+                });
+                
+                newItem.prepend(deleteButton);
+                
+                // Make new elements editable
+                const editableElements = newItem.querySelectorAll(".editable-content");
+                editableElements.forEach((element) => {
+                  element.setAttribute("contenteditable", "true");
+                  element.setAttribute("spellcheck", "true");
+                  element.classList.add("edit-placeholder");
+                  element.addEventListener("focus", handleElementFocus);
+                  element.addEventListener("blur", handleElementBlur);
+                });
+                
+                editableElements[0].focus();
+              });
+            } else if (section.dataset.sectionType === "skills") {
+              newButton.addEventListener("click", function() {
+                const skillsGrid = section.querySelector(".skill-grid");
+                if (!skillsGrid) return;
+                
+                const items = skillsGrid.querySelectorAll(".skill-item");
+                const newItemId = `skill_${section.id}_${items.length + 1}`;
+                
+                const newItem = document.createElement("div");
+                newItem.className = "skill-item new-item";
+                newItem.dataset.itemId = newItemId;
+                
+                newItem.innerHTML = `
+                  <div class="skill-progress" data-progress="50">
+                    <div class="skill-progress-bar" style="width: 50%"></div>
+                  </div>
+                  <div class="skill-info">
+                    <span class="skill-name editable-content" data-field="${newItemId}_name">Enter skill name...</span>
+                    <span class="skill-level editable-content" data-field="${newItemId}_level">Intermediate</span>
+                  </div>
+                `;
+                
+                skillsGrid.appendChild(newItem);
+                
+                // Add delete button
+                const deleteButton = document.createElement("button");
+                deleteButton.className = "delete-item-button";
+                deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                deleteButton.setAttribute("type", "button");
+                deleteButton.setAttribute("aria-label", "Delete item");
+                
+                deleteButton.addEventListener("click", function () {
+                  if (confirm("Are you sure you want to delete this skill?")) {
+                    newItem.remove();
+                  }
+                });
+                
+                newItem.appendChild(deleteButton);
+                
+                // Add progress editor
+                const progressBar = newItem.querySelector(".skill-progress");
+                const editor = document.createElement("div");
+                editor.className = "progress-editor";
+                editor.innerHTML = `
+                  <input type="number" min="0" max="100" value="50" aria-label="Skill progress percentage">
+                  <button type="button">Set</button>
+                `;
+                
+                editor.querySelector("button").addEventListener("click", function () {
+                  const input = editor.querySelector("input");
+                  const newProgress = Math.min(100, Math.max(0, parseInt(input.value) || 0));
+                  progressBar.setAttribute("data-progress", newProgress);
+                  const progressBarFill = newItem.querySelector(".skill-progress-bar");
+                  progressBarFill.style.width = `${newProgress}%`;
+                });
+                
+                newItem.appendChild(editor);
+                
+                // Make new elements editable
+                const editableElements = newItem.querySelectorAll(".editable-content");
+                editableElements.forEach((element) => {
+                  element.setAttribute("contenteditable", "true");
+                  element.setAttribute("spellcheck", "true");
+                  element.classList.add("edit-placeholder");
+                  element.addEventListener("focus", handleElementFocus);
+                  element.addEventListener("blur", handleElementBlur);
+                });
+                
+                editableElements[0].focus();
+              });
+            }
+          }
+        });
       }
     }
 
@@ -2308,6 +2499,9 @@ async function saveFeaturedProjects() {
       // Setup action buttons for the new section
       setupSectionActionButtons(newSection);
       
+      // Setup event listeners for "Add" buttons in the new section
+      setupAddButtonsInNewSection(newSection, sectionId);
+      
       // Update section order
       updateSectionOrder();
       
@@ -2357,6 +2551,274 @@ async function saveFeaturedProjects() {
           newSection.classList.remove("adding");
         }, 500);
       }, 100);
+    }
+    
+    // New function to set up "Add" buttons in newly created sections
+    function setupAddButtonsInNewSection(newSection, sectionId) {
+      // For Education section
+      if (newSection.dataset.sectionType === "education") {
+        const addEducationBtn = newSection.querySelector(".add-item-button");
+        if (addEducationBtn) {
+          // First remove any existing listeners to avoid duplicates
+          if (addEducationBtn._clickHandler) {
+            addEducationBtn.removeEventListener("click", addEducationBtn._clickHandler);
+          }
+          
+          // Create and store handler function
+          addEducationBtn._clickHandler = function() {
+            const timelineContainer = newSection.querySelector(".timeline");
+            if (!timelineContainer) return;
+            
+            const items = timelineContainer.querySelectorAll(".timeline-item");
+            const newItemId = `edu_${sectionId}_${items.length + 1}`;
+            
+            // Create new timeline item with unique ID
+            const newItem = document.createElement("div");
+            newItem.className = "timeline-item new-item";
+            newItem.dataset.itemId = newItemId;
+            
+            newItem.innerHTML = `
+              <div class="timeline-dot"></div>
+              <div class="timeline-date editable-content" data-field="${newItemId}_date">Enter date...</div>
+              <div class="timeline-content">
+                <h3 class="timeline-title editable-content" data-field="${newItemId}_degree">Enter degree/certification...</h3>
+                <p class="timeline-subtitle editable-content" data-field="${newItemId}_school">Enter school/institution...</p>
+                <p class="timeline-description editable-content" data-field="${newItemId}_description">Enter description...</p>
+              </div>
+            `;
+            
+            timelineContainer.appendChild(newItem);
+            
+            // Add delete button to new item
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-item-button";
+            deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            deleteButton.setAttribute("type", "button");
+            deleteButton.setAttribute("aria-label", "Delete item");
+            
+            // Add click handler for delete
+            deleteButton.addEventListener("click", function () {
+              if (confirm("Are you sure you want to delete this item?")) {
+                newItem.remove();
+              }
+            });
+            
+            newItem.prepend(deleteButton);
+            
+            // Make new elements editable
+            const editableElements = newItem.querySelectorAll(".editable-content");
+            editableElements.forEach((element) => {
+              element.setAttribute("contenteditable", "true");
+              element.setAttribute("spellcheck", "true");
+              
+              // Add placeholder styles
+              element.classList.add("edit-placeholder");
+              
+              // Handle focus to remove placeholder
+              element.addEventListener("focus", handleElementFocus);
+              
+              // Handle blur to restore placeholder if empty
+              element.addEventListener("blur", handleElementBlur);
+            });
+            
+            // Focus the first editable element
+            editableElements[0].focus();
+          };
+          
+          // Add event listener
+          addEducationBtn.addEventListener("click", addEducationBtn._clickHandler);
+          
+          // Make button visible in edit mode
+          if (isEditMode) {
+            addEducationBtn.style.display = "flex";
+          }
+        }
+      }
+      
+      // For Experience section
+      if (newSection.dataset.sectionType === "experience") {
+        const addExperienceBtn = newSection.querySelector(".add-item-button");
+        if (addExperienceBtn) {
+          // First remove any existing listeners to avoid duplicates
+          if (addExperienceBtn._clickHandler) {
+            addExperienceBtn.removeEventListener("click", addExperienceBtn._clickHandler);
+          }
+          
+          // Create and store handler function
+          addExperienceBtn._clickHandler = function() {
+            const timelineContainer = newSection.querySelector(".timeline");
+            if (!timelineContainer) return;
+            
+            const items = timelineContainer.querySelectorAll(".timeline-item");
+            const newItemId = `exp_${sectionId}_${items.length + 1}`;
+            
+            // Create new timeline item with unique ID
+            const newItem = document.createElement("div");
+            newItem.className = "timeline-item new-item";
+            newItem.dataset.itemId = newItemId;
+            
+            newItem.innerHTML = `
+              <div class="timeline-dot"></div>
+              <div class="timeline-date editable-content" data-field="${newItemId}_date">Enter date...</div>
+              <div class="timeline-content">
+                <h3 class="timeline-title editable-content" data-field="${newItemId}_title">Enter job title...</h3>
+                <p class="timeline-subtitle editable-content" data-field="${newItemId}_company">Enter company...</p>
+                <p class="timeline-description editable-content" data-field="${newItemId}_description">Enter job description...</p>
+              </div>
+            `;
+            
+            timelineContainer.appendChild(newItem);
+            
+            // Add delete button to new item
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-item-button";
+            deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            deleteButton.setAttribute("type", "button");
+            deleteButton.setAttribute("aria-label", "Delete item");
+            
+            // Add click handler for delete
+            deleteButton.addEventListener("click", function () {
+              if (confirm("Are you sure you want to delete this item?")) {
+                newItem.remove();
+              }
+            });
+            
+            newItem.prepend(deleteButton);
+            
+            // Make new elements editable
+            const editableElements = newItem.querySelectorAll(".editable-content");
+            editableElements.forEach((element) => {
+              element.setAttribute("contenteditable", "true");
+              element.setAttribute("spellcheck", "true");
+              
+              // Add placeholder styles
+              element.classList.add("edit-placeholder");
+              
+              // Handle focus to remove placeholder
+              element.addEventListener("focus", handleElementFocus);
+              
+              // Handle blur to restore placeholder if empty
+              element.addEventListener("blur", handleElementBlur);
+            });
+            
+            // Focus the first editable element
+            editableElements[0].focus();
+          };
+          
+          // Add event listener
+          addExperienceBtn.addEventListener("click", addExperienceBtn._clickHandler);
+          
+          // Make button visible in edit mode
+          if (isEditMode) {
+            addExperienceBtn.style.display = "flex";
+          }
+        }
+      }
+      
+      // For Skills section
+      if (newSection.dataset.sectionType === "skills") {
+        const addSkillBtn = newSection.querySelector(".add-item-button");
+        if (addSkillBtn) {
+          // First remove any existing listeners to avoid duplicates
+          if (addSkillBtn._clickHandler) {
+            addSkillBtn.removeEventListener("click", addSkillBtn._clickHandler);
+          }
+          
+          // Create and store handler function
+          addSkillBtn._clickHandler = function() {
+            const skillsGrid = newSection.querySelector(".skill-grid");
+            if (!skillsGrid) return;
+            
+            const items = skillsGrid.querySelectorAll(".skill-item");
+            const newItemId = `skill_${sectionId}_${items.length + 1}`;
+            
+            // Create new skill item with unique ID
+            const newItem = document.createElement("div");
+            newItem.className = "skill-item new-item";
+            newItem.dataset.itemId = newItemId;
+            
+            newItem.innerHTML = `
+              <div class="skill-progress" data-progress="50">
+                <div class="skill-progress-bar" style="width: 50%"></div>
+              </div>
+              <div class="skill-info">
+                <span class="skill-name editable-content" data-field="${newItemId}_name">Enter skill name...</span>
+                <span class="skill-level editable-content" data-field="${newItemId}_level">Intermediate</span>
+              </div>
+            `;
+            
+            skillsGrid.appendChild(newItem);
+            
+            // Add delete button to new item
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-item-button";
+            deleteButton.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            deleteButton.setAttribute("type", "button");
+            deleteButton.setAttribute("aria-label", "Delete item");
+            
+            // Add click handler for delete
+            deleteButton.addEventListener("click", function () {
+              if (confirm("Are you sure you want to delete this skill?")) {
+                newItem.remove();
+              }
+            });
+            
+            newItem.appendChild(deleteButton);
+            
+            // Add progress editor to new item
+            const progressBar = newItem.querySelector(".skill-progress");
+            
+            const editor = document.createElement("div");
+            editor.className = "progress-editor";
+            editor.innerHTML = `
+              <input type="number" min="0" max="100" value="50" aria-label="Skill progress percentage">
+              <button type="button">Set</button>
+            `;
+            
+            // Add click handler for progress update
+            editor.querySelector("button").addEventListener("click", function () {
+              const input = editor.querySelector("input");
+              const newProgress = Math.min(
+                100,
+                Math.max(0, parseInt(input.value) || 0)
+              );
+              
+              progressBar.setAttribute("data-progress", newProgress);
+              const progressBarFill = newItem.querySelector(".skill-progress-bar");
+              progressBarFill.style.width = `${newProgress}%`;
+            });
+            
+            newItem.appendChild(editor);
+            
+            // Make new elements editable
+            const editableElements = newItem.querySelectorAll(".editable-content");
+            editableElements.forEach((element) => {
+              element.setAttribute("contenteditable", "true");
+              element.setAttribute("spellcheck", "true");
+              
+              // Add placeholder styles
+              element.classList.add("edit-placeholder");
+              
+              // Handle focus to remove placeholder
+              element.addEventListener("focus", handleElementFocus);
+              
+              // Handle blur to restore placeholder if empty
+              element.addEventListener("blur", handleElementBlur);
+            });
+            
+            // Focus the first editable element
+            editableElements[0].focus();
+          };
+          
+          // Add event listener
+          addSkillBtn.addEventListener("click", addSkillBtn._clickHandler);
+          
+          // Make button visible in edit mode
+          if (isEditMode) {
+            addSkillBtn.style.display = "flex";
+          }
+        }
+      }
     }
     
     // Section template HTML - Updated to match index page styling

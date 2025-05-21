@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSync - Build Your Tech Portfolio</title>
+    <title>CSync - View Developer Profile</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,137 +18,786 @@
         <script type="module" src="navbar.js"></script>
 
         <main class="container">
-            <div class="portfolio-hero">
+            <!-- Profile hero section - will be populated dynamically -->
+            <div class="portfolio-hero" id="profileHero">
+                <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 16px; color: white; opacity: 0.8;">Loading profile...</p>
+                </div>
+            </div>
+
+            <!-- Portfolio nav section -->
+            <div class="portfolio-nav" id="portfolioNav">
+                <a href="#about" class="portfolio-nav-item active">About</a>
+                <a href="#education" class="portfolio-nav-item">Education</a>
+                <a href="#skills" class="portfolio-nav-item">Skills</a>
+                <a href="#experience" class="portfolio-nav-item">Experience</a>
+                <a href="#projects" class="portfolio-nav-item">Projects</a>
+            </div>
+
+            <!-- Portfolio content sections - will be populated dynamically -->
+            <div id="portfolioContent">
+                <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 16px; color: var(--gray-500);">Loading portfolio content...</p>
+                </div>
+            </div>
+
+            <!-- Back to connect button -->
+            <div style="text-align: center; margin: 40px 0;">
+                <a href="connect.html" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px;">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Back to Connect
+                </a>
+            </div>
+
+            <nav class="bottom-nav">
+                <a href="index.html" class="nav-item" aria-label="Home">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span>Home</span>
+                </a>
+                <a href="portfolio.html" class="nav-item" aria-label="Portfolio">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span>Portfolio</span>
+                </a>
+                <a href="projects.html" class="nav-item" aria-label="Projects">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 14L18 11L15 14M18 11V17M10 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3H14C15.1046 3 16 3.89543 16 5V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span>Projects</span>
+                </a>
+                <a href="connect.html" class="nav-item active" aria-label="Connect">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span>Connect</span>
+                </a>
+            </nav>
+        </main>
+    </div>
+
+    <script type="module">
+        import { supabase } from './supabaseAPI.js';
+
+        // Get selected profile ID from localStorage
+        const selectedProfileId = localStorage.getItem('selectedProfileId');
+        
+        // Load profile data from Supabase
+        async function loadUserProfile() {
+            if (!selectedProfileId) {
+                showError('No profile selected. Please select a user from the Connect page.');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                document.getElementById('profileHero').innerHTML = `
+                    <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 16px; color: white; opacity: 0.8;">Loading profile...</p>
+                    </div>
+                `;
+                
+                document.getElementById('portfolioContent').innerHTML = `
+                    <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 16px; color: var(--gray-500);">Loading portfolio content...</p>
+                    </div>
+                `;
+                
+                // Add a cache-busting timestamp to prevent cached results
+                const cacheBuster = Date.now();
+                
+                // Fetch user profile data
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', selectedProfileId)
+                    .single();
+                    
+                if (profileError) throw profileError;
+                if (!profile) throw new Error('Profile not found');
+                
+                console.log("Profile data loaded:", profile);
+                
+                // Fetch user's portfolio data with forceful no-cache approach
+                let portfolioData = null;
+                try {
+                    // First approach - using standard query
+                    const { data, error } = await supabase
+                        .from('portfolios')
+                        .select('*')
+                        .eq('user_id', selectedProfileId)
+                        .maybeSingle();
+                        
+                    if (!error && data) {
+                        portfolioData = data;
+                        console.log("Portfolio data loaded via standard query:", data);
+                    } else if (error) {
+                        console.warn("Error with standard query:", error);
+                    }
+                } catch (e) {
+                    console.error("Error fetching portfolio via standard query:", e);
+                }
+                
+                // If first approach failed, try using RPC for more direct access
+                if (!portfolioData) {
+                    try {
+                        const { data, error } = await supabase.rpc('get_user_portfolio', {
+                            user_id_param: selectedProfileId
+                        });
+                        
+                        if (!error && data) {
+                            portfolioData = data;
+                            console.log("Portfolio data loaded via RPC:", data);
+                        } else {
+                            console.warn("RPC approach failed:", error);
+                        }
+                    } catch (e) {
+                        console.error("Error with RPC approach:", e);
+                    }
+                }
+                
+                // Clear any cached data
+                localStorage.removeItem('cachedPortfolioData');
+                localStorage.removeItem('cachedProfileData');
+                
+                // Set a timestamp to indicate when data was last loaded
+                localStorage.setItem('profileLoadTimestamp', cacheBuster);
+                
+                // Render profile header
+                renderProfileHeader(profile);
+                
+                // Clear any cached portfolio data from window object
+                window.portfolioCache = null;
+                
+                // Render portfolio sections
+                if (portfolioData) {
+                    // Log detailed information about the portfolio data to help debug
+                    console.log('Loaded fresh portfolio data:', portfolioData);
+                    
+                    // Extract experience data for debugging
+                    if (portfolioData.data) {
+                        // Check for experience data in the data field
+                        if (typeof portfolioData.data === 'string') {
+                            try {
+                                const parsedData = JSON.parse(portfolioData.data);
+                                console.log("Experience data in parsed portfolioData:", {
+                                    exp1_title: parsedData.exp1_title,
+                                    exp1_company: parsedData.exp1_company,
+                                    exp1_date: parsedData.exp1_date,
+                                    experience: parsedData.experience
+                                });
+                            } catch (e) {
+                                console.error("Error parsing portfolio data:", e);
+                            }
+                        } else if (typeof portfolioData.data === 'object') {
+                            console.log("Experience data in portfolioData object:", {
+                                exp1_title: portfolioData.data.exp1_title,
+                                exp1_company: portfolioData.data.exp1_company,
+                                exp1_date: portfolioData.data.exp1_date,
+                                experience: portfolioData.data.experience
+                            });
+                        }
+                    } else {
+                        // Check if experience data is directly in portfolioData
+                        console.log("Direct experience data check:", {
+                            exp1_title: portfolioData.exp1_title,
+                            exp1_company: portfolioData.exp1_company,
+                            exp1_date: portfolioData.exp1_date,
+                            experience: portfolioData.experience
+                        });
+                    }
+                    
+                    renderPortfolioContent(portfolioData);
+                } else {
+                    // If no portfolio data, show placeholder content
+                    console.log('No portfolio data found for user');
+                    renderPlaceholderContent(profile);
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showError('Error loading profile. Please try again later.');
+            }
+        }
+        
+        // Render the profile header with user information
+        function renderProfileHeader(profile) {
+            const heroSection = document.getElementById('profileHero');
+            if (!heroSection) return;
+            
+            const firstLetter = profile.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U';
+            
+            heroSection.innerHTML = `
                 <div class="portfolio-hero-content">
-                    <div class="avatar large">CS</div>
+                    <div class="avatar large">${firstLetter}</div>
                     <div class="portfolio-info">
-                        <h1 class="portfolio-title" data-field="name">CS Student</h1>
-                        <p class="portfolio-subtitle editable-content" data-field="title" contenteditable="true">Full
-                            Stack
-                            Developer & Computer Science Enthusiast</p>
+                        <h1 class="portfolio-title">${profile.full_name || 'Anonymous User'}</h1>
+                        <p class="portfolio-subtitle">${profile.job_title || 'Developer'}</p>
                         <div class="portfolio-meta">
+                            ${profile.city ? `
                             <div class="portfolio-meta-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                    <path
-                                        d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span data-field="location" id="location-info">Detecting city...</span>
-                            </div>
+                                <span>${profile.city}</span>
+                            </div>` : ''}
                             <div class="portfolio-meta-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span data-field="email">csstudent@example.com</span>
+                                <span>${profile.email || 'Email not provided'}</span>
                             </div>
+                            ${profile.education ? `
                             <div class="portfolio-meta-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z"
-                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" />
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                <span class="editable-content" data-field="education">Computer Science, Year 3</span>
-                            </div>
+                                <span>${profile.education}</span>
+                            </div>` : ''}
                         </div>
                         <a href="#contact" class="connect-button">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path
-                                    d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             Connect With Me
                         </a>
                     </div>
                 </div>
-            </div>
-            <style>
-                .connect-card {
-                    display: flex;
-                    align-items: center;
-                    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-                    border-radius: 20px;
-                    box-shadow: var(--card-shadow);
-                    padding: 32px 36px;
-                    color: #fff;
-                    width: 100%;
-                    max-width: 500px;
-                    margin: 0 auto;
-                    transition: box-shadow 0.3s, transform 0.3s;
+            `;
+        }
+        
+        // Render portfolio content from the data object
+        function renderPortfolioContent(portfolioData) {
+            const contentContainer = document.getElementById('portfolioContent');
+            if (!contentContainer) return;
+            
+            console.log('Raw portfolio data:', portfolioData);
+            
+            // Parse the data if it's stored as a JSON string
+            let portfolioContent = portfolioData.data;
+            
+            // Handle different data formats
+            if (typeof portfolioContent === 'string') {
+                try {
+                    portfolioContent = JSON.parse(portfolioContent);
+                    console.log('Parsed portfolio content from string:', portfolioContent);
+                } catch (e) {
+                    console.error('Error parsing portfolio data as string:', e);
+                    portfolioContent = {};
                 }
-
-                .connect-card:not(:last-child) {
-                    margin-bottom: 24px;
+            } else if (!portfolioContent && typeof portfolioData === 'object') {
+                // Some databases might store the data directly in the portfolioData object
+                // Try to extract relevant fields directly
+                console.log('Trying to extract portfolio content directly from object');
+                portfolioContent = { ...portfolioData };
+                delete portfolioContent.id;
+                delete portfolioContent.created_at;
+                delete portfolioContent.updated_at;
+                delete portfolioContent.user_id;
+                console.log('Extracted portfolio content:', portfolioContent);
+            } else if (!portfolioContent) {
+                console.error('No portfolio content found in data');
+                portfolioContent = {};
+            }
+            
+            // Extract experience array if it exists (in case experience is stored as an array)
+            const experienceArray = portfolioContent.experience || [];
+            
+            // Convert array-based experience data to individual field format if needed
+            if (Array.isArray(experienceArray) && experienceArray.length > 0) {
+                console.log('Converting experience array to individual fields:', experienceArray);
+                experienceArray.forEach((exp, index) => {
+                    const i = index + 1;
+                    portfolioContent[`exp${i}_title`] = exp.title;
+                    portfolioContent[`exp${i}_company`] = exp.company;
+                    portfolioContent[`exp${i}_date`] = exp.date;
+                    portfolioContent[`exp${i}_description`] = exp.description;
+                });
+            }
+            
+            // Initialize HTML for content sections
+            let htmlContent = '';
+            
+            // About section
+            htmlContent += `
+                <section id="about" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">About Me</h2>
+                    </div>
+                    <div class="about-content">
+                        <p class="about-text">${portfolioContent.about1 || 'This user has not added any information about themselves yet.'}</p>
+                        ${portfolioContent.about2 ? `<p class="about-text">${portfolioContent.about2}</p>` : ''}
+                    </div>
+                </section>
+            `;
+            
+            // Education section
+            htmlContent += `
+                <section id="education" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Education</h2>
+                    </div>
+                    <div class="timeline">
+            `;
+            
+            // Check if education data exists
+            if (portfolioContent.edu1_degree) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent.edu1_date || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent.edu1_degree}</h3>
+                            <p class="timeline-subtitle">${portfolioContent.edu1_school || ''}</p>
+                            <p class="timeline-description">${portfolioContent.edu1_description || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add more education items if they exist
+            if (portfolioContent.edu2_degree) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent.edu2_date || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent.edu2_degree}</h3>
+                            <p class="timeline-subtitle">${portfolioContent.edu2_school || ''}</p>
+                            <p class="timeline-description">${portfolioContent.edu2_description || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add third education item if it exists
+            if (portfolioContent.edu3_degree) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent.edu3_date || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent.edu3_degree}</h3>
+                            <p class="timeline-subtitle">${portfolioContent.edu3_school || ''}</p>
+                            <p class="timeline-description">${portfolioContent.edu3_description || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add any additional education items if they exist (support for more than 3)
+            let eduIndex = 4;
+            while (portfolioContent[`edu${eduIndex}_degree`]) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent[`edu${eduIndex}_date`] || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent[`edu${eduIndex}_degree`]}</h3>
+                            <p class="timeline-subtitle">${portfolioContent[`edu${eduIndex}_school`] || ''}</p>
+                            <p class="timeline-description">${portfolioContent[`edu${eduIndex}_description`] || ''}</p>
+                        </div>
+                    </div>
+                `;
+                eduIndex++;
+            }
+            
+            // If no education data, show placeholder
+            if (!portfolioContent.edu1_degree) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">Not provided</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">No education information available</h3>
+                            <p class="timeline-description">This user has not added their education details yet.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            htmlContent += `
+                    </div>
+                </section>
+            `;
+            
+            // Add custom sections if they exist
+            if (portfolioContent.sections && Array.isArray(portfolioContent.sections)) {
+                // Filter for custom sections
+                const customSections = portfolioContent.sections.filter(
+                    section => section.type === 'custom' && section.content
+                );
+                
+                // Add each custom section
+                customSections.forEach(section => {
+                    htmlContent += `
+                        <section id="${section.id}" class="portfolio-section">
+                            <div class="section-header">
+                                <h2 class="section-title">${section.title || 'Custom Section'}</h2>
+                            </div>
+                            <div class="custom-section-content">
+                                ${section.content || 'No content available'}
+                            </div>
+                        </section>
+                    `;
+                });
+            }
+            
+            // Skills section
+            htmlContent += `
+                <section id="skills" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Technical Skills</h2>
+                    </div>
+                    <div class="skills-container">
+            `;
+            
+            // Add skill categories if they exist
+            if (portfolioContent.skill_cat1) {
+                htmlContent += `
+                    <div class="skill-category">
+                        <h3 class="skill-category-title">${portfolioContent.skill_cat1}</h3>
+                        <div class="skill-grid">
+                `;
+                
+                // Add skills
+                if (portfolioContent.skill1_name) {
+                    htmlContent += createSkillHTML(portfolioContent.skill1_name, portfolioContent.skill1_level, 85);
                 }
-
-                .connect-card:hover {
-                    box-shadow: var(--card-hover-shadow);
-                    transform: translateY(-3px);
+                if (portfolioContent.skill2_name) {
+                    htmlContent += createSkillHTML(portfolioContent.skill2_name, portfolioContent.skill2_level, 75);
                 }
-
-                .connect-avatar {
-                    width: 64px;
-                    height: 64px;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.18);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 2rem;
-                    font-weight: 600;
-                    margin-right: 28px;
-                    border: 2px solid rgba(255, 255, 255, 0.25);
+                if (portfolioContent.skill3_name) {
+                    htmlContent += createSkillHTML(portfolioContent.skill3_name, portfolioContent.skill3_level, 65);
                 }
-
-                .connect-info {
-                    display: flex;
-                    flex-direction: column;
+                if (portfolioContent.skill4_name) {
+                    htmlContent += createSkillHTML(portfolioContent.skill4_name, portfolioContent.skill4_level, 55);
                 }
-
-                .connect-name {
-                    font-size: 1.3rem;
-                    font-weight: 600;
-                    margin-bottom: 4px;
-                }
-
-                .connect-role {
-                    font-size: 1rem;
-                    opacity: 0.92;
-                }
-
-                @media (max-width: 600px) {
-                    .connect-card {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        padding: 24px 16px;
+                
+                htmlContent += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // If no skills data, show placeholder
+            if (!portfolioContent.skill_cat1) {
+                htmlContent += `
+                    <div class="skill-category">
+                        <h3 class="skill-category-title">Skills</h3>
+                        <div class="skill-grid">
+                            <div class="skill-item">
+                                <div class="skill-progress" data-progress="50">
+                                    <div class="skill-progress-bar" style="width: 50%"></div>
+                                </div>
+                                <div class="skill-info">
+                                    <span class="skill-name">No skills added yet</span>
+                                    <span class="skill-level">N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add skill tags
+            htmlContent += `
+                    <div class="skill-tags-container">
+                        <div class="skill-tag active">JavaScript</div>
+                        <div class="skill-tag">React</div>
+                        <div class="skill-tag">Node.js</div>
+                        <div class="skill-tag">Python</div>
+                        <div class="skill-tag">HTML/CSS</div>
+                    </div>
+                </div>
+            </section>
+            `;
+            
+            // Add Experience section - this was missing
+            htmlContent += `
+                <section id="experience" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Work Experience</h2>
+                    </div>
+                    <div class="timeline">
+            `;
+            
+            console.log("Checking for experience data with keys:", 
+                Object.keys(portfolioContent).filter(key => key.startsWith('exp')));
+            
+            // Check multiple formats for experience data
+            const hasExperienceData = portfolioContent.exp1_title || 
+                                     (portfolioContent.experience && portfolioContent.experience.length > 0) ||
+                                     Object.keys(portfolioContent).some(key => key.startsWith('exp') && key.endsWith('_title'));
+            
+            console.log("Has experience data:", hasExperienceData);
+            
+            // Check if experience data exists
+            if (portfolioContent.exp1_title) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent.exp1_date || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent.exp1_title}</h3>
+                            <p class="timeline-subtitle">${portfolioContent.exp1_company || ''}</p>
+                            <p class="timeline-description">${portfolioContent.exp1_description || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add more experience items if they exist
+            if (portfolioContent.exp2_title) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent.exp2_date || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent.exp2_title}</h3>
+                            <p class="timeline-subtitle">${portfolioContent.exp2_company || ''}</p>
+                            <p class="timeline-description">${portfolioContent.exp2_description || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add third experience item if it exists
+            if (portfolioContent.exp3_title) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent.exp3_date || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent.exp3_title}</h3>
+                            <p class="timeline-subtitle">${portfolioContent.exp3_company || ''}</p>
+                            <p class="timeline-description">${portfolioContent.exp3_description || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add any additional experience items if they exist (support for more than 3)
+            let expIndex = 4;
+            while (portfolioContent[`exp${expIndex}_title`]) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">${portfolioContent[`exp${expIndex}_date`] || 'No date provided'}</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">${portfolioContent[`exp${expIndex}_title`]}</h3>
+                            <p class="timeline-subtitle">${portfolioContent[`exp${expIndex}_company`] || ''}</p>
+                            <p class="timeline-description">${portfolioContent[`exp${expIndex}_description`] || ''}</p>
+                        </div>
+                    </div>
+                `;
+                expIndex++;
+            }
+            
+            // Check if there's an array-based experience structure we missed
+            if (!hasExperienceData && portfolioData.experience && Array.isArray(portfolioData.experience)) {
+                console.log("Found experience array directly in portfolioData:", portfolioData.experience);
+                portfolioData.experience.forEach(exp => {
+                    htmlContent += `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">${exp.date || 'No date provided'}</div>
+                            <div class="timeline-content">
+                                <h3 class="timeline-title">${exp.title || exp.role || ''}</h3>
+                                <p class="timeline-subtitle">${exp.company || exp.organization || ''}</p>
+                                <p class="timeline-description">${exp.description || ''}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                // Set flag to indicate we found experience data
+                hasExperienceData = true;
+            }
+            
+            // If no experience data, show placeholder
+            if (!hasExperienceData) {
+                htmlContent += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">Not provided</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">No experience information available</h3>
+                            <p class="timeline-description">This user has not added their work experience details yet.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            htmlContent += `
+                    </div>
+                </section>
+            `;
+            
+            // Projects section
+            htmlContent += `
+                <section id="projects" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Featured Projects</h2>
+                    </div>
+                    <div class="projects-grid">
+            `;
+            
+            // Fetch projects if available or show placeholders
+            if (portfolioContent.featured_projects_details && portfolioContent.featured_projects_details.length > 0) {
+                portfolioContent.featured_projects_details.forEach(project => {
+                    htmlContent += `
+                        <div class="project-card">
+                            <div class="project-image">
+                                <span class="featured-badge">Featured</span>
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="project-content">
+                                <h3 class="project-title">${project.name || 'Unnamed Project'}</h3>
+                                <p class="project-tech">Technology: ${project.technologies || 'Not specified'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                // Show placeholder projects if none exist
+                htmlContent += `
+                    <div class="project-card">
+                        <div class="project-image">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <div class="project-content">
+                            <h3 class="project-title">No Projects Yet</h3>
+                            <p class="project-tech">This user hasn't added any projects</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            htmlContent += `
+                    </div>
+                </section>
+            `;
+            
+            // Update the content container
+            contentContainer.innerHTML = htmlContent;
+            
+            // Initialize portfolio navigation
+            initPortfolioNav();
+        }
+        
+        // Helper function to create skill HTML
+        function createSkillHTML(name, level, progress) {
+            return `
+                <div class="skill-item">
+                    <div class="skill-progress" data-progress="${progress}">
+                        <div class="skill-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="skill-info">
+                        <span class="skill-name">${name}</span>
+                        <span class="skill-level">${level || 'Intermediate'}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render placeholder content if no portfolio data exists
+        function renderPlaceholderContent(profile) {
+            const contentContainer = document.getElementById('portfolioContent');
+            if (!contentContainer) return;
+            
+            contentContainer.innerHTML = `
+                <section id="about" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">About Me</h2>
+                    </div>
+                    <div class="about-content">
+                        <p class="about-text">This user has not created their portfolio yet.</p>
+                    </div>
+                </section>
+            `;
+        }
+        
+        // Show error message if loading fails
+        function showError(message) {
+            const heroSection = document.getElementById('profileHero');
+            const contentContainer = document.getElementById('portfolioContent');
+            
+            if (heroSection) {
+                heroSection.innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: white;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 16px; opacity: 0.8;">
+                            <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 style="margin-bottom: 8px;">${message}</h2>
+                    </div>
+                `;
+            }
+            
+            if (contentContainer) {
+                contentContainer.innerHTML = '';
+            }
+        }
+        
+        // Initialize portfolio navigation
+        function initPortfolioNav() {
+            const navLinks = document.querySelectorAll('.portfolio-nav-item');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all links
+                    navLinks.forEach(item => item.classList.remove('active'));
+                    
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                    
+                    // Get the target section id from the href attribute
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    
+                    // Smooth scroll to target section
+                    if (targetSection) {
+                        window.scrollTo({
+                            top: targetSection.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
                     }
-
-                    .connect-avatar {
-                        margin-right: 0;
-                        margin-bottom: 16px;
-                    }
-                }
-            </style>
-        </main>
-    </div>
-    <script type="module" src="profile.js"></script>
+                });
+            });
+        }
+        
+        // Load the profile when the page loads
+        document.addEventListener('DOMContentLoaded', loadUserProfile);
+    </script>
 </body>
 
 </html>

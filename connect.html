@@ -4,13 +4,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSync - Build Your Tech Portfolio</title>
+    <title>CSync - Connect with Developers</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- <link rel="stylesheet" href="eachConnect.css"> -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        /* Connect page specific styles */
+        .connect-hero {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 24px;
+            padding: 40px 30px;
+            margin: 24px 0 32px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.3);
+            text-align: center;
+        }
+        
+        .connect-hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .connect-hero p {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .connect-search-container {
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
+        
+        .connect-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 24px 0;
+            justify-content: center;
+        }
+        
+        .connect-filter {
+            background-color: var(--light);
+            border: 1px solid var(--gray-200);
+            border-radius: 100px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .connect-filter:hover, .connect-filter.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+        }
+        
+        .connect-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+        
+        @media (min-width: 768px) {
+            .connect-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .connect-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .connect-card {
+            background-color: var(--light);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid var(--gray-100);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .connect-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        
+        .connect-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 2px solid var(--gray-100);
+        }
+        
+        .connect-info {
+            width: 100%;
+        }
+        
+        .connect-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--dark);
+        }
+        
+        .connect-role {
+            font-size: 14px;
+            color: var(--gray-500);
+            margin-bottom: 16px;
+        }
+        
+        .user-location {
+            font-size: 14px;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .connect-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .connect-tag {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .connect-open-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 100px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+        }
+        
+        .connect-open-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background-color: var(--light);
+            border-radius: 20px;
+            margin: 40px auto;
+            max-width: 500px;
+            color: var(--gray-500);
+        }
+    </style>
 </head>
 
 <body>
@@ -19,35 +208,78 @@
         <script type="module" src="navbar.js"></script>
 
         <main class="container">
-            <h1 style="font-size: 2rem; font-weight: 600; text-align: center; margin: 48px 0 32px;">Find similar
-                portfolios to connect with</h1>
-            <div id="cardsContainer"
-                style="display: flex; flex-direction: column; gap: 32px; align-items: center; max-width: 600px; margin: 0 auto 80px auto;">
-                <!-- Dummy Cards -->
-                <!-- <div class="connect-card">
-                    <div class="connect-avatar">D</div>
-                    <div class="connect-info">
-                        <div class="connect-name">Dummy</div>
-                        <div class="connect-role">Java Developer</div>
-                    </div>
-                    <button id="openCard" class="connect-open-btn">Open</button>
-                </div>
-                <div class="connect-card">
-                    <div class="connect-avatar">D</div>
-                    <div class="connect-info">
-                        <div class="connect-name">Dummy</div>
-                        <div class="connect-role">Java Developer</div>
-                    </div>
-                    <button id="openCard" class="connect-open-btn">Open</button>
-                </div> -->
+            <!-- Hero section -->
+            <div class="connect-hero">
+                <h1>Connect with Fellow Developers</h1>
+                <p>Discover and connect with developers who share your interests and skills</p>
             </div>
+            
+            <!-- Search section -->
+            <div class="connect-search-container">
+                <div class="search-container">
+                    <span class="search-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="connectSearchInput" class="search-input" placeholder="Search developers by name, skills or location" aria-label="Search for developers">
+                    <button class="search-button" id="connectSearchButton" aria-label="Search">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Filters -->
+                <div class="connect-filters">
+                    <div class="connect-filter active" data-filter="all">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 4.5H21M3 12H21M3 19.5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        All Developers
+                    </div>
+                    <div class="connect-filter" data-filter="frontend">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Frontend
+                    </div>
+                    <div class="connect-filter" data-filter="backend">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 12V8H8V12M20 12V16H8V12M20 12H8M4 4V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Backend
+                    </div>
+                    <div class="connect-filter" data-filter="fullstack">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Full Stack
+                    </div>
+                    <div class="connect-filter" data-filter="mobile">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 18V18.01M7 21H17C18.1046 21 19 20.1046 19 19V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V19C5 20.1046 5.89543 21 7 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Mobile
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards Container -->
+            <div id="cardsContainer" class="connect-grid">
+                <!-- Loading indicator (will be replaced by actual cards) -->
+                <div class="loading-container" style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 16px; color: var(--gray-500);">Loading developers...</p>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation -->
             <nav class="bottom-nav">
                 <a href="index.html" class="nav-item" aria-label="Home">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <span>Home</span>
@@ -55,15 +287,9 @@
                 <a href="portfolio.html" class="nav-item" aria-label="Portfolio">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            <path
-                                d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            <path
-                                d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <span>Portfolio</span>
@@ -71,9 +297,7 @@
                 <a href="projects.html" class="nav-item" aria-label="Projects">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M21 14L18 11L15 14M18 11V17M10 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3H14C15.1046 3 16 3.89543 16 5V9"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M21 14L18 11L15 14M18 11V17M10 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3H14C15.1046 3 16 3.89543 16 5V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <span>Projects</span>
@@ -81,118 +305,58 @@
                 <a href="connect.html" class="nav-item active" aria-label="Connect">
                     <div class="nav-icon">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
-                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <span>Connect</span>
                 </a>
             </nav>
-            <style>
-                .connect-card {
-                    display: flex;
-                    align-items: center;
-                    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-                    border-radius: 20px;
-                    box-shadow: var(--card-shadow);
-                    padding: 32px 36px;
-                    color: #fff;
-                    width: 100%;
-                    max-width: 500px;
-                    margin: 0 auto;
-                    transition: box-shadow 0.3s, transform 0.3s;
-                    position: relative;
-                }
-
-                .connect-card:not(:last-child) {
-                    margin-bottom: 24px;
-                }
-
-                .connect-card:hover {
-                    box-shadow: var(--card-hover-shadow);
-                    transform: translateY(-3px);
-                }
-
-                .connect-avatar {
-                    width: 64px;
-                    height: 64px;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.18);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 2rem;
-                    font-weight: 600;
-                    margin-right: 28px;
-                    border: 2px solid rgba(255, 255, 255, 0.25);
-                }
-
-                .connect-info {
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .connect-name {
-                    font-size: 1.3rem;
-                    font-weight: 600;
-                    margin-bottom: 4px;
-                }
-
-                .connect-role {
-                    font-size: 1rem;
-                    opacity: 0.92;
-                }
-
-                .connect-open-btn {
-                    position: absolute;
-                    bottom: 24px;
-                    right: 32px;
-                    background: #fff;
-                    color: var(--primary);
-                    border: none;
-                    border-radius: 8px;
-                    padding: 10px 22px;
-                    font-size: 1rem;
-                    font-weight: 600;
-                    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.10);
-                    cursor: pointer;
-                    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-                }
-
-                .connect-open-btn:hover {
-                    background: var(--primary-dark);
-                    color: #fff;
-                    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.18);
-                }
-
-                @media (max-width: 1024px) {
-                    .connect-card {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        padding: 24px 16px;
-                    }
-
-                    .connect-avatar {
-                        margin-right: 0;
-                        margin-bottom: 16px;
-                    }
-
-                    .connect-open-btn {
-                        bottom: 16px;
-                        right: 16px;
-                        padding: 9px 18px;
-                        font-size: 0.95rem;
-                        display: none;
-                    }
-                }
-            </style>
         </main>
     </div>
-    <script type="module" src="profile.js"></script>
+    
     <script type="module" src="eachConnect.js"></script>
+    <script type="module">
+        // Connect page specific script
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle filter clicks
+            const filters = document.querySelectorAll('.connect-filter');
+            filters.forEach(filter => {
+                filter.addEventListener('click', function() {
+                    // Toggle active class
+                    filters.forEach(f => f.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Get filter value
+                    const filterValue = this.getAttribute('data-filter');
+                    console.log('Filter selected:', filterValue);
+                    // In a real app, you would filter the cards based on this value
+                });
+            });
+            
+            // Handle search
+            const searchInput = document.getElementById('connectSearchInput');
+            const searchButton = document.getElementById('connectSearchButton');
+            
+            const performSearch = () => {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                console.log('Searching for:', searchTerm);
+                // In a real app, you would filter the cards based on this search term
+            };
+            
+            if (searchButton) {
+                searchButton.addEventListener('click', performSearch);
+            }
+            
+            if (searchInput) {
+                searchInput.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

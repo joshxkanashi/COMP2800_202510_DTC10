@@ -793,6 +793,32 @@
     
     <!-- Then load the eachConnect.js file -->
     <script type="module" src="eachConnect.js"></script>
+
+    <script type="module">
+        import { supabase } from './supabaseAPI.js';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check for stored chat parameters
+            const storedChatParams = localStorage.getItem('openChatWith');
+            if (storedChatParams) {
+                try {
+                    const { userId, name, avatar } = JSON.parse(storedChatParams);
+                    // Clear the stored parameters
+                    localStorage.removeItem('openChatWith');
+                    // Open the chat after a short delay to ensure everything is loaded
+                    setTimeout(() => {
+                        if (typeof window.openChat === 'function') {
+                            window.openChat(userId, name, avatar);
+                        } else {
+                            console.error('openChat function not available');
+                        }
+                    }, 1000);
+                } catch (error) {
+                    console.error('Error parsing stored chat parameters:', error);
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -104,7 +104,7 @@ function setupChatUI() {
         chatSend.disabled = !chatInput.value.trim();
         handleTypingIndicator();
     });
-    
+
     // Accept chat request
     acceptRequest.addEventListener('click', async () => {
         try {
@@ -304,8 +304,8 @@ function subscribeToConversationChanges() {
         .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
                 console.log('Successfully subscribed to conversation updates');
-            }
-        });
+        }
+    });
 }
 
 // Handle typing indicator
@@ -565,7 +565,7 @@ async function openChat(userId, userName, userAvatar) {
             conversationId = newConv.id;
             chatRequestStatus = 'pending';
         }
-
+        
         if (!conversationId) {
             throw new Error('Failed to get or create conversation');
         }
@@ -610,7 +610,7 @@ async function openChat(userId, userName, userAvatar) {
         
         // Only subscribe to messages if the chat is already accepted
         if (chatRequestStatus === 'accepted') {
-            subscribeToMessages(conversationId);
+        subscribeToMessages(conversationId);
         }
         
         // Load initial messages
@@ -618,15 +618,15 @@ async function openChat(userId, userName, userAvatar) {
         
         // Open chat modal
         chatModal.classList.add('open');
-        
+            
         // Ensure chat is scrolled to bottom after a short delay
-        setTimeout(() => {
+            setTimeout(() => {
             scrollToBottom();
             // Focus input field if chat is accepted
             const chatInput = document.getElementById('chatInput');
             if (chatInput && chatRequestStatus === 'accepted') {
                 chatInput.focus();
-            }
+        }
         }, 100);
     } catch (error) {
         console.error('Error opening chat:', error);
@@ -969,15 +969,15 @@ async function loadMessages(conversationId) {
                 chatMessages.style.display = 'flex';
                 
                 messages.forEach(message => {
-                    const isMine = message.sender_id === currentUser.id;
-                    addMessageToUI(message, isMine);
-                    
-                    // Mark other user's unread messages as read
-                    if (!isMine && !message.read) {
-                        markMessageAsRead(message.id);
-                    }
-                });
+                const isMine = message.sender_id === currentUser.id;
+                addMessageToUI(message, isMine);
                 
+                // Mark other user's unread messages as read
+                if (!isMine && !message.read) {
+                    markMessageAsRead(message.id);
+                }
+            });
+            
                 // Scroll to bottom after messages are loaded
                 setTimeout(scrollToBottom, 100);
             } else {
@@ -1155,7 +1155,7 @@ async function sendMessage() {
     
     try {
         console.log('Sending message to conversation:', currentConversationId);
-        
+    
         // Send message to server
         const { data: message, error } = await supabase
             .from('messages')

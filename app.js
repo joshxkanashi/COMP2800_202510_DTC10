@@ -125,12 +125,77 @@ async function loadStats(userId) {
             .select('id')
             .eq('user_id', userId);
 
-        // Get portfolio views
-        const { data: portfolioData, error: portfolioError } = await supabase
+        // Get or create portfolio
+        let { data: portfolioData, error: portfolioError } = await supabase
             .from('portfolios')
             .select('view_count')
             .eq('user_id', userId)
             .single();
+
+        // If portfolio doesn't exist, create one with default values
+        if (!portfolioData) {
+            const defaultPortfolioData = {
+                title: "Enter Your Professional Title",
+                about1: "Write a brief introduction about yourself...",
+                about2: "Share more about your interests and expertise...",
+                skills: [
+                    {
+                        id: "skill1",
+                        name: "Enter Skill",
+                        level: "Select Level",
+                        progress: "0"
+                    }
+                ],
+                sections: [
+                    { id: "about", type: "about", title: "About Me", visible: true },
+                    { id: "education", type: "education", title: "Education", visible: true },
+                    { id: "skills", type: "skills", title: "Technical Skills", visible: true },
+                    { id: "experience", type: "experience", title: "Work Experience", visible: true },
+                    { id: "projects", type: "projects", title: "Featured Projects", visible: true }
+                ],
+                education: [
+                    {
+                        id: "edu1",
+                        date: "Enter Date",
+                        degree: "Enter Degree/Certificate",
+                        school: "Enter Institution Name",
+                        description: "Describe your education..."
+                    }
+                ],
+                experience: [
+                    {
+                        id: "exp1",
+                        date: "Enter Date",
+                        title: "Enter Job Title",
+                        company: "Enter Company Name",
+                        description: "Describe your role and responsibilities..."
+                    }
+                ],
+                skill_cat1: "Enter Skill Category",
+                skill_cat2: "Enter Another Category",
+                education_summary: "Enter your latest education",
+                project_new1_title: "Enter Project Title",
+                project_new1_description: "Enter project description...",
+                project_new1_link: "Project URL",
+                project_new1_github: "GitHub URL"
+            };
+
+            const { data: newPortfolio, error: createError } = await supabase
+                .from('portfolios')
+                .insert([
+                    { 
+                        user_id: userId,
+                        view_count: 0,
+                        data: defaultPortfolioData
+                    }
+                ])
+                .select()
+                .single();
+
+            if (!createError) {
+                portfolioData = newPortfolio;
+            }
+        }
 
         // Update project stats
         const projectCount = projects?.length || 0;
@@ -1054,14 +1119,79 @@ async function loadRecommendedProjects() {
 
         if (profileError) throw profileError;
 
-        // Get user's portfolio to find their skills and interests
-        const { data: portfolioData, error: portfolioError } = await supabase
+        // Get or create user's portfolio
+        let { data: portfolioData, error: portfolioError } = await supabase
             .from('portfolios')
             .select('data')
             .eq('user_id', user.id)
             .single();
 
-        // Extract user's skills from portfolio data
+        // If portfolio doesn't exist, create one with default values
+        if (!portfolioData) {
+            const defaultPortfolioData = {
+                title: "Enter Your Professional Title",
+                about1: "Write a brief introduction about yourself...",
+                about2: "Share more about your interests and expertise...",
+                skills: [
+                    {
+                        id: "skill1",
+                        name: "Enter Skill",
+                        level: "Select Level",
+                        progress: "0"
+                    }
+                ],
+                sections: [
+                    { id: "about", type: "about", title: "About Me", visible: true },
+                    { id: "education", type: "education", title: "Education", visible: true },
+                    { id: "skills", type: "skills", title: "Technical Skills", visible: true },
+                    { id: "experience", type: "experience", title: "Work Experience", visible: true },
+                    { id: "projects", type: "projects", title: "Featured Projects", visible: true }
+                ],
+                education: [
+                    {
+                        id: "edu1",
+                        date: "Enter Date",
+                        degree: "Enter Degree/Certificate",
+                        school: "Enter Institution Name",
+                        description: "Describe your education..."
+                    }
+                ],
+                experience: [
+                    {
+                        id: "exp1",
+                        date: "Enter Date",
+                        title: "Enter Job Title",
+                        company: "Enter Company Name",
+                        description: "Describe your role and responsibilities..."
+                    }
+                ],
+                skill_cat1: "Enter Skill Category",
+                skill_cat2: "Enter Another Category",
+                education_summary: "Enter your latest education",
+                project_new1_title: "Enter Project Title",
+                project_new1_description: "Enter project description...",
+                project_new1_link: "Project URL",
+                project_new1_github: "GitHub URL"
+            };
+
+            const { data: newPortfolio, error: createError } = await supabase
+                .from('portfolios')
+                .insert([
+                    { 
+                        user_id: user.id,
+                        view_count: 0,
+                        data: defaultPortfolioData
+                    }
+                ])
+                .select()
+                .single();
+
+            if (!createError) {
+                portfolioData = newPortfolio;
+            }
+        }
+
+        // Extract user's skills from portfolio data (handle case where portfolio might not exist)
         let userSkills = [];
         if (portfolioData?.data?.skills) {
             userSkills = portfolioData.data.skills.map(skill => skill.name.toLowerCase());

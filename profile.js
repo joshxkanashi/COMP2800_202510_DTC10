@@ -259,11 +259,133 @@ function setupLogout() {
     }
 }
 
+// Function to handle account deletion
+async function deleteAccount() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Delete user's avatar from storage if it exists
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('avatar_url')
+            .eq('id', user.id)
+            .single();
+
+        if (profile?.avatar_url) {
+            const fileName = profile.avatar_url.split('/').pop();
+            await supabase.storage
+                .from('avatars')
+                .remove([fileName]);
+        }
+
+        // Delete user's portfolio
+        const { error: portfolioError } = await supabase
+            .from('portfolios')
+            .delete()
+            .eq('user_id', user.id);
+
+        if (portfolioError) throw portfolioError;
+
+        // Delete user's projects and their associated images
+        const { data: projects, error: projectsError } = await supabase
+            .from('projects')
+            .select('photo_url, photo_urls')
+            .eq('user_id', user.id);
+
+        if (projectsError) throw projectsError;
+
+        // Delete project images from storage
+        if (projects && projects.length > 0) {
+            const imagesToDelete = projects.flatMap(project => {
+                const images = [];
+                if (project.photo_url) {
+                    images.push(project.photo_url.split('/').pop());
+                }
+                if (project.photo_urls) {
+                    images.push(...project.photo_urls.map(url => url.split('/').pop()));
+                }
+                return images;
+            });
+
+            if (imagesToDelete.length > 0) {
+                await supabase.storage
+                    .from('project-images')
+                    .remove(imagesToDelete);
+            }
+        }
+
+        // Delete all projects
+        const { error: deleteProjectsError } = await supabase
+            .from('projects')
+            .delete()
+            .eq('user_id', user.id);
+
+        if (deleteProjectsError) throw deleteProjectsError;
+
+        // Delete user's profile
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', user.id);
+
+        if (profileError) throw profileError;
+
+        // Call auth.signout to invalidate all sessions
+        await supabase.auth.signOut();
+
+        // Call RPC function to delete auth user
+        const { error: rpcError } = await supabase
+            .rpc('delete_user', { user_id: user.id });
+
+        if (rpcError) throw rpcError;
+
+        // Redirect to login page
+        window.location.href = 'login.html';
+
+    } catch (error) {
+        console.error('Error deleting account:', error);
+        alert('Error deleting account. Please try again.');
+    }
+}
+
+// Function to handle modal interactions
+function setupDeleteAccountModal() {
+    const modal = document.getElementById('deleteModal');
+    const deleteBtn = document.getElementById('deleteAccountButton');
+    const cancelBtn = document.getElementById('cancelDelete');
+    const confirmBtn = document.getElementById('confirmDelete');
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            modal.classList.add('show');
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+        });
+    }
+
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', deleteAccount);
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+}
+
 // Initialize all functionality when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     updateUserAvatar();
     loadProfileData();
     setupLogout();
+    setupDeleteAccountModal();
 
     // Set up form submission handlers
     const profileForm = document.getElementById('profileForm');

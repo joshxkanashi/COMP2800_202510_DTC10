@@ -4186,6 +4186,13 @@ async function saveFeaturedProjects() {
   // --- FEATURED PROJECTS SECTION ---
   async function loadFeaturedProjects() {
     try {
+        const projectsContainer = document.getElementById('projectsContainer');
+        // If container doesn't exist, exit early
+        if (!projectsContainer) {
+            console.log('Projects container not found, skipping featured projects render');
+            return;
+        }
+
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
@@ -4198,48 +4205,50 @@ async function saveFeaturedProjects() {
           .maybeSingle();
         
         if (portfolioError) {
-          console.warn("Error fetching portfolio for featured projects:", portfolioError);
-        } else if (portfolioData && portfolioData.data && portfolioData.data.featured_project_ids && portfolioData.data.featured_project_ids.length > 0) {
-          // If we have featured project IDs, use those
-          featuredProjectIds = portfolioData.data.featured_project_ids;
-          console.log("Loading featured projects with IDs:", featuredProjectIds);
-          
-          // Get all featured projects by their IDs
-          const { data: projects, error } = await supabase
-            .from('projects')
-            .select('*')
-            .in('id', featuredProjectIds);
+            console.warn("Error fetching portfolio for featured projects:", portfolioError);
+        } else if (portfolioData?.data?.featured_project_ids?.length > 0) {
+            // If we have featured project IDs, use those
+            featuredProjectIds = portfolioData.data.featured_project_ids;
+            console.log("Loading featured projects with IDs:", featuredProjectIds);
             
-          if (error) {
-            console.error("Error loading featured projects by ID:", error);
-            throw error;
-          }
-          
-          // If we successfully got the featured projects, render them in the correct order
-          if (projects && projects.length > 0) {
-            const projectsContainer = document.getElementById('projectsContainer');
-            projectsContainer.innerHTML = '';
+            // Get all featured projects by their IDs
+            const { data: projects, error } = await supabase
+                .from('projects')
+                .select('*')
+                .in('id', featuredProjectIds);
+                
+            if (error) {
+                console.error("Error loading featured projects by ID:", error);
+                throw error;
+            }
             
-            // Sort the projects based on the order in featured_project_ids
-            const orderedProjects = featuredProjectIds.map(id => {
-              // Convert both to strings for safe comparison
-              return projects.find(project => project.id.toString() === id.toString());
-            }).filter(Boolean); // Remove any null/undefined values
-            
-            console.log("Ordered featured projects:", orderedProjects.map(p => p.title));
-            
-            // Render the projects in the specified order
-            orderedProjects.forEach(project => {
-              const card = createFeaturedProjectCard(project);
-              projectsContainer.appendChild(card);
-            });
-            
-            return; // Exit early since we already handled the rendering
-          }
+            // If we successfully got the featured projects, render them in the correct order
+            if (projects && projects.length > 0) {
+                projectsContainer.innerHTML = '';
+                
+                // Sort the projects based on the order in featured_project_ids
+                const orderedProjects = featuredProjectIds.map(id => {
+                    // Convert both to strings for safe comparison
+                    return projects.find(project => project.id.toString() === id.toString());
+                }).filter(Boolean); // Remove any null/undefined values
+                
+                console.log("Ordered featured projects:", orderedProjects.map(p => p.title));
+                
+                // Render the projects in the specified order
+                orderedProjects.forEach(project => {
+                    const card = createFeaturedProjectCard(project);
+                    projectsContainer.appendChild(card);
+                });
+                
+                return; // Exit early since we already handled the rendering
+            }
         }
         
-        // If no featured projects are selected, show the empty state
-        const projectsContainer = document.getElementById('projectsContainer');
+        // If we reach here, it means either:
+        // 1. No featured projects are selected
+        // 2. Error fetching projects
+        // 3. No projects found
+        // Show the empty state
         projectsContainer.innerHTML = `
             <div class="empty-state">
                 <div class="project-image">
@@ -4257,6 +4266,22 @@ async function saveFeaturedProjects() {
         `;
     } catch (error) {
         console.error('Error loading featured projects:', error);
+        // Only show error state if container exists
+        if (projectsContainer) {
+            projectsContainer.innerHTML = `
+                <div class="empty-state">
+                    <div class="project-image">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 8l-8 8-8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="empty-state-content">
+                        <h3>Error Loading Projects</h3>
+                        <p>There was an error loading your projects. Please try again later.</p>
+                    </div>
+                </div>
+            `;
+        }
     }
   }
 

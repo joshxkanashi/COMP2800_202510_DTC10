@@ -234,29 +234,74 @@ async function handleConversationStatusChange(newStatus) {
 
 // Subscribe to conversation status changes
 function subscribeToConversationChanges() {
-    console.log('Setting up conversation subscription for:', currentConversationId);
-    
     if (conversationSubscription) {
         conversationSubscription.unsubscribe();
     }
 
+    const channelName = `conversation_changes_${currentConversationId}_${Date.now()}`;
+    console.log('Setting up conversation subscription:', channelName);
+
     conversationSubscription = supabase
-        .channel(`conversation_changes_${currentConversationId}`)
+        .channel(channelName)
         .on(
             'postgres_changes',
             {
-                event: 'UPDATE',
+                event: '*',
                 schema: 'public',
                 table: 'conversations',
                 filter: `id=eq.${currentConversationId}`
             },
-            (payload) => {
-                console.log('Conversation status changed:', payload);
-                handleConversationStatusChange(payload.new.status);
+            async (payload) => {
+                console.log('Conversation change detected:', payload.new.status);
+                
+                // Update local status
+                chatRequestStatus = payload.new.status;
+                
+                if (payload.new.status === 'accepted') {
+                    // Hide waiting message
+                    const chatEmpty = document.getElementById('chatEmpty');
+                    const chatMessages = document.getElementById('chatMessages');
+                    const chatInput = document.getElementById('chatInput');
+                    
+                    if (chatEmpty) chatEmpty.style.display = 'none';
+                    if (chatMessages) {
+                        chatMessages.style.display = 'flex';
+                        chatMessages.innerHTML = ''; // Clear any existing content
+                    }
+                    if (chatInput) {
+                        chatInput.disabled = false;
+                        chatInput.placeholder = 'Type a message...';
+                    }
+                    
+                    // Load initial messages
+                    try {
+                        const { data: messages, error } = await supabase
+                            .from('messages')
+                            .select('*')
+                            .eq('conversation_id', currentConversationId)
+                            .order('created_at', { ascending: true });
+                            
+                        if (error) throw error;
+                        
+                        if (messages && messages.length > 0) {
+                            messages.forEach(message => {
+                                const isMine = message.sender_id === currentUser.id;
+                                addMessageToUI(message, isMine);
+                            });
+                            scrollToBottom();
+                        }
+                    } catch (error) {
+                        console.error('Error loading initial messages:', error);
+                    }
+                    
+                    // Subscribe to new messages
+                    subscribeToMessages(currentConversationId);
+                } else if (payload.new.status === 'declined') {
+                    closeChat();
+                }
             }
         )
         .subscribe((status) => {
-            console.log('Conversation subscription status:', status);
             if (status === 'SUBSCRIBED') {
                 console.log('Successfully subscribed to conversation updates');
             }
@@ -559,11 +604,14 @@ async function openChat(userId, userName, userAvatar) {
             chatMessages.innerHTML = '<div class="chat-loading">Loading messages...</div>';
         }
         
-        // Subscribe to presence channel
+        // Set up subscriptions before opening the modal
+        subscribeToConversationChanges();
         subscribeToPresence(conversationId);
         
-        // Subscribe to new messages
-        subscribeToMessages(conversationId);
+        // Only subscribe to messages if the chat is already accepted
+        if (chatRequestStatus === 'accepted') {
+            subscribeToMessages(conversationId);
+        }
         
         // Load initial messages
         await loadMessages(conversationId);

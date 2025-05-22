@@ -1092,6 +1092,10 @@
                         `;
                         break;
                         
+                    case 'about':
+                        htmlContent += renderAboutSection(portfolioContent);
+                        break;
+                        
                     case 'skills':
                         htmlContent += renderSkillsSection(portfolioContent);
                         break;
@@ -1116,6 +1120,41 @@
             
             // Update the content container
             contentContainer.innerHTML = htmlContent;
+        }
+        
+        // Helper function to render about section
+        function renderAboutSection(portfolioContent) {
+            // Get the about content based on either format
+            let about1Content = '';
+            let about2Content = '';
+            
+            // Find keys ending with _about1 and _about2
+            const about1Key = Object.keys(portfolioContent).find(key => key.endsWith('_about1'));
+            const about2Key = Object.keys(portfolioContent).find(key => key.endsWith('_about2'));
+            
+            if (about1Key && about2Key) {
+                // Use the dynamic content if found
+                about1Content = portfolioContent[about1Key];
+                about2Content = portfolioContent[about2Key];
+            } else {
+                // Fallback to template format
+                about1Content = portfolioContent.about1 || 
+                              'Write a brief introduction about yourself...';
+                about2Content = portfolioContent.about2 || 
+                              'Share more about your interests and expertise...';
+            }
+
+            return `
+                <section id="about" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">About Me</h2>
+                    </div>
+                    <div class="about-content">
+                        <p class="about-text">${about1Content.trim()}</p>
+                        <p class="about-text">${about2Content.trim()}</p>
+                    </div>
+                </section>
+            `;
         }
         
         // Helper function to render skills section

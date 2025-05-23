@@ -129,13 +129,22 @@ body {
   .user-avatar {
     width: 36px;
     height: 36px;
-    font-size: 14px;
-    border-width: 1px;
+    border-radius: 50% !important;
+    overflow: hidden;
+    background-color: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
   }
-
-  .user-avatar:hover,
-  .user-avatar:active {
-    transform: scale(1.05);
+  .user-avatar img.profile-picture {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50% !important;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   /* Add spacing between buttons */
@@ -2399,4 +2408,30 @@ body.modal-open {
   color: var(--primary);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.project-modal-footer {
+  background: white;
+  padding: 16px 24px;
+  border-top: 1px solid var(--gray-200);
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .project-modal-footer {
+    padding: 12px 8px;
+  }
+  .project-modal-links {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .project-modal-link {
+    width: 100%;
+    text-align: center;
+  }
 }

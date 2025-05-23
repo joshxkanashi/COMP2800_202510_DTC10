@@ -138,6 +138,7 @@
             position: relative;
             overflow: hidden;
             cursor: pointer;
+            min-height: 100%;
         }
         
         .connect-card:hover {
@@ -173,6 +174,9 @@
         
         .connect-info {
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
         
         .connect-name {
@@ -507,7 +511,9 @@
         .connect-actions {
             display: flex;
             gap: 8px;
-            margin-top: 16px;
+            margin-top: auto;
+            justify-content: center;
+            width: 100%;
         }
         
         .connect-message-btn {

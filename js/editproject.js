@@ -35,7 +35,7 @@ async function loadProject() {
     titleInput.value = data.title;
     descInput.value = data.description;
     urlInput.value = data.project_url || '';
-    
+
     // Load existing photos
     if (data.photo_urls && Array.isArray(data.photo_urls)) {
         currentPhotoUrls = data.photo_urls;

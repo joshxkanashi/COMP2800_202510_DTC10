@@ -90,7 +90,7 @@ form.addEventListener('submit', async (e) => {
                         cacheControl: '3600',
                         upsert: false
                     });
-                
+
                 if (uploadError) {
                     console.error('Upload error:', uploadError);
                     throw uploadError;
@@ -100,7 +100,7 @@ form.addEventListener('submit', async (e) => {
                 const { data: { publicUrl } } = supabase.storage
                     .from('project-photos')
                     .getPublicUrl(filePath);
-                
+
                 photoUrls.push(publicUrl);
             } catch (error) {
                 console.error('Error uploading photo:', error);

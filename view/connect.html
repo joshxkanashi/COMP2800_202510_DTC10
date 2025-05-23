@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSync - Connect with Developers</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <!-- Load chat module first to ensure it's available -->
-    <script type="module" src="connectChat.js"></script>
+    <script type="module" src="../js/connectChat.js"></script>
     <style>
         /* Connect page specific styles */
         .search-icon2 {
@@ -23,7 +23,7 @@
             transition: color 0.3s ease;
             z-index: 2;
             pointer-events: none;
-            }
+        }
 
         .search-button2 {
             position: absolute;
@@ -43,8 +43,8 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
             z-index: 3;
-            }
-        
+        }
+
         .connect-hero {
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border-radius: 24px;
@@ -56,25 +56,25 @@
             box-shadow: 0 15px 30px -10px rgba(99, 102, 241, 0.3);
             text-align: center;
         }
-        
+
         .connect-hero h1 {
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 16px;
         }
-        
+
         .connect-hero p {
             font-size: 16px;
             opacity: 0.9;
             max-width: 600px;
             margin: 0 auto;
         }
-        
+
         .connect-search-container {
             max-width: 700px;
             margin: 0 auto 32px;
         }
-        
+
         .connect-filters {
             display: flex;
             flex-wrap: wrap;
@@ -82,7 +82,7 @@
             margin: 24px 0;
             justify-content: center;
         }
-        
+
         .connect-filter {
             background-color: var(--light);
             border: 1px solid var(--gray-200);
@@ -97,33 +97,34 @@
             align-items: center;
             gap: 8px;
         }
-        
-        .connect-filter:hover, .connect-filter.active {
+
+        .connect-filter:hover,
+        .connect-filter.active {
             background-color: var(--primary);
             color: white;
             border-color: var(--primary);
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
         }
-        
+
         .connect-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 24px;
             margin-bottom: 60px;
         }
-        
+
         @media (min-width: 768px) {
             .connect-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         @media (min-width: 1024px) {
             .connect-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-        
+
         .connect-card {
             background-color: var(--light);
             border-radius: 20px;
@@ -140,12 +141,12 @@
             cursor: pointer;
             min-height: 100%;
         }
-        
+
         .connect-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--card-hover-shadow);
         }
-        
+
         .connect-avatar {
             width: 80px;
             height: 80px;
@@ -162,7 +163,7 @@
             overflow: hidden;
             position: relative;
         }
-        
+
         .connect-avatar img {
             width: 100%;
             height: 100%;
@@ -171,27 +172,27 @@
             top: 0;
             left: 0;
         }
-        
+
         .connect-info {
             width: 100%;
             display: flex;
             flex-direction: column;
             flex: 1;
         }
-        
+
         .connect-name {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 6px;
             color: var(--dark);
         }
-        
+
         .connect-role {
             font-size: 14px;
             color: var(--gray-500);
             margin-bottom: 16px;
         }
-        
+
         .user-location {
             font-size: 14px;
             color: var(--gray-600);
@@ -201,7 +202,7 @@
             gap: 6px;
             margin-bottom: 20px;
         }
-        
+
         .connect-tags {
             display: flex;
             flex-wrap: wrap;
@@ -209,7 +210,7 @@
             justify-content: center;
             margin-bottom: 20px;
         }
-        
+
         .connect-tag {
             background-color: rgba(99, 102, 241, 0.1);
             color: var(--primary);
@@ -218,7 +219,7 @@
             font-size: 12px;
             font-weight: 500;
         }
-        
+
         .connect-open-btn {
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
@@ -232,12 +233,12 @@
             display: inline-block;
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
         }
-        
+
         .connect-open-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3);
         }
-        
+
         .no-results {
             text-align: center;
             padding: 40px;
@@ -247,12 +248,12 @@
             max-width: 500px;
             color: var(--gray-500);
         }
-        
+
         /* Add a subtle loading animation for avatars */
         .connect-avatar.loading {
             position: relative;
         }
-        
+
         .connect-avatar.loading::before {
             content: '';
             position: absolute;
@@ -260,19 +261,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, 
-                var(--primary-light) 25%, 
-                var(--primary) 50%, 
-                var(--primary-light) 75%);
+            background: linear-gradient(90deg,
+                    var(--primary-light) 25%,
+                    var(--primary) 50%,
+                    var(--primary-light) 75%);
             background-size: 200% 100%;
             border-radius: 50%;
             animation: avatarLoading 1.5s infinite;
         }
-        
+
         @keyframes avatarLoading {
             0% {
                 background-position: 200% 0;
             }
+
             100% {
                 background-position: -200% 0;
             }
@@ -291,11 +293,11 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .chat-modal.open {
             display: flex !important;
         }
-        
+
         .chat-container {
             background-color: white;
             width: 90%;
@@ -310,11 +312,11 @@
             transform: translateY(20px);
             transition: all 0.3s ease;
         }
-        
+
         .chat-modal.open .chat-container {
             transform: translateY(0);
         }
-        
+
         .chat-header {
             display: flex;
             align-items: center;
@@ -323,7 +325,7 @@
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
         }
-        
+
         .chat-header-avatar {
             width: 40px;
             height: 40px;
@@ -337,27 +339,27 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .chat-header-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
+
         .chat-header-info {
             flex: 1;
         }
-        
+
         .chat-header-name {
             font-weight: 600;
             margin-bottom: 2px;
         }
-        
+
         .chat-header-status {
             font-size: 12px;
             opacity: 0.8;
         }
-        
+
         .chat-close {
             background: none;
             border: none;
@@ -371,11 +373,11 @@
             justify-content: center;
             transition: all 0.2s ease;
         }
-        
+
         .chat-close:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
-        
+
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -385,22 +387,22 @@
             gap: 12px;
             background-color: #f9fafb;
         }
-        
+
         .chat-message {
             max-width: 80%;
             display: flex;
             flex-direction: column;
             position: relative;
         }
-        
+
         .chat-message.sent {
             align-self: flex-end;
         }
-        
+
         .chat-message.received {
             align-self: flex-start;
         }
-        
+
         .chat-message-content {
             padding: 12px 16px;
             border-radius: 16px;
@@ -408,31 +410,31 @@
             line-height: 1.5;
             word-wrap: break-word;
         }
-        
+
         .chat-message.sent .chat-message-content {
             background-color: #6366f1;
             color: white;
             border-bottom-right-radius: 4px;
         }
-        
+
         .chat-message.received .chat-message-content {
             background-color: white;
             color: #111827;
             border-bottom-left-radius: 4px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
-        
+
         .chat-message-time {
             font-size: 12px;
             color: #6b7280;
             margin-top: 4px;
             padding: 0 4px;
         }
-        
+
         .chat-message.sent .chat-message-time {
             text-align: right;
         }
-        
+
         .chat-input-container {
             padding: 16px;
             display: flex;
@@ -441,7 +443,7 @@
             border-top: 1px solid var(--gray-200);
             background-color: white;
         }
-        
+
         .chat-input {
             flex: 1;
             padding: 12px 16px;
@@ -454,12 +456,12 @@
             background-color: var(--gray-50);
             transition: all 0.2s ease;
         }
-        
+
         .chat-input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
-        
+
         .chat-send {
             width: 40px;
             height: 40px;
@@ -474,17 +476,17 @@
             transition: all 0.2s ease;
             flex-shrink: 0;
         }
-        
+
         .chat-send:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 8px rgba(99, 102, 241, 0.2);
         }
-        
+
         .chat-send:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         .chat-empty {
             display: flex;
             flex-direction: column;
@@ -495,19 +497,19 @@
             text-align: center;
             padding: 0 24px;
         }
-        
+
         .chat-empty svg {
             width: 80px;
             height: 80px;
             margin-bottom: 16px;
             color: var(--gray-300);
         }
-        
+
         .chat-empty h3 {
             margin-bottom: 8px;
             color: var(--gray-700);
         }
-        
+
         .connect-actions {
             display: flex;
             gap: 8px;
@@ -515,7 +517,7 @@
             justify-content: center;
             width: 100%;
         }
-        
+
         .connect-message-btn {
             background-color: white;
             color: var(--primary);
@@ -530,24 +532,25 @@
             align-items: center;
             gap: 6px;
         }
-        
+
         .connect-message-btn:hover {
             background-color: var(--primary);
             color: white;
             transform: translateY(-2px);
         }
-        
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .typing-indicator {
             display: flex;
             align-items: center;
@@ -556,12 +559,12 @@
             opacity: 0.7;
             font-size: 12px;
         }
-        
+
         .typing-dots {
             display: flex;
             margin-left: 8px;
         }
-        
+
         .typing-dot {
             width: 6px;
             height: 6px;
@@ -570,19 +573,23 @@
             margin-right: 3px;
             animation: typingDot 1.4s infinite;
         }
-        
+
         .typing-dot:nth-child(2) {
             animation-delay: 0.2s;
         }
-        
+
         .typing-dot:nth-child(3) {
             animation-delay: 0.4s;
         }
-        
+
         @keyframes typingDot {
-            0%, 60%, 100% {
+
+            0%,
+            60%,
+            100% {
                 transform: translateY(0);
             }
+
             30% {
                 transform: translateY(-4px);
             }
@@ -598,27 +605,27 @@
             text-align: center;
             background-color: var(--light);
         }
-        
+
         .chat-request svg {
             width: 48px;
             height: 48px;
             color: var(--primary);
             margin-bottom: 16px;
         }
-        
+
         .chat-request p {
             font-size: 18px;
             font-weight: 600;
             color: var(--gray-800);
             margin-bottom: 8px;
         }
-        
+
         .chat-request-subtitle {
             font-size: 14px;
             color: var(--gray-600);
             margin-bottom: 24px;
         }
-        
+
         .chat-request-message {
             background: white;
             border-radius: 12px;
@@ -631,12 +638,12 @@
             font-size: 14px;
             color: var(--gray-700);
         }
-        
+
         .chat-request-buttons {
             display: flex;
             gap: 12px;
         }
-        
+
         .chat-request-accept {
             padding: 8px 24px;
             background: var(--primary);
@@ -647,12 +654,12 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .chat-request-accept:hover {
             background: var(--primary-dark);
             transform: translateY(-1px);
         }
-        
+
         .chat-request-decline {
             padding: 8px 24px;
             background: var(--gray-100);
@@ -663,7 +670,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .chat-request-decline:hover {
             background: var(--gray-200);
             transform: translateY(-1px);
@@ -672,27 +679,32 @@
 </head>
 
 <body>
+    <div id="navbar-placeholder"></div>
+    <script type="module" src="../js/navbar.js"></script>
     <div id="app">
-        <div id="navbar-placeholder"></div>
-        <script type="module" src="navbar.js"></script>
-
         <main class="container">
             <section class="connect-hero">
                 <h1>Find and Connect with Developers</h1>
-                <p>Discover talented developers, view their portfolios, and connect with them for your next project or collaboration</p>
+                <p>Discover talented developers, view their portfolios, and connect with them for your next project or
+                    collaboration</p>
             </section>
 
             <div class="connect-search-container">
                 <div class="search-container">
                     <span class="search-icon2">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path
+                                d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </span>
-                    <input type="text" id="connectSearchInput" class="search-input" placeholder="Search developers by name, skills or location" aria-label="Search for developers">
+                    <input type="text" id="connectSearchInput" class="search-input"
+                        placeholder="Search developers by name, skills or location" aria-label="Search for developers">
                     <button class="search-button2" id="connectSearchButton" aria-label="Search">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path
+                                d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z"
+                                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </button>
                 </div>
@@ -700,39 +712,62 @@
                 <div class="connect-filters">
                     <button class="connect-filter active" data-filter="all">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 6H21M3 12H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3 6H21M3 12H21M3 18H21" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         All Developers
                     </button>
                     <button class="connect-filter" data-filter="frontend">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M8.5 12H15.5M6.5 15.5H17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M8.5 12H15.5M6.5 15.5H17.5" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         Frontend
                     </button>
                     <button class="connect-filter" data-filter="backend">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19.3 7.91998V13.07C19.3 16.15 17.54 17.47 14.9 17.47H6.11C5.4 17.47 4.75 17.38 4.18 17.19C3.88 17.1 3.6 16.99 3.35 16.85C2.21 16.2 1.6 14.99 1.6 13.07V7.91998C1.6 4.83998 3.36 3.52002 6 3.52002H14.9C17.54 3.52002 19.3 4.83998 19.3 7.91998Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M22.4001 10.9V16.05C22.4001 19.13 20.6401 20.4501 18.0001 20.4501H9.2101C7.9301 20.4501 6.88006 20.2101 6.12006 19.6701C5.37006 19.1301 4.90009 18.2701 4.80009 17.1901C5.37009 17.3801 6.02007 17.4701 6.73007 17.4701H15.5201C18.1601 17.4701 19.9201 16.1501 19.9201 13.0701V7.9201C19.9201 5.9301 19.0701 4.58009 17.5901 3.89009C17.8501 3.79009 18.1401 3.73006 18.4601 3.73006H18.0001C20.6401 3.73006 22.4001 5.05004 22.4001 8.13004V10.9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M10.4945 9.01001L7.55444 11.95L10.4945 14.89" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M13.8801 9.01001L16.8201 11.95L13.8801 14.89" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path
+                                d="M19.3 7.91998V13.07C19.3 16.15 17.54 17.47 14.9 17.47H6.11C5.4 17.47 4.75 17.38 4.18 17.19C3.88 17.1 3.6 16.99 3.35 16.85C2.21 16.2 1.6 14.99 1.6 13.07V7.91998C1.6 4.83998 3.36 3.52002 6 3.52002H14.9C17.54 3.52002 19.3 4.83998 19.3 7.91998Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path
+                                d="M22.4001 10.9V16.05C22.4001 19.13 20.6401 20.4501 18.0001 20.4501H9.2101C7.9301 20.4501 6.88006 20.2101 6.12006 19.6701C5.37006 19.1301 4.90009 18.2701 4.80009 17.1901C5.37009 17.3801 6.02007 17.4701 6.73007 17.4701H15.5201C18.1601 17.4701 19.9201 16.1501 19.9201 13.0701V7.9201C19.9201 5.9301 19.0701 4.58009 17.5901 3.89009C17.8501 3.79009 18.1401 3.73006 18.4601 3.73006H18.0001C20.6401 3.73006 22.4001 5.05004 22.4001 8.13004V10.9Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M10.4945 9.01001L7.55444 11.95L10.4945 14.89" stroke="currentColor"
+                                stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M13.8801 9.01001L16.8201 11.95L13.8801 14.89" stroke="currentColor"
+                                stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         Backend
                     </button>
                     <button class="connect-filter" data-filter="fullstack">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22 7C22 4 20 2 17 2H7C4 2 2 4 2 7V13C2 16 4 18 7 18H17C20 18 22 16 22 13V7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 22V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M2 13V17C2 19.8 4.2 22 7 22H17C19.8 22 22 19.8 22 17V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7.5 11L10.65 8.37C10.9 8.16 11.23 8.22 11.4 8.5L12.6 10.5C12.77 10.78 13.1 10.83 13.35 10.63L16.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 7C22 4 20 2 17 2H7C4 2 2 4 2 7V13C2 16 4 18 7 18H17C20 18 22 16 22 13V7Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M12 22V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M2 13V17C2 19.8 4.2 22 7 22H17C19.8 22 22 19.8 22 17V13" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                                d="M7.5 11L10.65 8.37C10.9 8.16 11.23 8.22 11.4 8.5L12.6 10.5C12.77 10.78 13.1 10.83 13.35 10.63L16.5 8"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         Full Stack
                     </button>
                     <button class="connect-filter" data-filter="mobile">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15 2V22M15 18H2.5V14L6.5 12L2.5 10V6H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M18.5 14H21.5M18.5 18H21.5M18.5 6H21.5M18.5 10H21.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15 2V22M15 18H2.5V14L6.5 12L2.5 10V6H15" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M18.5 14H21.5M18.5 18H21.5M18.5 6H21.5M18.5 10H21.5" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         Mobile
                     </button>
@@ -748,7 +783,9 @@
             <a href="index.html" class="nav-item" aria-label="Home">
                 <div class="nav-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span>Home</span>
@@ -756,9 +793,15 @@
             <a href="portfolio.html" class="nav-item" aria-label="Portfolio">
                 <div class="nav-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path
+                            d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path
+                            d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span>Portfolio</span>
@@ -766,7 +809,9 @@
             <a href="projects.html" class="nav-item" aria-label="Projects">
                 <div class="nav-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 14L18 11L15 14M18 11V17M10 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3H14C15.1046 3 16 3.89543 16 5V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M21 14L18 11L15 14M18 11V17M10 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3H14C15.1046 3 16 3.89543 16 5V9"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span>Projects</span>
@@ -774,8 +819,11 @@
             <a href="connect.html" class="nav-item active" aria-label="Connect">
                 <div class="nav-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </div>
                 <span>Connect</span>
@@ -793,7 +841,8 @@
                     </div>
                     <button id="chatClose" class="chat-close">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                     </button>
                 </div>
@@ -802,14 +851,18 @@
                 </div>
                 <div id="chatEmpty" class="chat-empty">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <p>No messages yet</p>
                     <p class="chat-empty-subtitle">Start the conversation by sending a message</p>
                 </div>
                 <div id="chatRequest" class="chat-request">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path
+                            d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <p>Chat Request</p>
                     <div class="chat-request-message" id="chatRequestMessage">
@@ -824,7 +877,8 @@
                     <textarea id="chatInput" class="chat-input" placeholder="Type a message..." rows="1"></textarea>
                     <button id="chatSend" class="chat-send" disabled>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </button>
                 </div>
@@ -833,14 +887,14 @@
     </div>
 
     <!-- First load the supabaseAPI.js as a module -->
-    <script type="module" src="supabaseAPI.js"></script>
-    
+    <script type="module" src="../js/supabaseAPI.js"></script>
+
     <!-- Then load the eachConnect.js file -->
-    <script type="module" src="eachConnect.js"></script>
+    <script type="module" src="../js/eachConnect.js"></script>
 
     <script type="module">
-        import { supabase } from './supabaseAPI.js';
-        
+        import { supabase } from '../js/supabaseAPI.js';
+
         document.addEventListener('DOMContentLoaded', async () => {
             // Check for stored chat parameters
             const storedChatParams = localStorage.getItem('openChatWith');

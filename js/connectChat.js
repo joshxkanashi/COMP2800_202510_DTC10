@@ -23,7 +23,7 @@ window.openChat = openChat;
 // Initialize chat functionality
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('Chat module loaded');
-    
+
     // Check if elements exist before trying to use them
     if (!document.getElementById('chatModal')) {
         console.error('Chat modal elements not found in DOM. Chat functionality disabled.');
@@ -37,19 +37,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('User not logged in. Chat functionality disabled.');
             return;
         }
-        
+
         currentUser = user;
         console.log('Chat initialized for user:', currentUser.id);
-        
+
         // Setup chat UI elements
         setupChatUI();
-        
+
         // Load existing conversations
         loadUserConversations();
-        
+
         // Subscribe to global presence
         subscribeToGlobalPresence();
-        
+
         // Make sure openChat is available globally (redundant but safe)
         window.openChat = openChat;
         console.log('Chat functions exposed globally');
@@ -68,29 +68,29 @@ function setupChatUI() {
     const chatMessages = document.getElementById('chatMessages');
     const acceptRequest = document.getElementById('acceptRequest');
     const declineRequest = document.getElementById('declineRequest');
-    
+
     if (!chatModal || !chatClose || !chatInput || !chatSend || !chatMessages || !acceptRequest || !declineRequest) {
         console.error('Required chat UI elements not found');
         return;
     }
-    
+
     // Close chat modal when clicking close button
     chatClose.addEventListener('click', () => {
         closeChat();
     });
-    
+
     // Close chat modal when clicking outside it
     chatModal.addEventListener('click', (e) => {
         if (e.target === chatModal) {
             closeChat();
         }
     });
-    
+
     // Send message when clicking send button
     chatSend.addEventListener('click', () => {
         sendMessage();
     });
-    
+
     // Send message when pressing Enter in input field
     chatInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -98,7 +98,7 @@ function setupChatUI() {
             sendMessage();
         }
     });
-    
+
     // Handle typing indicator
     chatInput.addEventListener('input', () => {
         chatSend.disabled = !chatInput.value.trim();
@@ -112,17 +112,17 @@ function setupChatUI() {
                 .from('conversations')
                 .update({ status: 'accepted' })
                 .eq('id', currentConversationId);
-                
+
             if (error) throw error;
-            
+
             chatRequestStatus = 'accepted';
-            
+
             // Update UI elements
             const chatEmpty = document.getElementById('chatEmpty');
             const chatRequest = document.getElementById('chatRequest');
             const chatMessages = document.getElementById('chatMessages');
             const chatInput = document.getElementById('chatInput');
-            
+
             if (chatEmpty) chatEmpty.style.display = 'none';
             if (chatRequest) chatRequest.style.display = 'none';
             if (chatMessages) {
@@ -134,7 +134,7 @@ function setupChatUI() {
                 chatInput.placeholder = 'Type a message...';
                 chatInput.focus();
             }
-            
+
             // Reload messages to show the initial message
             await loadMessages(currentConversationId);
         } catch (error) {
@@ -142,7 +142,7 @@ function setupChatUI() {
             alert('Error accepting chat request. Please try again.');
         }
     });
-    
+
     // Decline chat request
     declineRequest.addEventListener('click', async () => {
         try {
@@ -150,9 +150,9 @@ function setupChatUI() {
                 .from('conversations')
                 .update({ status: 'declined' })
                 .eq('id', currentConversationId);
-                
+
             if (error) throw error;
-            
+
             closeChat();
         } catch (error) {
             console.error('Error declining chat request:', error);
@@ -168,12 +168,12 @@ function setupChatUI() {
 async function handleConversationStatusChange(newStatus) {
     console.log('Handling conversation status change:', newStatus);
     chatRequestStatus = newStatus;
-    
+
     const chatInput = document.getElementById('chatInput');
     const chatMessages = document.getElementById('chatMessages');
     const chatRequest = document.getElementById('chatRequest');
     const chatEmpty = document.getElementById('chatEmpty');
-    
+
     if (!chatInput || !chatMessages || !chatRequest || !chatEmpty) {
         console.error('Required chat elements not found');
         return;
@@ -183,15 +183,15 @@ async function handleConversationStatusChange(newStatus) {
         // Hide request UI and empty state
         chatRequest.style.display = 'none';
         chatEmpty.style.display = 'none';
-        
+
         // Show messages container
         chatMessages.style.display = 'flex';
         chatMessages.innerHTML = ''; // Clear any existing content
-        
+
         // Enable input
         chatInput.disabled = false;
         chatInput.placeholder = 'Type a message...';
-        
+
         // Load messages
         try {
             const { data: messages, error } = await supabase
@@ -199,9 +199,9 @@ async function handleConversationStatusChange(newStatus) {
                 .select('*')
                 .eq('conversation_id', currentConversationId)
                 .order('created_at', { ascending: true });
-                
+
             if (error) throw error;
-            
+
             if (messages && messages.length > 0) {
                 messages.forEach(message => {
                     const isMine = message.sender_id === currentUser.id;
@@ -215,7 +215,7 @@ async function handleConversationStatusChange(newStatus) {
     } else if (newStatus === 'declined') {
         // Close the chat and clean up
         closeChat();
-        
+
         // Delete the conversation and messages
         if (currentConversationId) {
             supabase
@@ -253,16 +253,16 @@ function subscribeToConversationChanges() {
             },
             async (payload) => {
                 console.log('Conversation change detected:', payload.new.status);
-                
+
                 // Update local status
                 chatRequestStatus = payload.new.status;
-                
+
                 if (payload.new.status === 'accepted') {
                     // Hide waiting message
                     const chatEmpty = document.getElementById('chatEmpty');
                     const chatMessages = document.getElementById('chatMessages');
                     const chatInput = document.getElementById('chatInput');
-                    
+
                     if (chatEmpty) chatEmpty.style.display = 'none';
                     if (chatMessages) {
                         chatMessages.style.display = 'flex';
@@ -272,7 +272,7 @@ function subscribeToConversationChanges() {
                         chatInput.disabled = false;
                         chatInput.placeholder = 'Type a message...';
                     }
-                    
+
                     // Load initial messages
                     try {
                         const { data: messages, error } = await supabase
@@ -280,9 +280,9 @@ function subscribeToConversationChanges() {
                             .select('*')
                             .eq('conversation_id', currentConversationId)
                             .order('created_at', { ascending: true });
-                            
+
                         if (error) throw error;
-                        
+
                         if (messages && messages.length > 0) {
                             messages.forEach(message => {
                                 const isMine = message.sender_id === currentUser.id;
@@ -293,7 +293,7 @@ function subscribeToConversationChanges() {
                     } catch (error) {
                         console.error('Error loading initial messages:', error);
                     }
-                    
+
                     // Subscribe to new messages
                     subscribeToMessages(currentConversationId);
                 } else if (payload.new.status === 'declined') {
@@ -304,8 +304,8 @@ function subscribeToConversationChanges() {
         .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
                 console.log('Successfully subscribed to conversation updates');
-        }
-    });
+            }
+        });
 }
 
 // Handle typing indicator
@@ -314,12 +314,12 @@ function handleTypingIndicator() {
         isTyping = true;
         broadcastTypingStatus(true);
     }
-    
+
     // Clear existing timeout
     if (typingTimeout) {
         clearTimeout(typingTimeout);
     }
-    
+
     // Set new timeout
     typingTimeout = setTimeout(() => {
         isTyping = false;
@@ -341,7 +341,7 @@ function broadcastTypingStatus(isTyping) {
 // Load more messages (pagination)
 async function loadMoreMessages() {
     if (!currentConversationId) return;
-    
+
     try {
         currentPage++;
         const { data: messages, error } = await supabase
@@ -350,19 +350,19 @@ async function loadMoreMessages() {
             .eq('conversation_id', currentConversationId)
             .order('created_at', { ascending: false })
             .range((currentPage - 1) * MESSAGES_PER_PAGE, currentPage * MESSAGES_PER_PAGE - 1);
-            
+
         if (error) throw error;
-        
+
         // Preserve scroll position
         const chatMessages = document.getElementById('chatMessages');
         const oldHeight = chatMessages.scrollHeight;
-        
+
         // Add messages to top of container
         messages.reverse().forEach(message => {
             const isMine = message.sender_id === currentUser.id;
             prependMessageToUI(message, isMine);
         });
-        
+
         // Maintain scroll position
         chatMessages.scrollTop = chatMessages.scrollHeight - oldHeight;
     } catch (error) {
@@ -374,7 +374,7 @@ async function loadMoreMessages() {
 function prependMessageToUI(message, isMine) {
     const chatMessages = document.getElementById('chatMessages');
     if (!chatMessages) return;
-    
+
     const messageEl = createMessageElement(message, isMine);
     chatMessages.insertBefore(messageEl, chatMessages.firstChild);
 }
@@ -384,15 +384,15 @@ function createMessageElement(message, isMine) {
     const messageEl = document.createElement('div');
     messageEl.className = `chat-message ${isMine ? 'sent' : 'received'}`;
     messageEl.setAttribute('data-id', message.id);
-    
+
     const date = new Date(message.created_at);
     const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
+
     messageEl.innerHTML = `
         <div class="chat-message-content">${escapeHtml(message.content)}</div>
         <div class="chat-message-time">${timeString}</div>
     `;
-    
+
     return messageEl;
 }
 
@@ -401,9 +401,9 @@ function subscribeToPresence(conversationId) {
     if (presenceChannel) {
         presenceChannel.unsubscribe();
     }
-    
+
     presenceChannel = supabase.channel(`presence-${conversationId}`);
-    
+
     presenceChannel
         .on('presence', { event: 'sync' }, () => {
             const state = presenceChannel.presenceState();
@@ -422,7 +422,7 @@ function subscribeToPresence(conversationId) {
         })
         .subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
-                await presenceChannel.track({ 
+                await presenceChannel.track({
                     user_id: currentUser.id,
                     online_at: new Date().toISOString()
                 });
@@ -434,10 +434,10 @@ function subscribeToPresence(conversationId) {
 function updateOnlineStatus(state) {
     const statusEl = document.querySelector('.chat-header-status');
     if (!statusEl || !currentChatUserId) return;
-    
+
     const otherUserPresence = Object.values(state).flat()
         .find(presence => presence.user_id === currentChatUserId);
-    
+
     statusEl.textContent = otherUserPresence ? 'Online' : 'Offline';
 }
 
@@ -459,7 +459,7 @@ function handleTypingEvent(payload) {
 // Open chat with selected user
 async function openChat(userId, userName, userAvatar) {
     console.log('Opening chat with user:', userId, userName);
-    
+
     // Check if chat modal exists
     const chatModal = document.getElementById('chatModal');
     if (!chatModal) {
@@ -467,7 +467,7 @@ async function openChat(userId, userName, userAvatar) {
         alert('Chat functionality is not available. Please refresh the page.');
         return;
     }
-    
+
     if (!currentUser) {
         try {
             const { data: { user }, error } = await supabase.auth.getUser();
@@ -482,29 +482,29 @@ async function openChat(userId, userName, userAvatar) {
             return;
         }
     }
-    
+
     if (userId === currentUser.id) {
         alert('You cannot chat with yourself');
         return;
     }
-    
+
     try {
         // Check if conversation exists and its status
         const [user1, user2] = [currentUser.id, userId].sort();
         console.log('Checking for existing conversation between users:', user1, user2);
-        
+
         const { data: existingConv, error: queryError } = await supabase
             .from('conversations')
             .select('id, status, initiator_id')
             .eq('user1_id', user1)
             .eq('user2_id', user2)
             .maybeSingle();
-            
+
         if (queryError) throw queryError;
-        
+
         console.log('Existing conversation:', existingConv);
         let conversationId;
-        
+
         if (existingConv) {
             // If conversation exists and is accepted, open it directly
             if (existingConv.status === 'accepted') {
@@ -533,7 +533,7 @@ async function openChat(userId, userName, userAvatar) {
                 console.log('User cancelled initial message');
                 return; // User cancelled
             }
-            
+
             // Create new conversation with pending status
             const { data: newConv, error: insertError } = await supabase
                 .from('conversations')
@@ -545,11 +545,11 @@ async function openChat(userId, userName, userAvatar) {
                 }])
                 .select()
                 .single();
-                
+
             if (insertError) throw insertError;
-            
+
             console.log('Created new conversation:', newConv);
-            
+
             // Create initial message
             const { error: messageError } = await supabase
                 .from('messages')
@@ -559,36 +559,36 @@ async function openChat(userId, userName, userAvatar) {
                     content: initialMessage,
                     read: false
                 }]);
-                
+
             if (messageError) throw messageError;
-            
+
             conversationId = newConv.id;
             chatRequestStatus = 'pending';
         }
-        
+
         if (!conversationId) {
             throw new Error('Failed to get or create conversation');
         }
-        
+
         console.log('Final conversation state:', {
             conversationId,
             chatRequestStatus,
             currentUser: currentUser.id
         });
-        
+
         currentChatUserId = userId;
         currentConversationId = conversationId;
         currentPage = 1;
         allMessagesLoaded = false;
-        
+
         // Set chat header information
         const chatHeaderName = document.getElementById('chatHeaderName');
         const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
-        
+
         if (chatHeaderName) {
             chatHeaderName.textContent = userName || 'User';
         }
-        
+
         if (chatHeaderAvatar) {
             if (userAvatar) {
                 chatHeaderAvatar.innerHTML = `<img src="${userAvatar}" alt="${userName || 'User'}">`;
@@ -597,36 +597,36 @@ async function openChat(userId, userName, userAvatar) {
                 chatHeaderAvatar.innerHTML = firstLetter;
             }
         }
-        
+
         // Clear previous messages and show loading
         const chatMessages = document.getElementById('chatMessages');
         if (chatMessages) {
             chatMessages.innerHTML = '<div class="chat-loading">Loading messages...</div>';
         }
-        
+
         // Set up subscriptions before opening the modal
         subscribeToConversationChanges();
         subscribeToPresence(conversationId);
-        
+
         // Only subscribe to messages if the chat is already accepted
         if (chatRequestStatus === 'accepted') {
-        subscribeToMessages(conversationId);
+            subscribeToMessages(conversationId);
         }
-        
+
         // Load initial messages
         await loadMessages(conversationId);
-        
+
         // Open chat modal
         chatModal.classList.add('open');
-            
+
         // Ensure chat is scrolled to bottom after a short delay
-            setTimeout(() => {
+        setTimeout(() => {
             scrollToBottom();
             // Focus input field if chat is accepted
             const chatInput = document.getElementById('chatInput');
             if (chatInput && chatRequestStatus === 'accepted') {
                 chatInput.focus();
-        }
+            }
         }, 100);
     } catch (error) {
         console.error('Error opening chat:', error);
@@ -708,42 +708,42 @@ function promptForInitialMessage() {
 // Close chat modal and clean up
 function closeChat() {
     console.log('Closing chat...');
-    
+
     // Remove open class from modal
     const chatModal = document.getElementById('chatModal');
     if (chatModal) {
         chatModal.classList.remove('open');
     }
-    
+
     // Clear input
     const chatInput = document.getElementById('chatInput');
     if (chatInput) {
         chatInput.value = '';
         chatInput.disabled = false;
     }
-    
+
     // Clear messages
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
         chatMessages.innerHTML = '';
     }
-    
+
     // Clean up chat-specific subscriptions
     if (messageSubscription) {
         messageSubscription.unsubscribe();
         messageSubscription = null;
     }
-    
+
     if (presenceChannel) {
         presenceChannel.unsubscribe();
         presenceChannel = null;
     }
-    
+
     if (conversationSubscription) {
         conversationSubscription.unsubscribe();
         conversationSubscription = null;
     }
-    
+
     // Reset chat-specific state
     currentChatUserId = null;
     currentConversationId = null;
@@ -760,10 +760,10 @@ function closeChat() {
 async function getOrCreateConversation(otherUserId, initialMessage = null) {
     try {
         console.log('Getting or creating conversation between', currentUser.id, 'and', otherUserId);
-        
+
         // Sort user IDs to match how they are stored in the DB
         const [user1, user2] = [currentUser.id, otherUserId].sort();
-        
+
         // Check if conversation exists
         const { data: existingConv, error: queryError } = await supabase
             .from('conversations')
@@ -771,15 +771,15 @@ async function getOrCreateConversation(otherUserId, initialMessage = null) {
             .eq('user1_id', user1)
             .eq('user2_id', user2)
             .maybeSingle();
-            
+
         if (queryError) throw queryError;
-        
+
         if (existingConv) {
             console.log('Found existing conversation:', existingConv.id);
             chatRequestStatus = existingConv.status;
             return existingConv.id;
         }
-        
+
         // Create new conversation with pending status
         const { data: newConv, error: insertError } = await supabase
             .from('conversations')
@@ -791,9 +791,9 @@ async function getOrCreateConversation(otherUserId, initialMessage = null) {
             }])
             .select()
             .single();
-            
+
         if (insertError) throw insertError;
-        
+
         // If we have an initial message, create it
         if (initialMessage && newConv.id) {
             const { error: messageError } = await supabase
@@ -804,10 +804,10 @@ async function getOrCreateConversation(otherUserId, initialMessage = null) {
                     content: initialMessage,
                     read: false
                 }]);
-                
+
             if (messageError) throw messageError;
         }
-        
+
         console.log('Created new conversation:', newConv.id);
         chatRequestStatus = 'pending';
         return newConv.id;
@@ -821,17 +821,17 @@ async function getOrCreateConversation(otherUserId, initialMessage = null) {
 function subscribeToMessages(conversationId) {
     try {
         console.log('Setting up message subscription for conversation:', conversationId);
-        
+
         // Clean up any existing subscription
         if (messageSubscription) {
             console.log('Cleaning up existing message subscription');
             messageSubscription.unsubscribe();
         }
-        
+
         // Create new subscription with a unique channel name
         const channelName = `messages_${conversationId}_${Date.now()}`;
         console.log('Creating new message subscription on channel:', channelName);
-        
+
         messageSubscription = supabase
             .channel(channelName)
             .on(
@@ -848,7 +848,7 @@ function subscribeToMessages(conversationId) {
                         const message = payload.new;
                         const isMine = message.sender_id === currentUser.id;
                         console.log('New message:', message, 'Is mine:', isMine);
-                        
+
                         // Only handle messages from the other user
                         if (!isMine) {
                             console.log('Adding received message to UI');
@@ -879,22 +879,22 @@ function subscribeToMessages(conversationId) {
 async function loadMessages(conversationId) {
     try {
         console.log('Loading messages for conversation:', conversationId);
-        
+
         const { data: messages, error } = await supabase
             .from('messages')
             .select('*')
             .eq('conversation_id', conversationId)
             .order('created_at', { ascending: true })
             .limit(MESSAGES_PER_PAGE);
-            
+
         if (error) throw error;
-        
+
         // Get all UI elements
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const chatRequest = document.getElementById('chatRequest');
         const chatEmpty = document.getElementById('chatEmpty');
-        
+
         if (!chatMessages || !chatInput || !chatRequest || !chatEmpty) {
             console.error('Chat elements not found:', {
                 chatMessages: !!chatMessages,
@@ -904,17 +904,17 @@ async function loadMessages(conversationId) {
             });
             return;
         }
-        
+
         // Clear existing messages
         chatMessages.innerHTML = '';
-        
+
         // Hide all containers initially
         chatEmpty.style.display = 'none';
         chatRequest.style.display = 'none';
         chatMessages.style.display = 'flex';
-        
+
         console.log('Chat request status:', chatRequestStatus, 'Messages:', messages?.length);
-        
+
         if (chatRequestStatus === 'pending') {
             console.log('Handling pending chat request...');
             const { data: conv } = await supabase
@@ -922,11 +922,11 @@ async function loadMessages(conversationId) {
                 .select('initiator_id')
                 .eq('id', conversationId)
                 .single();
-                
+
             if (conv) {
                 const isRecipient = conv.initiator_id !== currentUser.id;
                 console.log('Is recipient:', isRecipient);
-                
+
                 if (isRecipient) {
                     // Show accept/decline UI for recipient
                     chatRequest.style.display = 'flex';
@@ -934,7 +934,7 @@ async function loadMessages(conversationId) {
                     chatEmpty.style.display = 'none';
                     chatInput.disabled = true;
                     chatInput.placeholder = 'Accept the chat request to start messaging...';
-                    
+
                     // Show initial message in request screen
                     if (messages && messages.length > 0) {
                         const chatRequestMessage = document.getElementById('chatRequestMessage');
@@ -962,22 +962,22 @@ async function loadMessages(conversationId) {
         } else {
             // Handle accepted conversation
             chatRequest.style.display = 'none';
-            
+
             if (messages && messages.length > 0) {
                 // Show messages if we have any
                 chatEmpty.style.display = 'none';
                 chatMessages.style.display = 'flex';
-                
+
                 messages.forEach(message => {
-                const isMine = message.sender_id === currentUser.id;
-                addMessageToUI(message, isMine);
-                
-                // Mark other user's unread messages as read
-                if (!isMine && !message.read) {
-                    markMessageAsRead(message.id);
-                }
-            });
-            
+                    const isMine = message.sender_id === currentUser.id;
+                    addMessageToUI(message, isMine);
+
+                    // Mark other user's unread messages as read
+                    if (!isMine && !message.read) {
+                        markMessageAsRead(message.id);
+                    }
+                });
+
                 // Scroll to bottom after messages are loaded
                 setTimeout(scrollToBottom, 100);
             } else {
@@ -992,18 +992,18 @@ async function loadMessages(conversationId) {
                     <p class="chat-empty-subtitle">Start the conversation by sending a message</p>
                 `;
             }
-            
+
             // Enable input for accepted conversations
             chatInput.disabled = false;
             chatInput.placeholder = 'Type a message...';
         }
-        
+
         if (messages && messages.length < MESSAGES_PER_PAGE) {
             allMessagesLoaded = true;
         }
     } catch (error) {
         console.error('Error loading messages:', error);
-        
+
         // Show error in chat container
         const chatMessages = document.getElementById('chatMessages');
         if (chatMessages) {
@@ -1016,22 +1016,22 @@ async function loadMessages(conversationId) {
 function addMessageToUI(message, isMine) {
     const chatMessages = document.getElementById('chatMessages');
     const chatEmpty = document.getElementById('chatEmpty');
-    
+
     if (!chatMessages || !chatEmpty) {
         console.error('Chat messages container or empty state not found');
         return;
     }
-    
+
     // Hide empty state and show messages container
     chatEmpty.style.display = 'none';
     chatMessages.style.display = 'flex';
-    
+
     // Create message element
     const messageEl = createMessageElement(message, isMine);
-    
+
     // Add to container
     chatMessages.appendChild(messageEl);
-    
+
     // Scroll to bottom
     scrollToBottom();
 }
@@ -1039,23 +1039,23 @@ function addMessageToUI(message, isMine) {
 // Toggle empty state visibility
 function toggleEmptyState(show) {
     console.log('Toggling empty state:', show, 'Status:', chatRequestStatus);
-    
+
     const chatEmpty = document.getElementById('chatEmpty');
     const chatRequest = document.getElementById('chatRequest');
     const chatMessages = document.getElementById('chatMessages');
     const chatRequestMessage = document.getElementById('chatRequestMessage');
     const chatInput = document.getElementById('chatInput');
-    
+
     if (!chatEmpty || !chatRequest || !chatMessages || !chatInput) {
         console.warn('Chat elements not found');
         return;
     }
-    
+
     // First hide all elements
     chatEmpty.style.display = 'none';
     chatRequest.style.display = 'none';
     chatMessages.style.display = 'flex';
-    
+
     if (show) {
         if (chatRequestStatus === 'pending') {
             // Get the conversation to check if user is recipient
@@ -1067,7 +1067,7 @@ function toggleEmptyState(show) {
                 .then(({ data, error }) => {
                     if (!error && data) {
                         const isRecipient = data.initiator_id !== currentUser.id;
-                        
+
                         // Get and show the initial message
                         supabase
                             .from('messages')
@@ -1080,7 +1080,7 @@ function toggleEmptyState(show) {
                                 if (!messageError && messageData && chatRequestMessage) {
                                     // Show the initial message in both chat request and messages
                                     chatRequestMessage.textContent = messageData.content;
-                                    
+
                                     // If showing messages, make sure the initial message is there
                                     if (chatMessages.style.display === 'flex' && chatMessages.children.length === 0) {
                                         const message = {
@@ -1093,7 +1093,7 @@ function toggleEmptyState(show) {
                                     }
                                 }
                             });
-                        
+
                         if (isRecipient) {
                             // Show request UI with accept/decline buttons for recipient
                             chatRequest.style.display = 'flex';
@@ -1141,21 +1141,21 @@ async function sendMessage() {
         console.error('Cannot send message: user or conversation not set or not accepted');
         return;
     }
-    
+
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
-    
+
     if (!chatInput || !chatSend) {
         console.error('Chat input or send button not found');
         return;
     }
-    
+
     const content = chatInput.value.trim();
     if (!content) return;
-    
+
     try {
         console.log('Sending message to conversation:', currentConversationId);
-    
+
         // Send message to server
         const { data: message, error } = await supabase
             .from('messages')
@@ -1167,14 +1167,14 @@ async function sendMessage() {
             }])
             .select()
             .single();
-            
+
         if (error) throw error;
-        
+
         console.log('Message sent successfully:', message);
-        
+
         // Add message to UI
         addMessageToUI(message, true);
-        
+
         // Clear input and scroll
         chatInput.value = '';
         chatSend.disabled = true;
@@ -1183,7 +1183,7 @@ async function sendMessage() {
         console.error('Error sending message:', error);
         alert('Error sending message. Please try again.');
     }
-    
+
     chatInput.focus();
 }
 
@@ -1194,7 +1194,7 @@ async function markMessageAsRead(messageId) {
             .from('messages')
             .update({ read: true })
             .eq('id', messageId);
-            
+
         if (error) {
             console.error('Error marking message as read:', error);
         }
@@ -1216,21 +1216,21 @@ function escapeHtml(unsafe) {
 // Load user's existing conversations
 async function loadUserConversations() {
     if (!currentUser) return;
-    
+
     try {
         // Get all conversations where the current user is involved
         const { data: conversations, error } = await supabase
             .from('conversations')
             .select('*')
             .or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`);
-        
+
         if (error) {
             console.error('Error loading conversations:', error);
             return;
         }
-        
+
         console.log('User conversations:', conversations);
-        
+
         // Subscribe to new conversations
         subscribeToConversations();
     } catch (error) {
@@ -1244,12 +1244,12 @@ function subscribeToConversations() {
         console.error('Cannot subscribe to conversations: No user');
         return;
     }
-    
+
     // Unsubscribe from existing subscription
     if (conversationSubscription) {
         conversationSubscription.unsubscribe();
     }
-    
+
     try {
         // Subscribe to conversation updates
         conversationSubscription = supabase
@@ -1285,7 +1285,7 @@ function subscribeToGlobalPresence() {
     }
 
     globalPresenceChannel = supabase.channel('global_presence');
-    
+
     globalPresenceChannel
         .on('presence', { event: 'sync' }, () => {
             const state = globalPresenceChannel.presenceState();
@@ -1312,14 +1312,14 @@ function subscribeToGlobalPresence() {
 // Update online users set and UI
 function updateOnlineUsers(state) {
     onlineUsers.clear();
-    
+
     // Collect all online user IDs
     Object.values(state).forEach(presences => {
         presences.forEach(presence => {
             onlineUsers.add(presence.user_id);
         });
     });
-    
+
     // Update status in chat header if chat is open
     updateChatHeaderStatus();
 }
@@ -1328,10 +1328,10 @@ function updateOnlineUsers(state) {
 function updateChatHeaderStatus() {
     const statusEl = document.querySelector('.chat-header-status');
     if (!statusEl || !currentChatUserId) return;
-    
+
     const isOnline = onlineUsers.has(currentChatUserId);
     const isTypingUser = isTyping && currentChatUserId;
-    
+
     if (isTypingUser) {
         statusEl.textContent = 'Typing...';
     } else {

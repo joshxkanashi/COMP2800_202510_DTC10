@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Project - CSync</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -159,7 +159,8 @@
 <body>
     <div id="app">
         <div id="navbar-placeholder"></div>
-        <script type="module" src="navbar.js"></script>
+        <script type="module" src="../js/supabaseAPI.js"></script>
+        <script type="module" src="../js/navbar.js"></script>
         <main class="container">
             <div class="form-container">
                 <h1>Add New Project</h1>
@@ -176,7 +177,8 @@
 
                     <div class="form-group">
                         <label for="projectUrl">Project Link (GitHub, Netlify, etc.)</label>
-                        <input type="url" id="projectUrl" name="project_url" placeholder="https://github.com/your-repo" pattern="https?://.*">
+                        <input type="url" id="projectUrl" name="project_url" placeholder="https://github.com/your-repo"
+                            pattern="https?://.*">
                     </div>
 
                     <div class="form-group">
@@ -263,8 +265,8 @@
         </nav>
     </div>
 
-    <script type="module" src="addproject.js"></script>
-    <script type="module" src="profile.js"></script>
+    <script type="module" src="../js/addproject.js"></script>
+    <script type="module" src="../js/profile.js"></script>
 </body>
 
 </html>

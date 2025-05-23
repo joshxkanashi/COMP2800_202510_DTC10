@@ -155,7 +155,7 @@ function toggleChatWindow(forceClose = false) {
 
 // Attach to existing Get Advice button
 // (Assumes your button has id="aiAdviceBtn")
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const adviceButton = document.getElementById('aiAdviceBtn');
   if (adviceButton) {
     adviceButton.onclick = () => toggleChatWindow();

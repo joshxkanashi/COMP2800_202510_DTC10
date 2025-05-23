@@ -15,7 +15,7 @@ const createProfileCard = (profile) => {
 
 	// Get first letter of name for avatar fallback
 	const firstLetter = profile.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U';
-	
+
 	// Create a random array of skills for demo purposes
 	const skillsList = ['JavaScript', 'React', 'Node.js', 'Python', 'UI/UX', 'CSS', 'HTML', 'MongoDB', 'PostgreSQL', 'TypeScript'];
 	const randomSkills = [];
@@ -24,11 +24,11 @@ const createProfileCard = (profile) => {
 		const randomIndex = Math.floor(Math.random() * skillsList.length);
 		randomSkills.push(skillsList[randomIndex]);
 	}
-	
+
 	// Create avatar element with profile picture or fallback to first letter
 	let avatarContent = '';
 	let avatarClass = 'connect-avatar';
-	
+
 	if (profile.avatar_url) {
 		avatarClass += ' loading'; // Add loading class until image loads
 		avatarContent = `<img src="${profile.avatar_url}" alt="${profile.full_name || 'User'}" 
@@ -37,7 +37,7 @@ const createProfileCard = (profile) => {
 	} else {
 		avatarContent = firstLetter;
 	}
-	
+
 	// Create card content
 	card.innerHTML = `
 		<div class="${avatarClass}">${avatarContent}</div>
@@ -62,73 +62,73 @@ const createProfileCard = (profile) => {
 	`;
 
 	// Add click event listener - but only for the main card excluding the message button
-    const viewProfileBtn = card.querySelector('.connect-open-btn');
-    if (viewProfileBtn) {
-        viewProfileBtn.addEventListener('click', () => {
-            // Clear any cached data to ensure fresh load
-            localStorage.removeItem('profileData');
-            localStorage.removeItem('cachedPortfolioData');
-            localStorage.removeItem('cachedProfileData');
-            
-            // Store the profile ID in localStorage for the next page
-            localStorage.setItem('selectedProfileId', profile.id);
-            
-            // Also store the timestamp to force a fresh load 
-            localStorage.setItem('profileLoadTimestamp', Date.now());
-            
-            // Log the action for debugging
-            console.log('Selected profile:', profile.id, 'Navigating to profile page...');
-            
-            // Navigate to the profile page with cache-busting parameter
-            window.location.href = 'eachConnectLanding.html?nocache=' + Date.now();
-        });
-    }
-    
-    // Add click handler for message button
-    const messageBtn = card.querySelector('.connect-message-btn');
-    if (messageBtn) {
-        messageBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent triggering card click
-            
-            const userId = messageBtn.dataset.userId;
-            const name = messageBtn.dataset.name;
-            const avatar = messageBtn.dataset.avatar;
-            
-            console.log('Message button clicked for:', userId, name);
-            
-            if (userId) {
-                try {
-                    // Try multiple ways to get the openChat function
-                    if (typeof window.openChat === 'function') {
-                        console.log('Using window.openChat function');
-                        window.openChat(userId, name, avatar);
-                    } else if (openChatFunction) {
-                        console.log('Using cached openChatFunction');
-                        openChatFunction(userId, name, avatar);
-                    } else {
-                        // Direct import as a last resort
-                        console.log('Attempting direct import of openChat');
-                        import('./connectChat.js')
-                            .then(module => {
-                                if (module && module.openChat) {
-                                    module.openChat(userId, name, avatar);
-                                } else {
-                                    throw new Error('openChat function not found in module');
-                                }
-                            })
-                            .catch(err => {
-                                console.error('Failed to import chat module:', err);
-                                alert('Chat functionality is not available. Please refresh the page and try again.');
-                            });
-                    }
-                } catch (err) {
-                    console.error('Error opening chat:', err);
-                    alert('Error opening chat. Please refresh the page and try again.');
-                }
-            }
-        });
-    }
+	const viewProfileBtn = card.querySelector('.connect-open-btn');
+	if (viewProfileBtn) {
+		viewProfileBtn.addEventListener('click', () => {
+			// Clear any cached data to ensure fresh load
+			localStorage.removeItem('profileData');
+			localStorage.removeItem('cachedPortfolioData');
+			localStorage.removeItem('cachedProfileData');
+
+			// Store the profile ID in localStorage for the next page
+			localStorage.setItem('selectedProfileId', profile.id);
+
+			// Also store the timestamp to force a fresh load 
+			localStorage.setItem('profileLoadTimestamp', Date.now());
+
+			// Log the action for debugging
+			console.log('Selected profile:', profile.id, 'Navigating to profile page...');
+
+			// Navigate to the profile page with cache-busting parameter
+			window.location.href = 'eachConnectLanding.html?nocache=' + Date.now();
+		});
+	}
+
+	// Add click handler for message button
+	const messageBtn = card.querySelector('.connect-message-btn');
+	if (messageBtn) {
+		messageBtn.addEventListener('click', (e) => {
+			e.preventDefault();
+			e.stopPropagation(); // Prevent triggering card click
+
+			const userId = messageBtn.dataset.userId;
+			const name = messageBtn.dataset.name;
+			const avatar = messageBtn.dataset.avatar;
+
+			console.log('Message button clicked for:', userId, name);
+
+			if (userId) {
+				try {
+					// Try multiple ways to get the openChat function
+					if (typeof window.openChat === 'function') {
+						console.log('Using window.openChat function');
+						window.openChat(userId, name, avatar);
+					} else if (openChatFunction) {
+						console.log('Using cached openChatFunction');
+						openChatFunction(userId, name, avatar);
+					} else {
+						// Direct import as a last resort
+						console.log('Attempting direct import of openChat');
+						import('./connectChat.js')
+							.then(module => {
+								if (module && module.openChat) {
+									module.openChat(userId, name, avatar);
+								} else {
+									throw new Error('openChat function not found in module');
+								}
+							})
+							.catch(err => {
+								console.error('Failed to import chat module:', err);
+								alert('Chat functionality is not available. Please refresh the page and try again.');
+							});
+					}
+				} catch (err) {
+					console.error('Error opening chat:', err);
+					alert('Error opening chat. Please refresh the page and try again.');
+				}
+			}
+		});
+	}
 
 	return card;
 };
@@ -136,7 +136,7 @@ const createProfileCard = (profile) => {
 // Filter profiles based on current filter and search term
 const filterProfiles = () => {
 	if (!allProfiles.length) return [];
-	
+
 	return allProfiles.filter(profile => {
 		// Apply category filter
 		if (currentFilter !== 'all') {
@@ -148,18 +148,18 @@ const filterProfiles = () => {
 			if (currentFilter === 'fullstack' && random < 0.7) return false;
 			if (currentFilter === 'mobile' && random < 0.7) return false;
 		}
-		
+
 		// Apply search filter
 		if (searchTerm) {
 			const name = (profile.full_name || '').toLowerCase();
 			const email = (profile.email || '').toLowerCase();
 			const location = (profile.city || '').toLowerCase();
-			
-			return name.includes(searchTerm) || 
-				   email.includes(searchTerm) || 
-				   location.includes(searchTerm);
+
+			return name.includes(searchTerm) ||
+				email.includes(searchTerm) ||
+				location.includes(searchTerm);
 		}
-		
+
 		return true;
 	});
 };
@@ -168,13 +168,13 @@ const filterProfiles = () => {
 const renderProfiles = () => {
 	const container = document.getElementById('cardsContainer');
 	if (!container) return;
-	
+
 	// Clear existing content
 	container.innerHTML = '';
-	
+
 	// Get filtered profiles
 	const filteredProfiles = filterProfiles();
-	
+
 	// If no profiles found, show message
 	if (filteredProfiles.length === 0) {
 		const noResults = document.createElement('div');
@@ -189,15 +189,15 @@ const renderProfiles = () => {
 		container.appendChild(noResults);
 		return;
 	}
-	
+
 	console.log(`Rendering ${filteredProfiles.length} profile cards`);
-	
+
 	// Create and append cards
 	filteredProfiles.forEach(profile => {
 		const card = createProfileCard(profile);
 		container.appendChild(card);
 	});
-	
+
 	console.log('Profile cards rendered successfully');
 };
 
@@ -214,28 +214,28 @@ const getUsers = async () => {
 				</div>
 			`;
 		}
-		
+
 		console.log('Fetching profiles from Supabase...');
-		
+
 		// Fetch user profiles with a timestamp to prevent caching
 		const { data: profiles, error } = await supabase
 			.from('profiles')
 			.select('id, full_name, email, city, avatar_url, created_at')
 			.order('created_at', { ascending: false });
-			
+
 		if (error) {
 			console.error('Error fetching profiles:', error);
 			throw error;
 		}
-		
+
 		console.log(`Loaded ${profiles?.length || 0} profiles from Supabase`);
-		
+
 		// Store profiles globally for filtering
 		allProfiles = profiles || [];
-		
+
 		// Render profiles
 		renderProfiles();
-		
+
 	} catch (error) {
 		console.error('Error fetching users:', error);
 		// Show error message
@@ -248,7 +248,7 @@ const getUsers = async () => {
 					<button id="retryButton" style="margin-top: 16px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">Retry</button>
 				</div>
 			`;
-			
+
 			// Add retry button listener
 			const retryButton = document.getElementById('retryButton');
 			if (retryButton) {
@@ -267,17 +267,17 @@ const setupEventListeners = () => {
 			// Update active state
 			filterButtons.forEach(btn => btn.classList.remove('active'));
 			button.classList.add('active');
-			
+
 			// Update filter and re-render
 			currentFilter = button.getAttribute('data-filter');
 			renderProfiles();
 		});
 	});
-	
+
 	// Search input
 	const searchInput = document.getElementById('connectSearchInput');
 	const searchButton = document.getElementById('connectSearchButton');
-	
+
 	if (searchInput) {
 		searchInput.addEventListener('keyup', (e) => {
 			if (e.key === 'Enter') {
@@ -286,7 +286,7 @@ const setupEventListeners = () => {
 			}
 		});
 	}
-	
+
 	if (searchButton) {
 		searchButton.addEventListener('click', () => {
 			searchTerm = searchInput.value.trim().toLowerCase();
@@ -298,10 +298,10 @@ const setupEventListeners = () => {
 // Initialize the page
 const initPage = () => {
 	console.log('Initializing Connect page...');
-	
+
 	// Clear any cached data
 	localStorage.removeItem('profileData');
-	
+
 	// Try to get the openChat function
 	if (typeof window.openChat === 'function') {
 		console.log('openChat function already available globally');
@@ -324,7 +324,7 @@ const initPage = () => {
 				console.error('Error importing connectChat.js:', error);
 			});
 	}
-	
+
 	// Fetch fresh data
 	getUsers();
 	setupEventListeners();

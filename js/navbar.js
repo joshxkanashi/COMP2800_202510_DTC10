@@ -4,14 +4,14 @@ import { supabase } from './supabaseAPI.js';
 const initializeProfileDropdown = () => {
   const profileButton = document.getElementById('profileButton');
   const profileDropdown = document.getElementById('profileDropdown');
-  
+
   if (profileButton && profileDropdown) {
     // Toggle dropdown on profile button click
     profileButton.addEventListener('click', (e) => {
       e.stopPropagation();
       profileDropdown.classList.toggle('show');
     });
-    
+
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
       if (!profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
@@ -34,10 +34,10 @@ const intializeNavbar = async () => {
     const response = await fetch('navbar.html');
     const html = await response.text();
     const navbarPlaceholder = document.getElementById('navbar-placeholder');
-    
+
     if (navbarPlaceholder) {
       navbarPlaceholder.innerHTML = html;
-      
+
       // Highlight active nav link
       const path = window.location.pathname.split('/').pop() || 'index.html';
       document.querySelectorAll('.desktop-nav-item').forEach(link => {

@@ -17,7 +17,7 @@ function showMessage(message, type) {
     messageDiv.textContent = message;
     messageDiv.className = `message ${type}`;
     messageDiv.style.display = 'block';
-    
+
     // Hide message after 5 seconds
     setTimeout(() => {
         messageDiv.style.display = 'none';
@@ -27,7 +27,7 @@ function showMessage(message, type) {
 // Handle Login
 async function handleLogin(event) {
     event.preventDefault();
-    
+
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 

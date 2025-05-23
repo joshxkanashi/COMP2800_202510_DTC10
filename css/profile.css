@@ -1,0 +1,376 @@
+:root {
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-dark: #4f46e5;
+  --error: #ef4444;
+  --success: #22c55e;
+}
+
+.settings-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 6rem 1rem 2rem 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.profile-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.profile-card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Profile Picture Styles */
+.profile-picture-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.profile-picture-container {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  border: 2px solid var(--primary-light);
+  transition: all 0.2s ease;
+}
+
+.profile-picture-container:hover {
+  border-color: var(--primary);
+  transform: scale(1.02);
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(99, 102, 241, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.profile-picture-container:hover .profile-picture-overlay {
+  opacity: 1;
+}
+
+.profile-picture-overlay svg {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 0.5rem;
+  stroke: white;
+}
+
+.profile-picture-overlay span {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.profile-picture-help {
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Loading state for profile picture */
+.profile-picture-container.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-picture-container.loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+  z-index: 1;
+}
+
+.profile-section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.profile-section-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 3px;
+  background-color: var(--primary);
+  margin-top: 8px;
+  border-radius: 2px;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.profile-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem;
+  gap: 0.5rem;
+}
+
+.profile-form input,
+.profile-form select {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+.profile-form input:focus,
+.profile-form select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.profile-form input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.profile-btn {
+  align-self: flex-start;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: var(--primary-light);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-btn:hover {
+  background-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.profile-btn:active {
+  transform: translateY(0);
+}
+
+.form-help {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: -0.25rem;
+}
+
+.logout-btn {
+  background-color: var(--error);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 0;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+}
+
+.logout-btn svg {
+  stroke: white;
+}
+
+.delete-btn {
+  background-color: #dc2626;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.delete-btn:hover {
+  background-color: #b91c1c;
+}
+
+.delete-btn svg {
+  stroke: white;
+}
+
+/* Success and error messages */
+.message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.message.success {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.message.error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-container {
+    padding-top: 5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .profile-card {
+    padding: 1.5rem;
+  }
+  
+  .profile-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profile-picture-container {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #dc2626;
+}
+
+.modal-text {
+  margin-bottom: 2rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-btn.cancel {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+.modal-btn.cancel:hover {
+  background-color: #d1d5db;
+}
+
+.modal-btn.confirm {
+  background-color: #dc2626;
+  color: white;
+}
+
+.modal-btn.confirm:hover {
+  background-color: #b91c1c;
+}

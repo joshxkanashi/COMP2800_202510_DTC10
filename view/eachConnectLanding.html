@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSync - View Developer Profile</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script type="module" src="../js/featured-projects.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #10B981;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
+        }
+
+        /* Projects Grid and Card Styles */
+        .projects-grid,
+        .portfolio-projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .portfolio-project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .portfolio-project-photo {
+            width: 100%;
+            height: 160px;
+            overflow: hidden;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .portfolio-project-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .portfolio-project-info {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        .portfolio-project-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .portfolio-project-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        .portfolio-project-description {
+            display: none;
+            /* Hide descriptions */
+        }
+
+        .tech-tag {
+            font-size: 12px;
+            padding: 4px 12px;
+            background: rgb(243, 244, 246);
+            color: rgb(99, 102, 241);
+            border-radius: 9999px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .portfolio-project-languages {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .portfolio-project-links {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .portfolio-project-view-btn {
+            flex: 1;
+            padding: 8px 16px;
+            background: rgb(99, 102, 241);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .project-link {
+            padding: 8px 16px;
+            color: rgb(99, 102, 241);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+            letter-spacing: -0.02em;
+            position: relative;
+            display: inline-block;
+            margin: 32px 0 20px;
+        }
+
+        @media (min-width: 1024px) {
+            .section-title {
+                font-size: 28px;
+                margin: 48px 0 28px;
+            }
+
+            .section-title::after {
+                width: 60px;
+                height: 4px;
+            }
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            border-radius: 3px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .portfolio-section {
+            margin: 40px 0;
+            padding-bottom: 20px;
+            transition: all 0.3s ease;
+            border-radius: 24px;
+        }
+
+        /* Empty state styles */
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            grid-column: 1/-1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .empty-state .project-image {
+            width: 80px;
+            height: 80px;
+            background: var(--gray-100);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .empty-state .project-image svg {
+            width: 40px;
+            height: 40px;
+            color: var(--gray-400);
+        }
+
+        .empty-state-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 8px;
+        }
+
+        .empty-state-content p {
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+
+        /* Styling avatar images */
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            border: 2px solid var(--gray-100);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .avatar.large {
+            width: 100px;
+            height: 100px;
+            font-size: 36px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* Loading animation for avatars */
+        .avatar.loading {
+            position: relative;
+        }
+
+        .avatar.loading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    var(--primary-light) 25%,
+                    var(--primary) 50%,
+                    var(--primary-light) 75%);
+            background-size: 200% 100%;
+            border-radius: 50%;
+            animation: avatarLoading 1.5s infinite;
+        }
+
+        @keyframes avatarLoading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 40px auto;
+            padding: 0;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--gray-500);
+            cursor: pointer;
+            z-index: 1;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--gray-900);
+        }
+
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: var(--gray-900);
+        }
+
+        .modal-body {
+            padding: 16px;
+        }
+
+        .modal-project-image {
+            margin: -24px -24px 24px -24px;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .modal-project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 20px;
+                width: calc(100% - 40px);
+            }
+
+            .modal-project-image {
+                height: 200px;
+            }
+        }
+
+        /* Project Modal Styles */
+        .project-modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .project-modal-backdrop.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .project-modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .project-modal-backdrop.active .project-modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .project-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--gray-500);
+            cursor: pointer;
+            padding: 8px;
+            z-index: 2;
+            transition: color 0.2s;
+        }
+
+        .project-modal-close:hover {
+            color: var(--gray-900);
+        }
+
+        .project-modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .project-modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        .project-modal-gallery {
+            position: relative;
+            height: 400px;
+            background: var(--gray-100);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .project-modal-images {
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
+
+        .project-modal-image {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+        }
+
+        .project-modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .project-modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            opacity: 0.8;
+            z-index: 2;
+        }
+
+        .project-modal-nav:hover {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.1);
+            background: white;
+        }
+
+        .project-modal-nav-prev {
+            left: 16px;
+        }
+
+        .project-modal-nav-next {
+            right: 16px;
+        }
+
+        .project-modal-dots {
+            display: none;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px;
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-modal-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            margin: 0 2px;
+            border: none;
+        }
+
+        .project-modal-dot.active {
+            background: var(--primary);
+        }
+
+        .project-modal-content {
+            padding: 24px;
+            max-height: calc(80vh - 400px);
+            overflow-y: auto;
+        }
+
+        .project-modal-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--gray-700);
+            margin-bottom: 24px;
+        }
+
+        .project-modal-tech {
+            margin-bottom: 24px;
+        }
+
+        .project-modal-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .project-modal-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .project-modal-link:hover {
+            background: var(--primary-dark);
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .project-modal {
+                width: 95%;
+                margin: 16px auto;
+            }
+
+            .project-modal-gallery {
+                height: 300px;
+            }
+
+            .project-modal-content {
+                max-height: calc(90vh - 300px);
+            }
+        }
+
+        .portfolio-nav {
+            display: flex;
+            overflow-x: auto;
+            padding: 0;
+            margin: 24px 0;
+            gap: 32px;
+            border: none;
+            /* Hide scrollbar but maintain scrolling functionality */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .portfolio-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .portfolio-nav-item {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0;
+            position: relative;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .portfolio-nav-item:hover {
+            color: var(--primary);
+        }
+
+        .portfolio-nav-item.active {
+            color: var(--primary);
+        }
+
+        .portfolio-nav-item.active::after {
+            display: none;
+        }
+
+        .connect-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background-color: white;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 24px;
+            border-radius: 100px;
+            margin-top: 24px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .connect-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="navbar-placeholder"></div>
+        <script type="module" src="../js/navbar.js"></script>
+
+        <main class="container">
+            <!-- Profile hero section - will be populated dynamically -->
+            <div class="portfolio-hero" id="profileHero">
+                <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 16px; color: white; opacity: 0.8;">Loading profile...</p>
+                </div>
+            </div>
+
+            <!-- Portfolio nav section -->
+            <div class="portfolio-nav" id="portfolioNav">
+                <!-- Navigation items will be dynamically inserted here -->
+            </div>
+
+            <!-- Portfolio content sections - will be populated dynamically -->
+            <div id="portfolioContent">
+                <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 16px; color: var(--gray-500);">Loading portfolio content...</p>
+                </div>
+            </div>
+
+            <!-- Back to connect button -->
+            <div style="text-align: center; margin: 40px 0;">
+                <a href="connect.html" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="margin-right: 8px;">
+                        <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Back to Connect
+                </a>
+            </div>
+
+            <nav class="bottom-nav">
+                <a href="index.html" class="nav-item" aria-label="Home">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span>Home</span>
+                </a>
+                <a href="portfolio.html" class="nav-item" aria-label="Portfolio">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                                d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                                d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span>Portfolio</span>
+                </a>
+                <a href="projects.html" class="nav-item" aria-label="Projects">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M21 14L18 11L15 14M18 11V17M10 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3H14C15.1046 3 16 3.89543 16 5V9"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span>Projects</span>
+                </a>
+                <a href="connect.html" class="nav-item active" aria-label="Connect">
+                    <div class="nav-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <span>Connect</span>
+                </a>
+            </nav>
+        </main>
+    </div>
+
+    <!-- Project Modal -->
+    <div id="projectModalBackdrop" class="project-modal-backdrop">
+        <div class="project-modal" id="projectModal">
+            <button class="project-modal-close" id="projectModalClose" aria-label="Close modal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+            <div class="project-modal-header">
+                <h2 class="project-modal-title" id="projectModalTitle">Project Title</h2>
+            </div>
+            <div class="project-modal-gallery">
+                <div class="project-modal-images" id="projectModalImages">
+                    <!-- Images will be inserted here -->
+                </div>
+                <button class="project-modal-nav project-modal-nav-prev" id="projectModalPrev"
+                    aria-label="Previous image">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <button class="project-modal-nav project-modal-nav-next" id="projectModalNext" aria-label="Next image">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <div class="project-modal-dots" id="projectModalDots">
+                    <!-- Dots will be inserted here -->
+                </div>
+            </div>
+            <div class="project-modal-content">
+                <div class="project-modal-scroll-container">
+                    <p class="project-modal-description" id="projectModalDescription">Project description</p>
+                    <div class="project-modal-tech" id="projectModalTech"></div>
+                </div>
+            </div>
+            <div class="project-modal-footer">
+                <div class="project-modal-links" id="projectModalLinks"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from '../js/supabaseAPI.js';
+
+        // Function to increment portfolio view count
+        async function incrementPortfolioViewCount(userId) {
+            // Check if this portfolio has been viewed in the current session
+            const viewedPortfolios = JSON.parse(sessionStorage.getItem('viewedPortfolios') || '[]');
+
+            if (!viewedPortfolios.includes(userId)) {
+                try {
+                    // First check if portfolio exists
+                    const { data: portfolio, error: getError } = await supabase
+                        .from('portfolios')
+                        .select('view_count')
+                        .eq('user_id', userId)
+                        .single();
+
+                    if (getError && getError.code === 'PGRST116') {
+                        // Portfolio doesn't exist, create it
+                        const { error: createError } = await supabase
+                            .from('portfolios')
+                            .insert([
+                                {
+                                    user_id: userId,
+                                    view_count: 1,
+                                    data: {} // Initialize with empty data object
+                                }
+                            ]);
+
+                        if (createError) throw createError;
+
+                        // Add to viewed portfolios for this session
+                        viewedPortfolios.push(userId);
+                        sessionStorage.setItem('viewedPortfolios', JSON.stringify(viewedPortfolios));
+
+                        console.log(`Created new portfolio for ${userId} with initial view count of 1`);
+
+                        // Update the view count display if it exists
+                        const viewCountElement = document.querySelector('.portfolio-view-count');
+                        if (viewCountElement) {
+                            viewCountElement.textContent = 1;
+                        }
+                        return;
+                    } else if (getError) {
+                        throw getError;
+                    }
+
+                    // Portfolio exists, increment view count
+                    const currentCount = portfolio?.view_count || 0;
+                    const newCount = currentCount + 1;
+
+                    const { error: updateError } = await supabase
+                        .from('portfolios')
+                        .update({ view_count: newCount })
+                        .eq('user_id', userId);
+
+                    if (updateError) throw updateError;
+
+                    // Add to viewed portfolios for this session
+                    viewedPortfolios.push(userId);
+                    sessionStorage.setItem('viewedPortfolios', JSON.stringify(viewedPortfolios));
+
+                    console.log(`Incremented view count for portfolio ${userId} to ${newCount}`);
+
+                    // Update the view count display if it exists
+                    const viewCountElement = document.querySelector('.portfolio-view-count');
+                    if (viewCountElement) {
+                        viewCountElement.textContent = newCount;
+                    }
+                } catch (error) {
+                    console.error('Error incrementing view count:', error);
+                }
+            }
+        }
+
+        // Load profile data from Supabase
+        async function loadUserProfile() {
+            // Get the profile ID from localStorage
+            const selectedProfileId = localStorage.getItem('selectedProfileId');
+
+            if (!selectedProfileId) {
+                showError('No profile selected. Please select a user from the Connect page.');
+                return;
+            }
+
+            try {
+                // Show loading state
+                document.getElementById('profileHero').innerHTML = `
+                    <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 16px; color: white; opacity: 0.8;">Loading profile...</p>
+                    </div>
+                `;
+
+                document.getElementById('portfolioContent').innerHTML = `
+                    <div class="loading-container" style="width: 100%; text-align: center; padding: 40px;">
+                        <div class="loading"></div>
+                        <p style="margin-top: 16px; color: var(--gray-500);">Loading portfolio content...</p>
+                    </div>
+                `;
+
+                // Set up cache buster to prevent cached responses
+                const cacheBuster = Date.now();
+
+                // First get the basic profile information
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', selectedProfileId)
+                    .single();
+
+                console.log('Profile data loaded:', profile);
+
+                if (profileError) {
+                    console.error('Error fetching profile:', profileError);
+                    showError('Could not load profile information. Database error occurred.');
+                    return;
+                }
+
+                if (!profile) {
+                    console.error('No profile found with ID:', selectedProfileId);
+                    showError('Profile not found. The user may have been removed.');
+                    return;
+                }
+
+                // Render the profile header with the basic profile info
+                renderProfileHeader(profile);
+
+                // Try multiple approaches to get portfolio data
+                let portfolioData = null;
+
+                // Method 1: Direct query to portfolios table
+                try {
+                    const { data, error } = await supabase
+                        .from('portfolios')
+                        .select('*')
+                        .eq('user_id', selectedProfileId)
+                        .maybeSingle();
+
+                    if (!error && data) {
+                        portfolioData = data;
+                        console.log('Portfolio data found via direct query:', data);
+                    }
+                } catch (e) {
+                    console.warn('Error with direct portfolio query:', e);
+                }
+
+                // Method 2: If the first method fails, try using RPC or a different approach
+                if (!portfolioData) {
+                    try {
+                        const { data, error } = await supabase
+                            .from('portfolios') // Try an alternative view or table if it exists
+                            .select('*')
+                            .eq('user_id', selectedProfileId)
+                            .maybeSingle();
+
+                        if (!error && data) {
+                            portfolioData = data;
+                            console.log('Portfolio data found via alternative table:', data);
+                        }
+                    } catch (e) {
+                        console.warn('Error with alternative portfolio query:', e);
+                    }
+                }
+
+                // Method 3: Try a raw SQL query using RPC if set up
+                if (!portfolioData) {
+                    try {
+                        const { data, error } = await supabase.rpc('get_user_portfolio', {
+                            user_id_param: selectedProfileId
+                        });
+
+                        if (!error && data) {
+                            portfolioData = data;
+                            console.log('Portfolio data found via RPC:', data);
+                        }
+                    } catch (e) {
+                        console.warn('Error with RPC call:', e);
+                    }
+                }
+
+                // Final check - if we have profile data but no portfolio data,
+                // just render with empty portfolio
+                if (!portfolioData) {
+                    console.log('No portfolio data found for user. Rendering placeholder content.');
+                    renderPlaceholderContent(profile);
+                    return;
+                }
+
+                // We have some portfolio data, render it
+                console.log('Final portfolio data being rendered:', portfolioData);
+                await incrementPortfolioViewCount(selectedProfileId);
+                renderProfileHeader(profile, typeof portfolioData.data === 'object' && portfolioData.data !== null ? portfolioData.data : portfolioData);
+                await renderPortfolioContent(portfolioData);
+
+            } catch (error) {
+                console.error('Unexpected error during profile loading:', error);
+                showError('An unexpected error occurred. Please try again later.');
+            }
+        }
+
+        // Render the profile header with user information
+        function renderProfileHeader(profile, portfolioData = {}) {
+            const heroSection = document.getElementById('profileHero');
+            if (!heroSection) return;
+
+            const firstLetter = profile.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U';
+
+            // Create avatar with image or fallback to first letter
+            let avatarContent = '';
+            let avatarClass = 'avatar large';
+
+            if (profile.avatar_url) {
+                avatarClass += ' loading';
+                avatarContent = `<img src="${profile.avatar_url}" alt="${profile.full_name || 'User'}" 
+                    onload="this.parentNode.classList.remove('loading')" 
+                    onerror="this.style.display='none'; this.parentNode.textContent='${firstLetter}'; this.parentNode.classList.remove('loading')">`;
+            } else {
+                avatarContent = firstLetter;
+            }
+
+            // Get education info - check both formats
+            let educationDisplay = 'Education information not provided';
+            if (portfolioData.education_summary) {
+                educationDisplay = portfolioData.education_summary;
+                console.log('[Education] Using education_summary:', educationDisplay);
+            } else if (Array.isArray(portfolioData.education) && portfolioData.education.length > 0) {
+                const latest = portfolioData.education[0];
+                educationDisplay = `${latest.degree} at ${latest.school}`;
+                console.log('[Education] Using education array:', latest, 'Display:', educationDisplay);
+            } else if (portfolioData.edu_new1_degree && portfolioData.edu_new1_school) {
+                educationDisplay = `${portfolioData.edu_new1_degree} at ${portfolioData.edu_new1_school}`;
+                console.log('[Education] Using edu_new1 fields:', portfolioData.edu_new1_degree, portfolioData.edu_new1_school, 'Display:', educationDisplay);
+            } else if (portfolioData.edu1_degree && portfolioData.edu1_school) {
+                educationDisplay = `${portfolioData.edu1_degree} at ${portfolioData.edu1_school}`;
+                console.log('[Education] Using edu1 fields:', portfolioData.edu1_degree, portfolioData.edu1_school, 'Display:', educationDisplay);
+            } else {
+                console.log('[Education] No education info found, using default message.');
+            }
+
+            heroSection.innerHTML = `
+                <div class="portfolio-hero-content">
+                    <div class="${avatarClass}">${avatarContent}</div>
+                    <div class="portfolio-info">
+                        <h1 class="portfolio-title">${profile.full_name || 'Anonymous User'}</h1>
+                        <p class="portfolio-subtitle">${portfolioData.title || 'Developer'}</p>
+                        <div class="portfolio-meta">
+                            ${profile.city ? `
+                            <div class="portfolio-meta-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>${profile.city}</span>
+                            </div>` : ''}
+                            <div class="portfolio-meta-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>${profile.email || 'Email not provided'}</span>
+                            </div>
+                            <div class="portfolio-meta-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 9L11 12L8 15M13 9H16M5 20H19C20.1046 20 21 19.1046 21 18V6C21 4.89543 20.1046 4 19 4H5C3.89543 4 3 4.89543 3 6V18C3 19.1046 3.89543 20 5 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>${educationDisplay}</span>
+                            </div>
+                        </div>
+                        <button class="connect-button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 19C17.771 19 19.657 19 20.828 17.828C22 16.657 22 14.771 22 11C22 7.229 22 5.343 20.828 4.172C19.657 3 17.771 3 14 3H10C6.229 3 4.343 3 3.172 4.172C2 5.343 2 7.229 2 11C2 14.771 2 16.657 3.172 17.828C3.825 18.482 4.7 18.771 6 18.899" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M14 19C12.764 19 11.402 19.5 10.159 20.145C8.161 21.182 7.162 21.701 6.67 21.37C6.178 21.04 6.271 20.015 6.458 17.966L6.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Connect With Me
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render portfolio content from the data object
+        async function renderPortfolioContent(portfolioData) {
+            const contentContainer = document.getElementById('portfolioContent');
+            if (!contentContainer) return;
+
+            console.log('Raw portfolio data:', portfolioData);
+
+            // Parse the data if it's stored as a JSON string
+            let portfolioContent = portfolioData.data;
+
+            // Handle different data formats
+            if (typeof portfolioContent === 'string') {
+                try {
+                    portfolioContent = JSON.parse(portfolioContent);
+                    console.log('Parsed portfolio content from string:', portfolioContent);
+                } catch (e) {
+                    console.error('Error parsing portfolio data as string:', e);
+                    portfolioContent = {};
+                }
+            } else if (!portfolioContent && typeof portfolioData === 'object') {
+                console.log('Trying to extract portfolio content directly from object');
+                portfolioContent = { ...portfolioData };
+                delete portfolioContent.id;
+                delete portfolioContent.created_at;
+                delete portfolioContent.updated_at;
+                delete portfolioContent.user_id;
+                console.log('Extracted portfolio content:', portfolioContent);
+            } else if (!portfolioContent) {
+                console.error('No portfolio content found in data');
+                portfolioContent = {};
+            }
+
+            // Initialize navigation with the portfolio content
+            initPortfolioNav(portfolioContent);
+
+            // Initialize HTML for content sections
+            let htmlContent = '';
+
+            // Get sections array and filter visible sections
+            const sections = (portfolioContent.sections || []).filter(section => section.visible);
+
+            // Render sections in order
+            for (const section of sections) {
+                switch (section.type) {
+                    case 'custom':
+                        htmlContent += `
+                            <section id="${section.id}" class="portfolio-section">
+                                <div class="section-header">
+                                    <h2 class="section-title">${section.title}</h2>
+                                </div>
+                                <div class="custom-section-content">
+                                    ${portfolioContent[`${section.id}_content`] || section.content || 'No content available'}
+                                </div>
+                            </section>
+                        `;
+                        break;
+
+                    case 'about':
+                        htmlContent += renderAboutSection(portfolioContent);
+                        break;
+
+                    case 'skills':
+                        htmlContent += renderSkillsSection(portfolioContent);
+                        break;
+
+                    case 'experience':
+                        htmlContent += renderExperienceSection(portfolioContent);
+                        break;
+
+                    case 'education':
+                        htmlContent += renderEducationSection(portfolioContent);
+                        break;
+
+                    case 'projects':
+                        htmlContent += await renderProjectsSection(portfolioContent);
+                        break;
+
+                    case 'contact':
+                        htmlContent += renderContactSection(portfolioContent);
+                        break;
+                }
+            }
+
+            // Update the content container
+            contentContainer.innerHTML = htmlContent;
+        }
+
+        // Helper function to render about section
+        function renderAboutSection(portfolioContent) {
+            // Get the about content based on either format
+            let about1Content = '';
+            let about2Content = '';
+
+            // Find keys ending with _about1 and _about2
+            const about1Key = Object.keys(portfolioContent).find(key => key.endsWith('_about1'));
+            const about2Key = Object.keys(portfolioContent).find(key => key.endsWith('_about2'));
+
+            if (about1Key && about2Key) {
+                // Use the dynamic content if found
+                about1Content = portfolioContent[about1Key];
+                about2Content = portfolioContent[about2Key];
+            } else {
+                // Fallback to template format
+                about1Content = portfolioContent.about1 ||
+                    'Write a brief introduction about yourself...';
+                about2Content = portfolioContent.about2 ||
+                    'Share more about your interests and expertise...';
+            }
+
+            return `
+                <section id="about" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">About Me</h2>
+                    </div>
+                    <div class="about-content">
+                        <p class="about-text">${about1Content.trim()}</p>
+                        <p class="about-text">${about2Content.trim()}</p>
+                    </div>
+                </section>
+            `;
+        }
+
+        // Helper function to render skills section
+        function renderSkillsSection(portfolioContent) {
+            let html = `
+                <section id="skills" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Technical Skills</h2>
+                    </div>
+                    <div class="skills-container">
+                        <!-- Programming Languages Section -->
+                    <div class="skill-category">
+                            <h3 class="skill-category-title">Programming Languages</h3>
+                        <div class="skill-grid">
+                `;
+
+            // Add programming language skills
+            if (portfolioContent.skills && Array.isArray(portfolioContent.skills)) {
+                const programmingSkills = portfolioContent.skills.filter(skill =>
+                    !['HTML5/CSS3', 'React', 'Node.js', 'Vue.js'].includes(skill.name));
+
+                programmingSkills.forEach(skill => {
+                    html += createSkillHTML(skill.name, skill.level, skill.progress);
+                });
+            }
+
+            html += `
+                        </div>
+                    </div>
+            
+                        <!-- Web Technologies Section -->
+                    <div class="skill-category">
+                            <h3 class="skill-category-title">Web Technologies</h3>
+                        <div class="skill-grid">
+            `;
+
+            // Add web technology skills
+            if (portfolioContent.skills && Array.isArray(portfolioContent.skills)) {
+                const webSkills = portfolioContent.skills.filter(skill =>
+                    ['HTML5/CSS3', 'React', 'Node.js', 'Vue.js'].includes(skill.name));
+
+                webSkills.forEach(skill => {
+                    html += createSkillHTML(skill.name, skill.level, skill.progress);
+                });
+            }
+
+            html += `
+                            </div>
+                    </div>
+                </div>
+            </section>
+            `;
+
+            return html;
+        }
+
+        // Helper function to render experience section
+        function renderExperienceSection(portfolioContent) {
+            let html = `
+                <section id="experience" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Work Experience</h2>
+                    </div>
+                    <div class="timeline">
+            `;
+
+            if (portfolioContent.experience && Array.isArray(portfolioContent.experience)) {
+                portfolioContent.experience.forEach(exp => {
+                    html += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                            <div class="timeline-date">${exp.date || 'No date provided'}</div>
+                        <div class="timeline-content">
+                                <h3 class="timeline-title">${exp.title || ''}</h3>
+                                <p class="timeline-subtitle">${exp.company || ''}</p>
+                                <p class="timeline-description">${exp.description || ''}</p>
+                        </div>
+                    </div>
+                `;
+                });
+            } else {
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">Not provided</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">No experience information available</h3>
+                            <p class="timeline-description">This user has not added their work experience details yet.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                        </div>
+                </section>
+            `;
+
+            return html;
+        }
+
+        // Helper function to render education section
+        function renderEducationSection(portfolioContent) {
+            let html = `
+                <section id="education" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Education</h2>
+                        </div>
+                    <div class="timeline">
+            `;
+
+            if (portfolioContent.education && Array.isArray(portfolioContent.education)) {
+                portfolioContent.education.forEach(edu => {
+                    html += `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">${edu.date || 'No date provided'}</div>
+                            <div class="timeline-content">
+                                <h3 class="timeline-title">${edu.degree || ''}</h3>
+                                <p class="timeline-subtitle">${edu.school || ''}</p>
+                                <p class="timeline-description">${edu.description || ''}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-date">Not provided</div>
+                        <div class="timeline-content">
+                            <h3 class="timeline-title">No education information available</h3>
+                            <p class="timeline-description">This user has not added their education details yet.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                    </div>
+                </section>
+            `;
+
+            return html;
+        }
+
+        // Helper function to render projects section
+        async function renderProjectsSection(portfolioContent) {
+            console.log('Starting renderProjectsSection with content:', portfolioContent);
+            let html = `
+                <section id="projects" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Featured Projects</h2>
+                    </div>
+                    <div class="projects-grid" id="projectsContainer">
+            `;
+
+            try {
+                // Check if we have featured project IDs
+                if (portfolioContent.featured_project_ids && portfolioContent.featured_project_ids.length > 0) {
+                    console.log('Found featured_project_ids:', portfolioContent.featured_project_ids);
+
+                    // Fetch the actual projects from the projects table
+                    const { data: projects, error } = await supabase
+                        .from('projects')
+                        .select('*')
+                        .in('id', portfolioContent.featured_project_ids);
+
+                    console.log('Fetched projects:', projects);
+                    if (error) {
+                        console.error('Error fetching projects:', error);
+                        throw error;
+                    }
+
+                    if (projects && projects.length > 0) {
+                        // Sort projects to match the order in featured_project_ids
+                        const sortedProjects = portfolioContent.featured_project_ids
+                            .map(id => projects.find(p => p.id === id))
+                            .filter(p => p);
+
+                        console.log('Sorted projects:', sortedProjects);
+
+                        sortedProjects.forEach(project => {
+                            html += `
+                                <div class="portfolio-project-card" data-item-id="${project.id}">
+                                    <div class="portfolio-project-photo">
+                                        ${project.photo_url ? `<img src="${project.photo_url}" alt="${project.title}">` : `
+                                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>`}
+                                    </div>
+                                    <div class="portfolio-project-info">
+                                        <div class="portfolio-project-content">
+                                            <h3 class="portfolio-project-title">${project.title || 'Unnamed Project'}</h3>
+                                            <div class="portfolio-project-languages">
+                                                ${(project.languages || []).map(lang => `<span class="tech-tag">${lang}</span>`).join('')}
+                                            </div>
+                                        </div>
+                                        <div class="portfolio-project-links">
+                                            <button class="portfolio-project-view-btn" onclick="window.openProjectModal(${JSON.stringify(project).replace(/"/g, '&quot;')})">View</button>
+                                            ${project.project_url ? `<a href="${project.project_url}" class="project-link" target="_blank" rel="noopener noreferrer">Link</a>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        console.log('No projects found in database for the given IDs');
+                    }
+                } else {
+                    console.log('No featured_project_ids found in portfolio content');
+                }
+
+                if (!html.includes('portfolio-project-card')) {
+                    console.log('No projects to display, showing empty state');
+                    html += `
+                        <div class="empty-state">
+                            <div class="project-image">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="empty-state-content">
+                                <h3>No Featured Projects</h3>
+                                <p>This user hasn't featured any projects yet</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                        </div>
+                    </section>
+                `;
+
+                return html;
+            } catch (error) {
+                console.error('Error rendering projects section:', error);
+                return `
+                    <section id="projects" class="portfolio-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Featured Projects</h2>
+                        </div>
+                        <div class="projects-grid">
+                            <div class="error-message">
+                                <p>Error loading projects. Please try again later.</p>
+                                <p class="error-details">${error.message || ''}</p>
+                            </div>
+                        </div>
+                    </section>
+                `;
+            }
+        }
+
+        // Helper function to render contact section
+        function renderContactSection(portfolioContent) {
+            return `
+                <section id="contact" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Get In Touch</h2>
+                    </div>
+                    <div class="contact-content">
+                        <p>Feel free to reach out for collaborations or just a friendly hello</p>
+                        <div class="contact-buttons">
+                            <a href="mailto:${portfolioContent.email || ''}" class="btn-primary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Send Email
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        // Helper function to create skill HTML
+        function createSkillHTML(name, level, progress) {
+            return `
+                <div class="skill-item">
+                    <div class="skill-info">
+                        <span class="skill-name">${name}</span>
+                        <span class="skill-level">${level || 'Intermediate'}</span>
+                    </div>
+                    <div class="skill-progress" data-progress="${progress}">
+                        <div class="skill-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render placeholder content if no portfolio data exists
+        function renderPlaceholderContent(profile) {
+            const contentContainer = document.getElementById('portfolioContent');
+            if (!contentContainer) return;
+
+            contentContainer.innerHTML = `
+                <section id="about" class="portfolio-section">
+                    <div class="section-header">
+                        <h2 class="section-title">About Me</h2>
+                    </div>
+                    <div class="about-content">
+                        <p class="about-text">This user has not created their portfolio yet.</p>
+                    </div>
+                </section>
+            `;
+        }
+
+        // Show error message if loading fails
+        function showError(message) {
+            const heroSection = document.getElementById('profileHero');
+            const contentContainer = document.getElementById('portfolioContent');
+
+            if (heroSection) {
+                heroSection.innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: white; background: linear-gradient(135deg, #f43f5e, #ef4444); border-radius: 8px; margin: 20px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 16px; opacity: 0.8;">
+                            <path d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h2 style="margin-bottom: 8px; font-size: 24px;">${message}</h2>
+                        <p style="margin-bottom: 24px; opacity: 0.8;">There was a problem loading the profile data.</p>
+                        <a href="connect.html" class="btn-primary" style="background: white; color: #ef4444; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px; vertical-align: middle;">
+                                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Back to Connect
+                        </a>
+                    </div>
+                `;
+            }
+
+            if (contentContainer) {
+                contentContainer.innerHTML = '';
+            }
+
+            // Also log to console for debugging
+            console.error('Error shown to user:', message);
+        }
+
+        // Initialize portfolio navigation
+        function initPortfolioNav(portfolioContent) {
+            const navContainer = document.getElementById('portfolioNav');
+            if (!navContainer) return;
+
+            // Clear existing nav items
+            navContainer.innerHTML = '';
+
+            // Get sections from portfolio data
+            let sections = [];
+
+            // Use sections array from portfolio data if it exists
+            if (portfolioContent.sections && Array.isArray(portfolioContent.sections)) {
+                // Filter only visible sections
+                sections = portfolioContent.sections.filter(section => section.visible);
+            }
+
+            // Create nav items
+            sections.forEach((section, index) => {
+                const navItem = document.createElement('a');
+                navItem.href = `#${section.id}`;
+                navItem.className = 'portfolio-nav-item' + (index === 0 ? ' active' : '');
+                navItem.textContent = section.title;
+
+                navItem.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Remove active class from all links
+                    document.querySelectorAll('.portfolio-nav-item').forEach(item =>
+                        item.classList.remove('active'));
+
+                    // Add active class to clicked link
+                    this.classList.add('active');
+
+                    // Smooth scroll to target section
+                    const targetSection = document.querySelector(this.getAttribute('href'));
+                    if (targetSection) {
+                        window.scrollTo({
+                            top: targetSection.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+
+                navContainer.appendChild(navItem);
+            });
+
+            // Add scroll event listener to update active section
+            window.addEventListener('scroll', () => {
+                const scrollPosition = window.scrollY;
+
+                // Find all section elements
+                const sectionElements = document.querySelectorAll('.portfolio-section');
+
+                // Find the current section
+                let currentSection = null;
+                sectionElements.forEach(section => {
+                    if (section.offsetTop - 150 <= scrollPosition) {
+                        currentSection = section;
+                    }
+                });
+
+                if (currentSection) {
+                    // Update active nav item
+                    const currentId = currentSection.id;
+                    document.querySelectorAll('.portfolio-nav-item').forEach(item => {
+                        if (item.getAttribute('href') === `#${currentId}`) {
+                            item.classList.add('active');
+                        } else {
+                            item.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        }
+
+        // Project Modal Functions
+        function openProjectModal(project) {
+            const modal = document.getElementById('projectModal');
+            const modalContent = document.getElementById('projectModalContent');
+
+            modalContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>${project.title || 'Project Details'}</h2>
+                </div>
+                <div class="modal-body">
+                    ${project.photo_url ? `
+                        <div class="modal-project-image">
+                            <img src="${project.photo_url}" alt="${project.title}">
+                        </div>
+                    ` : ''}
+                    <div class="modal-project-details">
+                        <p class="project-description">${project.description || 'No description available.'}</p>
+                        ${project.languages && project.languages.length ? `
+                            <div class="project-languages">
+                                <h3>Technologies Used:</h3>
+                                <div class="tech-tags">
+                                    ${project.languages.map(lang => `<span class="tech-tag">${lang}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="project-links">
+                            ${project.project_url ? `<a href="${project.project_url}" class="project-link" target="_blank" rel="noopener noreferrer">Link</a>` : ''}
+                            ${project.github_url ? `<a href="${project.github_url}" class="project-link" target="_blank">View on GitHub</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = "block";
+        }
+
+        // Close modal when clicking the close button or outside the modal
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('projectModal');
+            const closeBtn = document.querySelector('.close-modal');
+
+            if (closeBtn && modal) {
+                closeBtn.onclick = function () {
+                    modal.style.display = "none";
+                }
+            }
+
+            if (modal) {
+                window.onclick = function (event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            }
+        });
+
+        // Load the profile when the page loads
+        document.addEventListener('DOMContentLoaded', loadUserProfile);
+
+        // Add click handler for Connect With Me button
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the current user's ID
+            const selectedProfileId = localStorage.getItem('selectedProfileId');
+
+            // Add click handler for the connect button
+            document.addEventListener('click', async (e) => {
+                if (e.target.closest('.connect-button')) {
+                    e.preventDefault();
+
+                    // Store chat parameters
+                    const profile = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', selectedProfileId)
+                        .single();
+
+                    if (profile.data) {
+                        localStorage.setItem('openChatWith', JSON.stringify({
+                            userId: profile.data.id,
+                            name: profile.data.full_name || 'User',
+                            avatar: profile.data.avatar_url || ''
+                        }));
+
+                        // Redirect to connect page
+                        window.location.href = 'connect.html';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

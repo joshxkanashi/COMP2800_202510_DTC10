@@ -328,10 +328,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 30px;
+  align-items: center;
   border-radius: 24px;
   overflow: hidden;
   position: relative;
   box-shadow: 0 20px 40px rgba(123, 58, 237, 0.2);
+}
+
+.feature-card.large h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+  max-width: 800px;
 }
 
 .feature-card.large::before {
@@ -346,6 +354,8 @@ body {
 }
 
 .feature-content {
+  flex: 1;
+  min-width: 300px;
   position: relative;
   z-index: 1;
 }
@@ -357,20 +367,27 @@ body {
   margin-top: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   background-color: #fff;
-  height: 400px;
+  height: auto;
+  min-height: 250px;
+  width: 100%;
+  flex: 1;
+  min-width: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 15px;
 }
 
 .canvas-preview {
   max-width: 100%;
+  width: 100%;
   height: auto;
   border-radius: 8px;
   display: block;
   transition: transform 0.5s ease;
   object-fit: contain;
+  max-height: 450px;
+  background-color: #f9fafb;
 }
 
 .feature-card.large:hover .canvas-preview {
@@ -416,6 +433,63 @@ body {
   border-radius: 12px;
 }
 
+/* Feature card container styles */
+.feature-card.large > div {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 40px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 767px) {
+  .feature-image {
+    min-height: 200px;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .canvas-preview {
+    max-height: 300px;
+  }
+  
+  .feature-card.large h2 {
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .feature-card.large {
+    padding: 30px 20px;
+  }
+  
+  /* Fix for the flex layout in the portfolio section */
+  .feature-card.large > div {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+  
+  .feature-content {
+    padding: 0 5px;
+  }
+  
+  .feature-description {
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .feature-highlights {
+    padding-left: 10px;
+  }
+  
+  .feature-cta {
+    display: flex;
+    justify-content: center;
+  }
+}
+
 @media (min-width: 1024px) {
   .feature-card h2 {
     font-size: 36px;
@@ -441,7 +515,7 @@ body {
 }
 
 .feature-description {
-  font-size: 18px;
+  font-size: 1.1rem;
   line-height: 1.6;
   margin-bottom: 30px;
   opacity: 0.9;
@@ -451,7 +525,7 @@ body {
 .feature-highlights {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 25px 0 0 0;
 }
 
 .feature-highlights li {
@@ -1010,7 +1084,10 @@ a:focus {
 }
 
 .feature-cta {
-  margin-top: 40px;
+  margin-top: 30px;
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out forwards;
+  animation-delay: 0.8s;
 }
 
 .btn-feature {

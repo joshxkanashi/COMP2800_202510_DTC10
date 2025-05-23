@@ -231,6 +231,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Fix portfolio image for mobile view
+    function adjustPortfolioImage() {
+        const portfolioImage = document.querySelector('.feature-image img');
+        if (portfolioImage) {
+            // If error loading the image, use fallback and ensure proper styling
+            portfolioImage.onerror = function() {
+                this.src = 'https://framerusercontent.com/images/AX9PukosNfGVcfXw8zSUbhYKg.jpg';
+                this.style.width = '100%';
+                this.style.height = 'auto';
+                this.style.maxHeight = window.innerWidth < 768 ? '250px' : '450px';
+                this.style.objectFit = 'contain';
+            };
+            
+            // Ensure proper styling for the loaded image
+            portfolioImage.onload = function() {
+                this.style.width = '100%';
+                this.style.height = 'auto';
+                this.style.maxHeight = window.innerWidth < 768 ? '250px' : '450px';
+                this.style.objectFit = 'contain';
+            };
+            
+            // Trigger onload if image is already loaded
+            if (portfolioImage.complete) {
+                portfolioImage.onload();
+            }
+        }
+    }
+    
+    // Run on page load
+    adjustPortfolioImage();
+    
+    // Run on window resize
+    window.addEventListener('resize', adjustPortfolioImage);
+    
     // Initialize
     initAnimations();
 }); 

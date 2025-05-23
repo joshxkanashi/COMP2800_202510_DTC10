@@ -1223,6 +1223,9 @@ async function loadRecommendedProjects() {
 }
 
 // Only call on home page
-if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '/index.html') {
+if (
+  window.location.pathname === '/view/' ||
+  window.location.pathname === '/view/index.html'
+) {
   document.addEventListener('DOMContentLoaded', loadRecommendedProjects);
-} 
+}

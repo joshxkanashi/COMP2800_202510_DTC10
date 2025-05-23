@@ -231,36 +231,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Fix portfolio image for mobile view
+    // Fix portfolio image for mobile and desktop views
     function adjustPortfolioImage() {
         const portfolioImage = document.querySelector('.feature-image img');
+        const featureImage = document.querySelector('.feature-image');
+        
         if (portfolioImage) {
-            // If error loading the image, use fallback and ensure proper styling
+            // Configure image for responsive display
+            portfolioImage.style.width = '100%';
+            portfolioImage.style.height = 'auto';
+            portfolioImage.style.objectFit = 'contain';
+            
+            // Check screen size and adjust dimensions accordingly
+            if (window.innerWidth < 768) {
+                // Mobile view
+                portfolioImage.style.maxHeight = '250px';
+                if (featureImage) {
+                    featureImage.style.minHeight = '200px';
+                    featureImage.style.maxWidth = '100%';
+                }
+            } else {
+                // Desktop view
+                portfolioImage.style.maxHeight = '450px';
+                if (featureImage) {
+                    featureImage.style.minHeight = '400px';
+                    featureImage.style.maxWidth = '50%';
+                }
+            }
+            
+            // Handle error loading the image
             portfolioImage.onerror = function() {
                 this.src = 'https://framerusercontent.com/images/AX9PukosNfGVcfXw8zSUbhYKg.jpg';
-                this.style.width = '100%';
-                this.style.height = 'auto';
-                this.style.maxHeight = window.innerWidth < 768 ? '250px' : '450px';
-                this.style.objectFit = 'contain';
             };
-            
-            // Ensure proper styling for the loaded image
-            portfolioImage.onload = function() {
-                this.style.width = '100%';
-                this.style.height = 'auto';
-                this.style.maxHeight = window.innerWidth < 768 ? '250px' : '450px';
-                this.style.objectFit = 'contain';
-            };
-            
-            // Trigger onload if image is already loaded
-            if (portfolioImage.complete) {
-                portfolioImage.onload();
-            }
         }
     }
     
-    // Run on page load
-    adjustPortfolioImage();
+    // Run on page load with a small delay to ensure DOM is fully loaded
+    setTimeout(adjustPortfolioImage, 100);
     
     // Run on window resize
     window.addEventListener('resize', adjustPortfolioImage);

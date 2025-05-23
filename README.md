@@ -6,7 +6,6 @@ Team Members:
 Nathan Hong <br>
 Senuk Jayalath <br>
 Joshua Sopena <br>
-Yi Yu Zhao <br>
 
 ## Project Pitch
 Due to the rising cost of living in Vancouver, we are creating a financial tracking app that is catered towards students to help them save and keep track of their student loans.
@@ -66,17 +65,7 @@ node.js, Supabase
    - @supabase/auth-ui-shared
    - @supabase/supabase-js
 
-3. Set up Supabase:
-   - Create a Supabase account at https://supabase.com
-   - Create a new project
-   - Get your project URL and anon key
-   - Create a `.env` file in the root directory with:
-     ```
-     SUPABASE_URL=your_project_url
-     SUPABASE_ANON_KEY=your_anon_key
-     ```
-
-4. Start the development server:
+3. Start the development server:
    ```bash
    npm start
    ```
@@ -109,10 +98,9 @@ This project utilizes the following AI and API services:
 
 ## Contact Information
 For any questions or support, please contact:
-- Nathan Hong: [email]
-- Senuk Jayalath: [email]
-- Joshua Sopena: [email]
-- Yi Yu Zhao: [email]
+- Nathan Hong: natexhong@gmail.com
+- Senuk Jayalath: senukpaypal@gmail.com
+- Joshua Sopena: jisopena25@gmail.com
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.

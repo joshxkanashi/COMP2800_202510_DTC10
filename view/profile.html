@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile Settings</title>
+    <link rel="stylesheet" href="../css/profile.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="module" src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script type="module" src="../js/supabaseAPI.js"></script>
+</head>
+
+<body>
+    <div id="navbar-placeholder"></div>
+    <script type="module" src="../js/navbar.js"></script>
+    <main class="settings-container">
+        <h1 class="profile-title">Profile Settings</h1>
+
+        <section class="profile-card">
+            <h2 class="profile-section-title">Account Information</h2>
+            <form id="profileForm" class="profile-form">
+                <div class="profile-picture-section">
+                    <div class="profile-picture-container">
+                        <img id="profilePicture" alt="Profile Picture" class="profile-picture" />
+                        <div class="profile-picture-overlay">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 16L12 8M8 12L16 12" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
+                            <span>Upload Photo</span>
+                        </div>
+                    </div>
+                    <input type="file" id="pictureInput" accept="image/*" class="hidden" />
+                    <div class="profile-picture-help">
+                        <small class="form-help">Click to upload a new photo</small>
+                        <small class="form-help">Maximum size: 2MB</small>
+                    </div>
+                </div>
+
+                <label>
+                    Full Name
+                    <input type="text" id="fullName" placeholder="Enter your full name" required />
+                </label>
+                <label>
+                    Email Address
+                    <input type="email" id="email" disabled />
+                    <small class="form-help">Email cannot be changed</small>
+                </label>
+                <label>
+                    Date of Birth
+                    <input type="date" id="dateOfBirth" />
+                </label>
+                <button type="submit" class="profile-btn">Save Changes</button>
+            </form>
+        </section>
+
+        <section class="profile-card">
+            <h2 class="profile-section-title">Change Password</h2>
+            <form id="passwordForm" class="profile-form">
+                <label>
+                    New Password
+                    <input type="password" id="newPassword" placeholder="Enter new password" required minlength="6" />
+                </label>
+                <label>
+                    Confirm Password
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password" required
+                        minlength="6" />
+                </label>
+                <button type="submit" class="profile-btn">Update Password</button>
+            </form>
+        </section>
+
+        <section class="profile-card">
+            <h2 class="profile-section-title">Account Actions</h2>
+            <div class="profile-form">
+                <button id="logoutButton" class="profile-btn logout-btn" type="button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="margin-right: 8px;">
+                        <path
+                            d="M17 16L21 12M21 12L17 8M21 12H9M9 21H7C5.93913 21 4.92172 20.5786 4.17157 19.8284C3.42143 19.0783 3 18.0609 3 17V7C3 5.93913 3.42143 4.92172 4.17157 4.17157C4.92172 3.42143 5.93913 3 7 3H9"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Logout
+                </button>
+                <button id="deleteAccountButton" class="profile-btn delete-btn" type="button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        style="margin-right: 8px;">
+                        <path
+                            d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7M4 7H20"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Delete Account
+                </button>
+            </div>
+        </section>
+
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item" aria-label="Home">
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M9 20V14C9 13.4477 9.44772 13 10 13H14C14.5523 13 15 13.4477 15 14V20M3 10L12 3L21 10M5 8.5V18C5 19.1046 5.89543 20 7 20H17C18.1046 20 19 19.1046 19 18V8.5"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span>Home</span>
+            </a>
+            <a href="portfolio.html" class="nav-item" aria-label="Portfolio">
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M19 11H5M19 11C20.1046 11 21 11.8954 21 13V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13C3 11.8954 3.89543 11 5 11M19 11V9C19 7.89543 18.1046 7 17 7M5 11V9C5 7.89543 5.89543 7 7 7M7 7V5C7 3.89543 7.89543 3 9 3H15C16.1046 3 17 3.89543 17 5V7M7 7H17"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span>Portfolio</span>
+            </a>
+            <a href="projects.html" class="nav-item" aria-label="Projects">
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M7 7H7.01M7 3H12C12.5119 3 13.0237 3.19399 13.4142 3.58579L20.4142 10.5858C21.1953 11.3668 21.1953 12.6332 20.4142 13.4142L13.4142 20.4142C12.6332 21.1953 11.3668 21.1953 10.5858 20.4142L3.58579 13.4142C3.19399 13.0237 3 12.5119 3 12V7C3 4.79086 4.79086 3 7 3Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span>Projects</span>
+            </a>
+            <a href="connect.html" class="nav-item" aria-label="Connect">
+                <div class="nav-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M16 7C16 9.20914 14.2091 11 12 11C9.79086 11 8 9.20914 8 7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7Z"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span>Connect</span>
+            </a>
+        </nav>
+    </main>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Delete Account</h3>
+            <p class="modal-text">Are you sure you want to delete your account? This action cannot be undone and all
+                your data will be permanently deleted.</p>
+            <div class="modal-buttons">
+                <button id="cancelDelete" class="modal-btn cancel">Cancel</button>
+                <button id="confirmDelete" class="modal-btn confirm">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/profile.js"></script>
+</body>
+
+</html>

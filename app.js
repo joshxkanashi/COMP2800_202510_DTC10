@@ -425,35 +425,15 @@ function createSearchFilters() {
         <option value="title">Title A-Z</option>
       </select>
     </div>
-    <div class="filter-group">
-      <label>Filter By:</label>
-      <select id="typeFilter" class="filter-select">
-        <option value="all">All Projects</option>
-        <option value="web">Web Development</option>
-        <option value="mobile">Mobile Apps</option>
-        <option value="ai">AI/ML</option>
-      </select>
-    </div>
   `;
-  
-  // Add event listeners for filters
+  // Only add sortFilter event listener
   const sortFilter = filtersDiv.querySelector('#sortFilter');
-  const typeFilter = filtersDiv.querySelector('#typeFilter');
-  
   sortFilter.addEventListener('change', () => {
     const currentSearch = document.querySelector('.search-input').value;
     if (currentSearch) {
       performSearch(currentSearch);
     }
   });
-  
-  typeFilter.addEventListener('change', () => {
-    const currentSearch = document.querySelector('.search-input').value;
-    if (currentSearch) {
-      performSearch(currentSearch);
-    }
-  });
-  
   return filtersDiv;
 }
 
@@ -527,18 +507,9 @@ function setupEventListeners() {
 
     // Add filter change handlers
     const sortFilter = document.getElementById('sortFilter');
-    const typeFilter = document.getElementById('typeFilter');
     
     if (sortFilter) {
       sortFilter.addEventListener('change', () => {
-        if (currentSearchTerm) {
-          performSearch(currentSearchTerm);
-        }
-      });
-    }
-    
-    if (typeFilter) {
-      typeFilter.addEventListener('change', () => {
         if (currentSearchTerm) {
           performSearch(currentSearchTerm);
         }
@@ -617,15 +588,11 @@ async function performSearch(searchTerm) {
 
     // Get current filter values
     const sortFilter = document.getElementById('sortFilter')?.value || 'newest';
-    const typeFilter = document.getElementById('typeFilter')?.value || 'all';
 
     // Update section title with search term and filters
     const sectionTitle = document.querySelector('.section-title');
     if (sectionTitle) {
       let titleText = `Search Results for "${searchTerm}"`;
-      if (typeFilter !== 'all') {
-        titleText += ` in ${typeFilter}`;
-      }
       sectionTitle.textContent = titleText;
     }
 
@@ -648,11 +615,6 @@ async function performSearch(searchTerm) {
         )
       `)
       .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%${matchingUserIds.length ? `,user_id.in.(${matchingUserIds.join(',')})` : ''}`);
-
-    // Apply type filter
-    if (typeFilter !== 'all') {
-      query = query.eq('type', typeFilter);
-    }
 
     // Apply sorting
     switch (sortFilter) {

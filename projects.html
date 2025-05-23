@@ -293,8 +293,47 @@
         </nav>
     </div>
 
+<<<<<<< Updated upstream:projects.html
     <script type="module" src="projects.js"></script>
     <script type="module" src="profile.js"></script>
+=======
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalProjectTitle"></h2>
+                <button class="close-modal" aria-label="Close modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="project-images">
+                    <div class="main-image-container">
+                        <button class="nav-button prev" aria-label="Previous image">❮</button>
+                        <div id="modalMainImage"></div>
+                        <button class="nav-button next" aria-label="Next image">❯</button>
+                    </div>
+                    <div id="imageThumbnails" class="thumbnail-container"></div>
+                </div>
+                <div class="project-details">
+                    <div class="tech-stack">
+                        <h3>Technologies Used</h3>
+                        <div id="modalTechStack" class="tech-tags"></div>
+                    </div>
+                    <div class="project-description">
+                        <h3>Description</h3>
+                        <p id="modalDescription"></p>
+                    </div>
+                    <div class="project-links">
+                        <a id="modalLiveLink" href="#" target="_blank" class="project-link">View Live Demo</a>
+                        <a id="modalGithubLink" href="#" target="_blank" class="project-link">View on GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/projects.js"></script>
+    <script type="module" src="../js/profile.js"></script>
+>>>>>>> Stashed changes:view/projects.html
 </body>
 
 </html>

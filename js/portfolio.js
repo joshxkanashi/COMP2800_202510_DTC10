@@ -3934,14 +3934,15 @@ async function saveFeaturedProjects() {
   const navItems = document.querySelectorAll(".nav-item");
   navItems.forEach((item) => {
     item.addEventListener("click", function (e) {
-      if (item.getAttribute("aria-label").toLowerCase() === "connect") {
+      const href = item.getAttribute("href");
+      if (href && href.startsWith("#")) {
+        // Only prevent default for in-page anchors
         e.preventDefault();
-        const contactSection = document.getElementById("contact");
-        if (contactSection) {
-          scrollToElement(contactSection);
+        const targetSection = document.querySelector(href);
+        if (targetSection) {
+          scrollToElement(targetSection);
         }
       }
-
       // Visual feedback
       navItems.forEach((navItem) => navItem.classList.remove("active"));
       item.classList.add("active");

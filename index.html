@@ -26,6 +26,21 @@
                 margin: 40px auto;
             }
         }
+
+        .portfolio-project-title {
+            font-size: 1rem;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 8px;
+        }
+
+        .projects-grid {
+            display: grid;
+            justify-content: center;
+        }
+        
     </style>
 </head>
 
@@ -57,6 +72,8 @@
                 </div>
             </div>
 
+            <!-- Recommended Projects Section -->
+            <h2 class="section-title">Recommended Projects</h2>
             <div class="search-container">
                 <span class="search-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,7 +82,7 @@
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </span>
-                <input type="text" class="search-input" placeholder="Computer Science Skills"
+                <input type="text" class="search-input" placeholder="Search for projects"
                     aria-label="Search for computer science skills">
                 <button class="search-button" aria-label="Search">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -75,9 +92,6 @@
                     </svg>
                 </button>
             </div>
-
-            <!-- Recommended Projects Section -->
-            <h2 class="section-title">Recommended Projects</h2>
             <div class="projects-grid" id="recommendedProjectsContainer">
                 <!-- Recommended projects will be loaded here -->
             </div>

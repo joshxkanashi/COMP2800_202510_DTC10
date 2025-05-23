@@ -541,11 +541,16 @@ body {
 
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
-  margin-top: 24px;
-  min-height: 400px;
-  position: relative;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-bottom: 80px;
+}
+
+@media (max-width: 1024px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }
 
 .project-card {
@@ -1081,26 +1086,72 @@ svg {
 
 .portfolio-project-card {
   background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  height: 100%;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
+  height: 100%;
+  max-width: 340px !important;
+  min-width: 300px !important;
+  margin: 0 auto !important;
 }
 
-.portfolio-project-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+/* Only apply mobile card/image fix to eachConnectLanding using a parent selector */
+@media (max-width: 640px) {
+  body.eachconnect-landing .portfolio-project-card {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    box-sizing: border-box;
+  }
+  body.eachconnect-landing .portfolio-project-photo {
+    height: 220px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+  }
+  body.eachconnect-landing .portfolio-project-photo img {
+    width: auto !important;
+    height: 100% !important;
+    max-width: 100%;
+    object-fit: contain !important;
+    display: block;
+    margin: 0 auto;
+  }
+}
+
+/* Restore default for all other pages */
+@media (max-width: 640px) {
+  body:not(.eachconnect-landing) .portfolio-project-card {
+    max-width: 340px !important;
+    min-width: 300px !important;
+    width: auto !important;
+    margin: 0 auto !important;
+    box-sizing: border-box;
+  }
+  body:not(.eachconnect-landing) .portfolio-project-photo {
+    height: 160px !important;
+    display: block;
+    background: #eee;
+  }
+  body:not(.eachconnect-landing) .portfolio-project-photo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    margin: 0;
+  }
 }
 
 .portfolio-project-photo {
   width: 100%;
-  height: 220px;
+  height: 160px;
   overflow: hidden;
+  border-radius: 8px;
   position: relative;
-  background: var(--gray-100);
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1110,83 +1161,96 @@ svg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.portfolio-project-card:hover .portfolio-project-photo img {
-  transform: scale(1.05);
 }
 
 .portfolio-project-info {
-  padding: 16px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   flex: 1;
+  justify-content: space-between;
+}
+
+.portfolio-project-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .portfolio-project-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   color: var(--gray-900);
   margin: 0;
-  padding: 0 4px;
 }
 
 .portfolio-project-languages {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .tech-tag {
   font-size: 12px;
   padding: 4px 12px;
-  background: var(--gray-100);
-  color: var(--primary);
-  border-radius: 20px;
+  background: rgb(243, 244, 246);
+  color: rgb(99, 102, 241);
+  border-radius: 9999px;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .portfolio-project-links {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: flex;
+  gap: 8px;
   margin-top: auto;
 }
 
 .portfolio-project-view-btn {
-  padding: 10px 16px;
+  flex: 1;
+  padding: 8px 16px;
+  background: rgb(99, 102, 241);
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
   text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s, opacity 0.2s, transform 0.2s;
 }
-
-.portfolio-project-view-btn:first-child {
-  background: var(--primary);
-  color: white;
-}
-
-.portfolio-project-view-btn:last-child {
-  background: var(--gray-100);
-  color: var(--gray-900);
-}
-
 .portfolio-project-view-btn:hover {
+  background: var(--primary-dark);
   opacity: 0.9;
   transform: translateY(-1px);
 }
 
-.portfolio-project-view-btn:first-child:hover {
-  background: var(--primary-dark);
+.project-link {
+  padding: 8px 16px;
+  color: rgb(99, 102, 241);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  align-self: center;
+  transition: color 0.2s;
+}
+.project-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
-.portfolio-project-view-btn:last-child:hover {
-  background: var(--gray-200);
+/* Remove any dark background overrides for cards in portfolio section */
+.portfolio-section .portfolio-project-card {
+  background: white !important;
+  color: var(--gray-900) !important;
 }
 
 .view-all-link {
@@ -2152,7 +2216,7 @@ a[href="account-settings.html"] {
 }
 
 .project-modal-link {
-    display: inline-flex;
+    display: block;
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
@@ -2162,6 +2226,7 @@ a[href="account-settings.html"] {
     transition: all 0.2s ease;
     cursor: pointer;
     border: none;
+    text-align: center;
 }
 
 .project-modal-link:first-child {
@@ -2347,15 +2412,6 @@ body.modal-open {
   font-weight: 500;
 }
 
-/* Ensure the projects container can center the empty state */
-.projects-grid .empty-state {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
 /* Responsive Styles for Search */
 @media (max-width: 768px) {
   .search-filters {
@@ -2433,5 +2489,40 @@ body.modal-open {
   .project-modal-link {
     width: 100%;
     text-align: center;
+  }
+}
+
+.view-portfolio-btn {
+    background: white;
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.view-portfolio-btn:hover {
+    background: white;
+    color: var(--primary-dark);
+    opacity: 0.9;
+    transform: translateY(-1px);
+    border-color: var(--primary-dark);
+}
+
+/* Remove card hover shadow/transform for portfolio project cards */
+.portfolio-project-card:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    transform: none !important;
+}
+
+/* Ensure scrollable modal content is not hidden behind sticky footer */
+.project-modal-scroll-container {
+  padding-bottom: 64px;
+}
+
+@media (max-width: 640px) {
+  .project-modal-scroll-container {
+    padding-bottom: 80px;
   }
 }

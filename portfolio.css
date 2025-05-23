@@ -2111,246 +2111,6 @@ body.edit-mode .section-actions {
   opacity: 0 !important;
 } */
 
-/* --- Project Card Layout: Spacious 300x300px, Modern Grid --- */
-.projects-grid, .portfolio-projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 32px;
-  justify-items: center;
-}
-
-.portfolio-project-view-btn {
-  margin-top: 10px;
-  padding: 8px 20px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(99,102,241,0.08);
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-  outline: none;
-}
-
-.portfolio-project-view-btn:hover, .portfolio-project-view-btn:focus {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-  box-shadow: 0 4px 16px rgba(99,102,241,0.15);
-  transform: translateY(-2px) scale(1.04);
-}
-
-/* Project Modal Styles */
-.project-modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-.project-modal-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.project-modal {
-  background-color: white;
-  border-radius: 18px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 85vh;
-  overflow-y: auto;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  transform: translateY(20px);
-  transition: transform 0.3s ease;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-}
-
-.project-modal-backdrop.active .project-modal {
-  transform: translateY(0);
-}
-
-.project-modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.9);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #333;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.project-modal-close:hover {
-  background-color: rgba(255, 255, 255, 1);
-  transform: scale(1.05);
-}
-
-.project-modal-header {
-  padding: 24px 24px 12px 24px;
-}
-
-.project-modal-title {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-  color: #333;
-}
-
-.project-modal-gallery {
-  position: relative;
-  width: 100%;
-  height: 50vh;
-  background-color: #f5f5f5;
-  overflow: hidden;
-}
-
-.project-modal-images {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.3s ease;
-}
-
-.project-modal-image {
-  flex: 0 0 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f0f0f0;
-}
-
-.project-modal-image img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.project-modal-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  color: #333;
-  border: none;
-  z-index: 5;
-}
-
-.project-modal-nav:hover {
-  background-color: white;
-  transform: translateY(-50%) scale(1.05);
-}
-
-.project-modal-nav-prev {
-  left: 16px;
-}
-
-.project-modal-nav-next {
-  right: 16px;
-}
-
-.project-modal-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: -24px;
-  margin-bottom: 8px;
-  position: relative;
-  z-index: 5;
-}
-
-.project-modal-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  transition: all 0.2s ease;
-}
-
-.project-modal-dot.active {
-  background-color: #6366f1;
-  border-color: #6366f1;
-  transform: scale(1.2);
-}
-
-.project-modal-content {
-  padding: 24px;
-  height: 50vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.project-modal-description {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #444;
-  margin-bottom: 24px;
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* Custom scrollbar for modal content */
-.project-modal-content::-webkit-scrollbar,
-.project-modal-description::-webkit-scrollbar {
-  width: 6px;
-}
-
-.project-modal-content::-webkit-scrollbar-track,
-.project-modal-description::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 6px;
-}
-
-.project-modal-content::-webkit-scrollbar-thumb,
-.project-modal-description::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 6px;
-}
-
-.project-modal-content::-webkit-scrollbar-thumb:hover,
-.project-modal-description::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-@media (max-width: 768px) {
-  .project-modal-gallery {
-    height: 40vh;
-  }
-  
-  .project-modal-content {
-    height: 40vh;
-  }
-}
-
 /* === AI Advice Chat Styles === */
 #ai-advice-root {
   position: fixed;
@@ -2488,4 +2248,36 @@ body.edit-mode .section-actions {
     font-size: 1rem;
     color: var(--gray-600);
     margin: 0;
+}
+
+/* Modal footer always at the bottom */
+.project-modal-footer {
+  width: 100%;
+  padding: 18px 24px 18px 24px;
+  background: #fff;
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.project-modal-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .project-modal-footer {
+    padding: 12px 8px;
+  }
+  .project-modal-links {
+    gap: 8px;
+  }
 }

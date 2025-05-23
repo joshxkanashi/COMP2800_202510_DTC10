@@ -757,7 +757,7 @@ function createProjectCard(project) {
   buttonsDiv.appendChild(viewProjectBtn);
 
   const viewPortfolioBtn = document.createElement('button');
-  viewPortfolioBtn.className = 'portfolio-project-view-btn';
+  viewPortfolioBtn.className = 'view-portfolio-btn';
   viewPortfolioBtn.textContent = 'View Portfolio';
   viewPortfolioBtn.onclick = () => {
     localStorage.setItem('selectedProfileId', project.user_id);
@@ -1020,7 +1020,7 @@ window.openProjectModal = function(project) {
         const demoLink = document.createElement('a');
         demoLink.href = project.project_url;
         demoLink.className = 'project-modal-link';
-        demoLink.textContent = 'Live Demo';
+        demoLink.textContent = 'Link';
         demoLink.target = '_blank';
         modalLinks.appendChild(demoLink);
     }
@@ -1041,7 +1041,7 @@ window.openProjectModal = function(project) {
 
     // Set up View Portfolio button
     const viewPortfolioBtn = document.createElement('button');
-    viewPortfolioBtn.className = 'project-modal-link';
+    viewPortfolioBtn.className = 'view-portfolio-btn';
     viewPortfolioBtn.textContent = 'View Portfolio';
     viewPortfolioBtn.onclick = () => {
         localStorage.setItem('selectedProfileId', project.user_id);

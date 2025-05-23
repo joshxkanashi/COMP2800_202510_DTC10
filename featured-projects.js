@@ -142,13 +142,17 @@ window.openProjectModal = function (project) {
 
   // Set links
   modalLinks.innerHTML = "";
+  // Always reset display so links show for projects that have them
+  modalLinks.style.display = "";
+  let hasLink = false;
   if (project.project_url) {
     const demoLink = document.createElement("a");
     demoLink.href = project.project_url;
     demoLink.className = "project-modal-link";
-    demoLink.textContent = "Live Demo";
+    demoLink.textContent = "Project Link";
     demoLink.target = "_blank";
     modalLinks.appendChild(demoLink);
+    hasLink = true;
   }
   if (project.github_url) {
     const githubLink = document.createElement("a");
@@ -163,6 +167,10 @@ window.openProjectModal = function (project) {
         `;
     githubLink.target = "_blank";
     modalLinks.appendChild(githubLink);
+    hasLink = true;
+  }
+  if (!hasLink) {
+    modalLinks.style.display = "none";
   }
 
   // Only add View Portfolio button if we're not already on the portfolio page
@@ -171,7 +179,7 @@ window.openProjectModal = function (project) {
     if (!viewPortfolioBtn) {
       viewPortfolioBtn = document.createElement("button");
       viewPortfolioBtn.id = "projectModalViewPortfolio";
-      viewPortfolioBtn.className = "btn-primary";
+      viewPortfolioBtn.className = "view-portfolio-btn";
       viewPortfolioBtn.style.marginTop = "18px";
       modalLinks.parentNode.appendChild(viewPortfolioBtn);
     }
@@ -341,7 +349,7 @@ function createFeaturedProjectCard(project, index) {
     const projectLink = document.createElement("a");
     projectLink.href = project.project_url;
     projectLink.className = "project-link";
-    projectLink.textContent = "Live Demo";
+    projectLink.textContent = "Project Link";
     projectLink.target = "_blank";
     linksSection.appendChild(projectLink);
   }

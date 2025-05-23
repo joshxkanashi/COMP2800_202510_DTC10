@@ -18,6 +18,7 @@ const languageTags = document.querySelectorAll('.language-tag');
 const selectedLanguages = new Set();
 let selectedPhotos = [];
 let currentPhotoUrls = [];
+const urlInput = document.getElementById('projectUrl');
 
 // Fetch project data and pre-fill form
 async function loadProject() {
@@ -33,6 +34,7 @@ async function loadProject() {
     }
     titleInput.value = data.title;
     descInput.value = data.description;
+    urlInput.value = data.project_url || '';
     
     // Load existing photos
     if (data.photo_urls && Array.isArray(data.photo_urls)) {
@@ -150,7 +152,8 @@ form.addEventListener('submit', async (e) => {
                 description: form.description.value,
                 photo_url: newPhotoUrls[0] || null, // Store first photo as main photo
                 photo_urls: newPhotoUrls, // Store all photo URLs
-                languages: Array.from(selectedLanguages)
+                languages: Array.from(selectedLanguages),
+                project_url: form.project_url.value // Add project_url
             })
             .eq('id', projectId);
         if (error) throw error;

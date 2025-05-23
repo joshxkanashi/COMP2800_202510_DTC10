@@ -208,13 +208,15 @@ document.addEventListener("DOMContentLoaded", function () {
               about2: "When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, or mentoring junior developers."
             };
             
-            // Insert a new portfolio for this user
+            // Insert a new portfolio for this user (use upsert to avoid duplicates)
+            // IMPORTANT: Ensure you have a unique constraint on user_id in the Supabase table:
+            // ALTER TABLE portfolios ADD CONSTRAINT unique_user_id UNIQUE (user_id);
             const { error: insertError } = await supabase
               .from("portfolios")
-              .insert([{ 
+              .upsert([{ 
                 user_id: user.id,
                 data: defaultData
-              }]);
+              }], { onConflict: ["user_id"] });
               
             if (insertError) {
               // Handle errors when inserting
@@ -300,42 +302,15 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             // Initialize with default data for new users
             portfolioData = {
-              name: "CS Student",
-              title: "Full Stack Developer & Computer Science Enthusiast",
-              location: "Vancouver, Canada",
-              email: "csstudent@example.com",
-              about1: "I'm a passionate Computer Science student with a strong interest in web development, artificial intelligence, and cybersecurity. My journey in tech began when I was 15, teaching myself how to code through online resources.",
-              about2: "When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, or mentoring junior developers. I believe in continuous learning and pushing the boundaries of what's possible with technology.",
-              education: [
-                {
-                  id: "edu1",
-                  date: "2021 - Present",
-                  degree: "BSc in Computer Science",
-                  school: "British Columbia Institute of Technology",
-                  description: "Focusing on Software Development, Data Structures, and Algorithms"
-                }
-              ],
+              title: "Enter Your Professional Title",
+              about1: "Write a brief introduction about yourself...",
+              about2: "Share more about your interests and expertise...",
               skills: [
                 {
                   id: "skill1",
-                  name: "JavaScript",
-                  level: "Advanced",
-                  progress: "90"
-                },
-                {
-                  id: "skill2",
-                  name: "Python",
-                  level: "Advanced",
-                  progress: "85"
-                }
-              ],
-              experience: [
-                {
-                  id: "exp1",
-                  date: "2022 - Present",
-                  title: "Junior Web Developer",
-                  company: "TechVision Labs, Vancouver",
-                  description: "Developing responsive web applications using React and Node.js. Collaborating with designers and back-end developers to create seamless user experiences."
+                  name: "Enter Skill",
+                  level: "Select Level",
+                  progress: "0"
                 }
               ],
               sections: [
@@ -343,10 +318,33 @@ document.addEventListener("DOMContentLoaded", function () {
                 { id: "education", type: "education", title: "Education", visible: true },
                 { id: "skills", type: "skills", title: "Technical Skills", visible: true },
                 { id: "experience", type: "experience", title: "Work Experience", visible: true },
-                { id: "projects", type: "projects", title: "Featured Projects", visible: true },
-                { id: "contact", type: "contact", title: "Get In Touch", visible: true }
+                { id: "projects", type: "projects", title: "Featured Projects", visible: true }
               ],
-              updated_at: new Date().toISOString()
+              education: [
+                {
+                  id: "edu1",
+                  date: "Enter Date",
+                  degree: "Enter Degree/Certificate",
+                  school: "Enter Institution Name",
+                  description: "Describe your education..."
+                }
+              ],
+              experience: [
+                {
+                  id: "exp1",
+                  date: "Enter Date",
+                  title: "Enter Job Title",
+                  company: "Enter Company Name",
+                  description: "Describe your role and responsibilities..."
+                }
+              ],
+              skill_cat1: "Enter Skill Category",
+              skill_cat2: "Enter Another Category",
+              education_summary: "Enter your latest education",
+              project_new1_link: "Project URL",
+              project_new1_title: "Enter Project Title",
+              project_new1_github: "GitHub URL",
+              project_new1_description: "Enter project description..."
             };
             console.log("Initialized with default portfolio data for new user");
           }
@@ -507,13 +505,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       }
       // Update hero education summary to match most recent timeline entry
-      if (portfolioData.education.length > 0) {
+      const heroEducation = document.querySelector('[data-field="education"]');
+      if (Array.isArray(portfolioData.education) && portfolioData.education.length > 0) {
         const latest = portfolioData.education[0];
         portfolioData.education_summary = `${latest.degree} at ${latest.school}`;
-        // Also update the hero field in the DOM if present
-        const heroEducation = document.querySelector('[data-field="education"]');
         if (heroEducation) {
           heroEducation.textContent = portfolioData.education_summary;
+        }
+      } else {
+        if (heroEducation) {
+          heroEducation.textContent = 'Education not inputted';
         }
       }
 
@@ -1891,7 +1892,7 @@ async function openProjectSelector() {
         }
         .project-modal-content {
           flex: 1;
-          overflow-y: auto;
+          /* overflow-y: auto; */
           padding: 20px;
           max-height: 40vh;
         }
@@ -1930,7 +1931,7 @@ async function openProjectSelector() {
           grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
           gap: 20px;
           max-height: 500px;
-          overflow-y: auto;
+          /* overflow-y: auto; */
           padding: 10px;
         }
         .project-select-card {
@@ -2010,6 +2011,18 @@ async function openProjectSelector() {
           padding: 24px;
           color: #6b7280;
         }
+        .project-selector-grid.empty-center {
+          display: flex !important;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 180px;
+        }
+        .project-selector-grid.empty-center .empty-projects {
+          width: 100%;
+          max-width: 400px;
+          margin: 0 auto;
+        }
       `;
       document.head.appendChild(styleEl);
     }
@@ -2076,7 +2089,10 @@ async function loadProjectsForSelector() {
           <p>Add projects in the <a href="projects.html" style="color: var(--primary); text-decoration: underline;">Projects page</a> first.</p>
         </div>
       `;
+      projectsGrid.classList.add('empty-center');
       return;
+    } else {
+      projectsGrid.classList.remove('empty-center');
     }
     
     // IMPORTANT: Clear the grid completely before adding new projects
@@ -2542,11 +2558,20 @@ async function saveFeaturedProjects() {
       portfolioData = gatherPortfolioData();
       localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
       
+      // Attach event listener for Manage Featured Projects if this is a projects section
+      if (newSection.dataset.sectionType === "projects") {
+        const addProjectButton = newSection.querySelector("#addProjectButton");
+        if (addProjectButton) {
+          // Remove any old listeners by cloning
+          const newButton = addProjectButton.cloneNode(true);
+          addProjectButton.parentNode.replaceChild(newButton, addProjectButton);
+          newButton.addEventListener("click", openProjectSelector);
+        }
+      }
+      
       // Scroll to the new section
       setTimeout(() => {
         newSection.scrollIntoView({ behavior: "smooth", block: "start" });
-        
-        // Remove animation class after animation completes
         setTimeout(() => {
           newSection.classList.remove("adding");
         }, 500);
@@ -2899,25 +2924,17 @@ async function saveFeaturedProjects() {
       `,
       projects: `
         <div class="projects-grid" id="projectsContainer">
-          <div class="portfolio-project-card">
-            <div class="portfolio-project-photo">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <div class="empty-state">
+            <div class="project-image">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-            <div class="portfolio-project-info">
-              <h3 class="portfolio-project-title editable-content" data-field="project_new1_title">Project Title</h3>
-              <p class="portfolio-project-description editable-content" data-field="project_new1_description">Project description...</p>
-              <div class="portfolio-project-languages">
-                <span class="tech-tag">React</span>
-                <span class="tech-tag">Node.js</span>
-              </div>
-              <div class="portfolio-project-links">
-                <a href="#" class="project-link editable-content" data-field="project_new1_link">View</a>
-                <a href="#" class="project-link editable-content" data-field="project_new1_github">GitHub</a>
-              </div>
+            <div class="empty-state-content">
+              <h3>No Featured Projects</h3>
+              <p>Select projects to feature in your portfolio</p>
             </div>
           </div>
         </div>
@@ -2925,87 +2942,10 @@ async function saveFeaturedProjects() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Add Project
+          Manage Featured Projects
         </button>
         <div class="view-all-link">
           <a href="projects.html" class="btn-primary">View All Projects</a>
-        </div>
-      `,
-      contact: `
-        <div class="contact-container">
-          <div class="contact-info">
-            <h3 class="contact-subtitle">Let's Connect</h3>
-            <p class="contact-text editable-content" data-field="contact_text">
-              I'm currently open to new opportunities and collaborations. Whether you have a project in mind, 
-              a question about my work, or just want to say hello, feel free to reach out!
-            </p>
-            
-            <div class="contact-methods">
-              <div class="contact-method">
-                <div class="contact-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
-                <div class="contact-detail">
-                  <h4 class="contact-label">Email</h4>
-                  <p class="contact-value editable-content" data-field="contact_email">youremail@example.com</p>
-                </div>
-              </div>
-              
-              <div class="contact-method">
-                <div class="contact-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 10C20 14.4183 12 22 12 22C12 22 4 14.4183 4 10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 12C13.1046 12 14 11.1046 14 10C14 8.89543 13.1046 8 12 8C10.8954 8 10 8.89543 10 10C10 11.1046 10.8954 12 12 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
-                <div class="contact-detail">
-                  <h4 class="contact-label">Location</h4>
-                  <p class="contact-value editable-content" data-field="contact_location">City, Country</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="social-links">
-              <a href="#" class="social-link">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5229 6.47715 22 12 22C17.5229 22 22 17.5229 22 12C22 6.47715 17.5229 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M14.3333 19V17.137C14.3583 16.8275 14.3154 16.5163 14.2073 16.2242C14.0993 15.9321 13.9286 15.6657 13.7067 15.4428C15.8 15.2156 18 14.4431 18 10.8989C17.9998 9.99256 17.6418 9.12101 17 8.46461C17.3039 7.67171 17.2824 6.79528 16.94 6.01739C16.94 6.01739 16.1533 5.7902 14.3333 6.97433C12.8053 6.57853 11.1947 6.57853 9.66666 6.97433C7.84666 5.7902 7.05999 6.01739 7.05999 6.01739C6.71757 6.79528 6.69609 7.67171 6.99999 8.46461C6.35341 9.12588 5.99501 10.0053 5.99999 10.9183C5.99999 14.4366 8.19999 15.2091 10.2933 15.4622C10.074 15.6829 9.90483 15.9461 9.79686 16.2347C9.68889 16.5232 9.64453 16.8306 9.66666 17.137V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M9.66667 17.7018C7.66667 18.3335 6 17.7018 5 16.0684" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-              <a href="#" class="social-link">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M6 9H2V21H6V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-          
-          <div class="contact-form-container">
-            <form class="contact-form" novalidate>
-              <div class="form-group">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" id="name" class="form-input" placeholder="Your name" required>
-              </div>
-              <div class="form-group">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" class="form-input" placeholder="Your email" required>
-              </div>
-              <div class="form-group">
-                <label for="subject" class="form-label">Subject</label>
-                <input type="text" id="subject" class="form-input" placeholder="Subject">
-              </div>
-              <div class="form-group">
-                <label for="message" class="form-label">Message</label>
-                <textarea id="message" class="form-textarea" placeholder="Your message" rows="5" required></textarea>
-              </div>
-              <button type="submit" class="btn-primary form-submit">Send Message</button>
-            </form>
-          </div>
         </div>
       `,
       custom: `
@@ -4293,50 +4233,70 @@ async function saveFeaturedProjects() {
     const photoSection = document.createElement('div');
     photoSection.className = 'portfolio-project-photo';
     if (project.photo_url) {
-        const img = document.createElement('img');
-        img.src = project.photo_url;
-        img.alt = project.title;
-        photoSection.appendChild(img);
+      const img = document.createElement('img');
+      img.src = project.photo_url;
+      img.alt = project.title;
+      photoSection.appendChild(img);
     } else {
-        // Default SVG if no photo
-        photoSection.innerHTML = `
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        `;
+      photoSection.innerHTML = `
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      `;
     }
 
     // Info section
     const infoSection = document.createElement('div');
     infoSection.className = 'portfolio-project-info';
 
+    // Content section (title + languages)
+    const contentSection = document.createElement('div');
+    contentSection.className = 'portfolio-project-content';
+
     // Title
     const title = document.createElement('h3');
     title.className = 'portfolio-project-title';
-    title.textContent = project.title;
-    infoSection.appendChild(title);
+    title.textContent = project.title || 'Unnamed Project';
+    contentSection.appendChild(title);
 
     // Languages/Tech
     const techSection = document.createElement('div');
     techSection.className = 'portfolio-project-languages';
     (project.languages || []).forEach(lang => {
-        const tag = document.createElement('span');
-        tag.className = 'tech-tag';
-        tag.textContent = lang;
-        techSection.appendChild(tag);
+      const tag = document.createElement('span');
+      tag.className = 'tech-tag';
+      tag.textContent = lang;
+      techSection.appendChild(tag);
     });
-    infoSection.appendChild(techSection);
+    contentSection.appendChild(techSection);
+    infoSection.appendChild(contentSection);
 
-    // View button (opens modal)
+    // Links section (View button + Link)
+    const linksSection = document.createElement('div');
+    linksSection.className = 'portfolio-project-links';
+
+    // View button (blue)
     const viewBtn = document.createElement('button');
     viewBtn.className = 'portfolio-project-view-btn';
     viewBtn.textContent = 'View';
     viewBtn.addEventListener('click', () => {
       openProjectModal(project);
     });
-    infoSection.appendChild(viewBtn);
+    linksSection.appendChild(viewBtn);
+
+    // Project Link (text link)
+    if (project.project_url) {
+      const projectLink = document.createElement('a');
+      projectLink.href = project.project_url;
+      projectLink.className = 'project-link';
+      projectLink.textContent = 'Link';
+      projectLink.target = '_blank';
+      projectLink.rel = 'noopener noreferrer';
+      linksSection.appendChild(projectLink);
+    }
+    infoSection.appendChild(linksSection);
 
     // Assemble card
     card.appendChild(photoSection);
@@ -4385,10 +4345,11 @@ async function saveFeaturedProjects() {
               <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-        </div>
-        <div class="project-modal-dots" id="projectModalDots">
+            <div class="project-modal-dots" id="projectModalDots">
           <!-- Dots will be inserted here -->
         </div>
+        </div>
+      
         <!-- Scrollable content section -->
         <div class="project-modal-content">
           <div class="project-modal-scroll-container">
@@ -4396,9 +4357,11 @@ async function saveFeaturedProjects() {
             <div class="project-modal-tech" id="projectModalTech">
               <!-- Tech tags will be inserted here -->
             </div>
-            <div class="project-modal-links" id="projectModalLinks">
-              <!-- Links will be inserted here -->
-            </div>
+          </div>
+        </div>
+        <div class="project-modal-footer">
+          <div class="project-modal-links" id="projectModalLinks">
+            <!-- Links will be inserted here -->
           </div>
         </div>
       </div>
@@ -4455,84 +4418,92 @@ window.openProjectModal = function(project) {
     }
     
     // Clear previous images
-    const imagesContainer = document.getElementById('projectModalImages');
-    imagesContainer.innerHTML = '';
-    
-      // Add project images or default image
-  const photoUrls = project.photo_urls || [];
-  
-  // Check for multiple images from photo_urls array first
-  if (photoUrls.length > 0) {
-    photoUrls.forEach(imageSrc => {
-      const imageDiv = document.createElement('div');
-      imageDiv.className = 'project-modal-image';
-      const img = document.createElement('img');
-      img.src = imageSrc;
-      img.alt = project.title;
-      imageDiv.appendChild(img);
-      imagesContainer.appendChild(imageDiv);
-    });
-  } 
-  // Fall back to single photo_url if no photo_urls array
-  else if (project.photo_url) {
-    const imageDiv = document.createElement('div');
-    imageDiv.className = 'project-modal-image';
-    const img = document.createElement('img');
-    img.src = project.photo_url;
-    img.alt = project.title;
-    imageDiv.appendChild(img);
-    imagesContainer.appendChild(imageDiv);
-  } else {
-      // Use default image/icon
-      const imageDiv = document.createElement('div');
-      imageDiv.className = 'project-modal-image';
-      imageDiv.innerHTML = `
+    const modalImages = document.getElementById('projectModalImages');
+    const modalDots = document.getElementById('projectModalDots');
+    const prevButton = document.getElementById('projectModalPrev');
+    const nextButton = document.getElementById('projectModalNext');
+    modalImages.innerHTML = '';
+    modalDots.innerHTML = '';
+    const photoUrls = project.photo_urls || (project.photo_url ? [project.photo_url] : []);
+    let currentImageIndex = 0;
+
+    function navigateToImage(index) {
+      const images = modalImages.querySelectorAll('.project-modal-image');
+      const dots = modalDots.querySelectorAll('.project-modal-dot');
+      images.forEach((img, i) => {
+        img.style.display = i === index ? 'block' : 'none';
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+      currentImageIndex = index;
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'ArrowLeft' && prevButton.style.display !== 'none') {
+        prevButton.click();
+      } else if (e.key === 'ArrowRight' && nextButton.style.display !== 'none') {
+        nextButton.click();
+      } else if (e.key === 'Escape') {
+        closeProjectModal();
+      }
+    }
+
+    if (photoUrls.length > 0) {
+      photoUrls.forEach((url, index) => {
+        const imageDiv = document.createElement('div');
+        imageDiv.className = 'project-modal-image';
+        imageDiv.style.display = index === 0 ? 'block' : 'none';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `${project.title} - Image ${index + 1}`;
+        imageDiv.appendChild(img);
+        modalImages.appendChild(imageDiv);
+      });
+      if (photoUrls.length > 1) {
+        prevButton.style.display = 'flex';
+        nextButton.style.display = 'flex';
+        modalDots.style.display = 'flex';
+        modalDots.innerHTML = '';
+        photoUrls.forEach((_, index) => {
+          const dot = document.createElement('div');
+          dot.className = `project-modal-dot ${index === 0 ? 'active' : ''}`;
+          dot.addEventListener('click', () => navigateToImage(index));
+          modalDots.appendChild(dot);
+        });
+        prevButton.onclick = () => {
+          currentImageIndex = (currentImageIndex - 1 + photoUrls.length) % photoUrls.length;
+          navigateToImage(currentImageIndex);
+        };
+        nextButton.onclick = () => {
+          currentImageIndex = (currentImageIndex + 1) % photoUrls.length;
+          navigateToImage(currentImageIndex);
+        };
+        document.addEventListener('keydown', handleKeyPress);
+      } else {
+        prevButton.style.display = 'none';
+        nextButton.style.display = 'none';
+        modalDots.style.display = 'none';
+      }
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'project-modal-image';
+      placeholder.innerHTML = `
         <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M4 5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V7C20 7.55228 19.5523 8 19 8H5C4.44772 8 4 7.55228 4 7V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M4 13C4 12.4477 4.44772 12 5 12H11C11.5523 12 12 12.4477 12 13V19C12 19.5523 11.5523 20 11 20H5C4.44772 20 4 19.5523 4 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M16 13C16 12.4477 16.4477 12 17 12H19C19.5523 12 20 12.4477 20 13V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       `;
-      imagesContainer.appendChild(imageDiv);
-    }
-    
-    // Handle navigation dots
-    const dotsContainer = document.getElementById('projectModalDots');
-    dotsContainer.innerHTML = '';
-    
-      // Set image state
-  currentImageIndex = 0;
-  totalImages = photoUrls.length || (project.photo_url ? 1 : 0);
-    
-    // Show/hide navigation buttons based on image count
-    const prevButton = document.getElementById('projectModalPrev');
-    const nextButton = document.getElementById('projectModalNext');
-    
-    if (totalImages <= 1) {
+      modalImages.appendChild(placeholder);
       prevButton.style.display = 'none';
       nextButton.style.display = 'none';
-      dotsContainer.style.display = 'none';
-    } else {
-      prevButton.style.display = 'flex';
-      nextButton.style.display = 'flex';
-      dotsContainer.style.display = 'flex';
-      
-      // Create dots for each image
-      for (let i = 0; i < totalImages; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'project-modal-dot';
-        if (i === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => {
-          setCurrentImage(i);
-        });
-        dotsContainer.appendChild(dot);
-      }
+      modalDots.style.display = 'none';
     }
-    
-    // Add tech tags
+
+    // Tech stack
     const techContainer = document.getElementById('projectModalTech');
     techContainer.innerHTML = '';
-    
     if (project.languages && project.languages.length > 0) {
       project.languages.forEach(lang => {
         const tag = document.createElement('span');
@@ -4543,20 +4514,22 @@ window.openProjectModal = function(project) {
     } else {
       techContainer.style.display = 'none';
     }
-    
-    // Add links
+
+    // Links
     const linksContainer = document.getElementById('projectModalLinks');
     linksContainer.innerHTML = '';
-    
+    // Always reset display so links show for projects that have them
+    linksContainer.style.display = '';
+    let hasLink = false;
     if (project.project_url) {
       const link = document.createElement('a');
       link.href = project.project_url;
       link.className = 'project-modal-link';
-      link.textContent = 'Live Demo';
+      link.textContent = 'Project Link';
       link.target = '_blank';
       linksContainer.appendChild(link);
+      hasLink = true;
     }
-    
     if (project.github_url) {
       const link = document.createElement('a');
       link.href = project.github_url;
@@ -4570,12 +4543,12 @@ window.openProjectModal = function(project) {
       `;
       link.target = '_blank';
       linksContainer.appendChild(link);
+      hasLink = true;
     }
-    
-    if (!project.project_url && !project.github_url) {
+    if (!hasLink) {
       linksContainer.style.display = 'none';
     }
-    
+
     // Show the modal
     const modalBackdrop = document.getElementById('projectModalBackdrop');
     modalBackdrop.classList.add('active');

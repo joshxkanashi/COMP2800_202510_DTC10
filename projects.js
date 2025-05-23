@@ -375,6 +375,7 @@ function openProjectModal(project) {
     if (project.project_url) {
         liveLink.href = project.project_url;
         liveLink.style.display = 'inline-block';
+        liveLink.textContent = 'Project Link';
     } else {
         liveLink.style.display = 'none';
     }

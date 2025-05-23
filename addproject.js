@@ -118,7 +118,8 @@ form.addEventListener('submit', async (e) => {
                     description: form.description.value,
                     photo_url: photoUrls[0] || null, // Store first photo as main photo
                     photo_urls: photoUrls, // Store all photo URLs
-                    languages: Array.from(selectedLanguages)
+                    languages: Array.from(selectedLanguages),
+                    project_url: form.project_url.value // Add project_url
                 }
             ]);
 

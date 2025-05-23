@@ -763,13 +763,11 @@
             <div class="project-modal-content">
                 <div class="project-modal-scroll-container">
                     <p class="project-modal-description" id="projectModalDescription">Project description</p>
-                    <div class="project-modal-tech" id="projectModalTech">
-                        <!-- Tech tags will be inserted here -->
-                    </div>
-                    <div class="project-modal-links" id="projectModalLinks">
-                        <!-- Links will be inserted here -->
-                    </div>
+                    <div class="project-modal-tech" id="projectModalTech"></div>
                 </div>
+            </div>
+            <div class="project-modal-footer">
+                <div class="project-modal-links" id="projectModalLinks"></div>
             </div>
         </div>
     </div>
@@ -966,7 +964,7 @@
                 // We have some portfolio data, render it
                 console.log('Final portfolio data being rendered:', portfolioData);
                 await incrementPortfolioViewCount(selectedProfileId);
-                renderProfileHeader(profile, portfolioData);
+                renderProfileHeader(profile, typeof portfolioData.data === 'object' && portfolioData.data !== null ? portfolioData.data : portfolioData);
                 await renderPortfolioContent(portfolioData);
                 
             } catch (error) {
@@ -996,29 +994,24 @@
             }
 
             // Get education info - check both formats
-            let educationDegree = '';
-            let educationSchool = '';
-            
-            // First try to get from education array
-            if (portfolioData.education && portfolioData.education.length > 0) {
-                const mostRecentEducation = portfolioData.education[0];
-                educationDegree = mostRecentEducation.degree;
-                educationSchool = mostRecentEducation.school;
-            } 
-            // Fallback to old format if array is not available
-            else if (portfolioData.edu_new1_degree && portfolioData.edu_new1_school) {
-                educationDegree = portfolioData.edu_new1_degree;
-                educationSchool = portfolioData.edu_new1_school;
+            let educationDisplay = 'Education information not provided';
+            if (portfolioData.education_summary) {
+                educationDisplay = portfolioData.education_summary;
+                console.log('[Education] Using education_summary:', educationDisplay);
+            } else if (Array.isArray(portfolioData.education) && portfolioData.education.length > 0) {
+                const latest = portfolioData.education[0];
+                educationDisplay = `${latest.degree} at ${latest.school}`;
+                console.log('[Education] Using education array:', latest, 'Display:', educationDisplay);
+            } else if (portfolioData.edu_new1_degree && portfolioData.edu_new1_school) {
+                educationDisplay = `${portfolioData.edu_new1_degree} at ${portfolioData.edu_new1_school}`;
+                console.log('[Education] Using edu_new1 fields:', portfolioData.edu_new1_degree, portfolioData.edu_new1_school, 'Display:', educationDisplay);
             } else if (portfolioData.edu1_degree && portfolioData.edu1_school) {
-                educationDegree = portfolioData.edu1_degree;
-                educationSchool = portfolioData.edu1_school;
+                educationDisplay = `${portfolioData.edu1_degree} at ${portfolioData.edu1_school}`;
+                console.log('[Education] Using edu1 fields:', portfolioData.edu1_degree, portfolioData.edu1_school, 'Display:', educationDisplay);
+            } else {
+                console.log('[Education] No education info found, using default message.');
             }
 
-            // Create the education display string
-            const educationDisplay = (educationDegree && educationSchool) 
-                ? `${educationDegree} at ${educationSchool}`
-                : 'Education information not provided';
-            
             heroSection.innerHTML = `
                 <div class="portfolio-hero-content">
                     <div class="${avatarClass}">${avatarContent}</div>
@@ -1381,7 +1374,7 @@
                                         </div>
                                         <div class="portfolio-project-links">
                                             <button class="portfolio-project-view-btn" onclick="window.openProjectModal(${JSON.stringify(project).replace(/"/g, '&quot;')})">View</button>
-                                            ${project.project_url ? `<a href="${project.project_url}" class="project-link" target="_blank" rel="noopener noreferrer">${project.project_url.toLowerCase().includes('github') ? 'GitHub' : 'Go'}</a>` : ''}
+                                            ${project.project_url ? `<a href="${project.project_url}" class="project-link" target="_blank" rel="noopener noreferrer">Link</a>` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -1624,7 +1617,7 @@
                             </div>
                         ` : ''}
                         <div class="project-links">
-                            ${project.project_url ? `<a href="${project.project_url}" class="project-link" target="_blank">View Live Demo</a>` : ''}
+                            ${project.project_url ? `<a href="${project.project_url}" class="project-link" target="_blank" rel="noopener noreferrer">Link</a>` : ''}
                             ${project.github_url ? `<a href="${project.github_url}" class="project-link" target="_blank">View on GitHub</a>` : ''}
                         </div>
                     </div>

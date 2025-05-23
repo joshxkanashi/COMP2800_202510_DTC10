@@ -65,10 +65,7 @@ node.js, Supabase
    - @supabase/auth-ui-shared
    - @supabase/supabase-js
 
-3. Start the development server:
-   ```bash
-   npm start
-   ```
+3. API keys are initalized already, acquiring them is not needed.
 
 ## Features
 - User authentication and authorization
@@ -99,7 +96,7 @@ This project utilizes the following AI and API services:
 ## Contact Information
 For any questions or support, please contact:
 - Nathan Hong: natexhong@gmail.com
-- Senuk Jayalath: senukpaypal@gmail.com
+- Senuk Jayalath: senukj@gmail.com
 - Joshua Sopena: jisopena25@gmail.com
 
 ## License
